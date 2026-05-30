@@ -3,16 +3,10 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { format } from "date-fns";
+import { PageHeader } from "@/components/page-header";
 import { PO_STATUSES } from "@/lib/enums";
+import { ChevronRight, Plus } from "lucide-react";
+import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
@@ -32,94 +26,86 @@ export default async function PurchaseOrdersPage({
     take: 200,
   });
 
+  const chip = (active: boolean) =>
+    `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center whitespace-nowrap ${
+      active
+        ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+        : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
+    }`;
+
   return (
-    <div className="px-4 pt-5 pb-28 space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Purchase orders</h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400">{pos.length} POs</p>
-        </div>
-        <Link href="/purchase-orders/new" className={buttonVariants()}>
-          New PO
-        </Link>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <Link
-          href="/purchase-orders"
-          className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
-        >
-          All
-        </Link>
-        {PO_STATUSES.map((s) => (
-          <Link
-            key={s}
-            href={`/purchase-orders?status=${s}`}
-            className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
-          >
-            {s.replace("_", " ")}
+    <div>
+      <PageHeader
+        title="Purchase orders"
+        subtitle={`${pos.length} PO${pos.length === 1 ? "" : "s"}`}
+        action={
+          <Link href="/purchase-orders/new" className={buttonVariants({ size: "sm" })}>
+            <Plus className="h-4 w-4" /> New
           </Link>
-        ))}
-      </div>
-
-      {pos.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
-            No purchase orders yet.{" "}
-            <Link href="/purchase-orders/new" className="text-amber-600 underline">
-              Create one
+        }
+      />
+      <div className="px-4 pt-5 pb-28 space-y-4">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <Link href="/purchase-orders" className={chip(!params.status)}>
+            All
+          </Link>
+          {PO_STATUSES.map((s) => (
+            <Link
+              key={s}
+              href={`/purchase-orders?status=${s}`}
+              className={chip(params.status === s)}
+            >
+              {s.replace(/_/g, " ").toLowerCase()}
             </Link>
-            .
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>PO</TableHead>
-                <TableHead>Vendor</TableHead>
-                <TableHead>Product</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Unit ₹</TableHead>
-                <TableHead className="text-right">Total ₹</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Ordered</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pos.map((po) => (
-                <TableRow key={po.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
-                  <TableCell className="text-xs font-mono">
-                    <Link href={`/purchase-orders/${po.id}`} className="hover:text-amber-600">
-                      #{po.id.slice(-6)}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <Link href={`/vendors/${po.vendor.id}`} className="text-xs hover:text-amber-600">
+          ))}
+        </div>
+
+        {pos.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+              No purchase orders yet.{" "}
+              <Link href="/purchase-orders/new" className="text-amber-600 underline">
+                Create one
+              </Link>
+              .
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {pos.map((po) => (
+              <Link
+                key={po.id}
+                href={`/purchase-orders/${po.id}`}
+                className="block rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
                       {po.vendor.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-xs">
-                    {po.product ? (
-                      <Link href={`/products/${po.product.id}`} className="hover:text-amber-600">
-                        {po.product.name}
-                      </Link>
-                    ) : (
-                      "—"
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right text-xs">{po.quantity}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">₹{po.unitCost}</TableCell>
-                  <TableCell className="text-right font-mono text-xs">₹{po.totalCost}</TableCell>
-                  <TableCell><Badge variant="outline">{po.status}</Badge></TableCell>
-                  <TableCell className="text-xs">{format(po.orderedAt, "yyyy-MM-dd")}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+                    </div>
+                    <div className="truncate text-xs text-slate-500 dark:text-gray-400">
+                      {po.product ? po.product.name : "no product link"} · #{po.id.slice(-6)}
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="shrink-0">
+                    {po.status.replace(/_/g, " ").toLowerCase()}
+                  </Badge>
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                </div>
+                <div className="mt-2 flex items-center gap-3 text-xs text-slate-500 dark:text-gray-400">
+                  <span>
+                    {po.quantity} × <span className="font-mono">₹{po.unitCost}</span>
+                  </span>
+                  <span className="font-mono font-semibold text-slate-900 dark:text-gray-100">
+                    = ₹{po.totalCost}
+                  </span>
+                  <span className="ml-auto">{format(po.orderedAt, "dd MMM")}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

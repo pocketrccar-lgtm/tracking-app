@@ -3,14 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/page-header";
 import {
   TASK_STATUS_COLORS,
   PRIORITY_COLORS,
@@ -22,6 +15,7 @@ import {
 } from "@/lib/enums";
 import { formatDistanceToNow } from "date-fns";
 import { TaskKanban } from "@/components/task-kanban";
+import { ChevronRight, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -48,146 +42,111 @@ export default async function TasksPage({
       take: 200,
       include: { vendor: true, assignedTo: true },
     }),
-    db.task.groupBy({
-      by: ["status"],
-      _count: { _all: true },
-    }),
+    db.task.groupBy({ by: ["status"], _count: { _all: true } }),
   ]);
 
-  return (
-    <div className="px-4 pt-5 pb-28 space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Tasks</h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400">
-            {tasks.length} task{tasks.length === 1 ? "" : "s"} shown
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link
-            href="/tasks/new"
-            className={buttonVariants()}
-          >
-            New task
-          </Link>
-        </div>
-      </div>
+  const chip = (active: boolean) =>
+    `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center whitespace-nowrap ${
+      active
+        ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+        : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
+    }`;
 
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex flex-wrap gap-2">
-          <Link
-            href={`/tasks${view === "kanban" ? "?view=kanban" : ""}`}
-            className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
-          >
-            All
+  return (
+    <div>
+      <PageHeader
+        title="Tasks"
+        subtitle={`${tasks.length} shown`}
+        action={
+          <Link href="/tasks/new" className={buttonVariants({ size: "sm" })}>
+            <Plus className="h-4 w-4" /> New
           </Link>
-          {(["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED"] as const).map(
-            (s) => {
-              const count = counts.find((c) => c.status === s)?._count._all ?? 0;
-              return (
-                <Link
-                  key={s}
-                  href={`/tasks?status=${s}`}
-                  className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
-                >
-                  {TASK_STATUS_LABELS[s]} ({count})
-                </Link>
-              );
-            },
-          )}
-        </div>
-        <div className="flex gap-1 rounded-md bg-slate-100 p-0.5">
+        }
+      />
+      <div className="px-4 pt-5 pb-28 space-y-4">
+        {/* view toggle */}
+        <div className="flex rounded-xl bg-slate-100 dark:bg-gray-800 p-1">
           <Link
             href="/tasks"
-            className={`rounded px-3 py-1 text-xs ${view === "list" ? "bg-white shadow-sm" : "text-slate-600 dark:text-gray-300"}`}
+            className={`flex-1 rounded-lg py-2 min-h-[44px] flex items-center justify-center text-xs font-bold transition-all ${view === "list" ? "bg-white dark:bg-gray-900 shadow-sm" : "text-slate-400"}`}
           >
             List
           </Link>
           <Link
             href="/tasks?view=kanban"
-            className={`rounded px-3 py-1 text-xs ${view === "kanban" ? "bg-white shadow-sm" : "text-slate-600 dark:text-gray-300"}`}
+            className={`flex-1 rounded-lg py-2 min-h-[44px] flex items-center justify-center text-xs font-bold transition-all ${view === "kanban" ? "bg-white dark:bg-gray-900 shadow-sm" : "text-slate-400"}`}
           >
             Kanban
           </Link>
         </div>
-      </div>
 
-      {view === "kanban" ? (
-        <TaskKanban tasks={tasks} />
-      ) : tasks.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
-            No tasks yet.{" "}
-            <Link href="/tasks/new" className="text-amber-600 underline">
-              Create one
+        {view === "list" && (
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+            <Link href="/tasks" className={chip(!params.status)}>
+              All
             </Link>
-            .
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Title</TableHead>
-                <TableHead>Vendor</TableHead>
-                <TableHead className="hidden md:table-cell">Type</TableHead>
-                <TableHead>Priority</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden md:table-cell text-right">
-                  Updated
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tasks.map((t) => (
-                <TableRow key={t.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
-                  <TableCell className="font-medium">
-                    <Link href={`/tasks/${t.id}`} className="hover:text-amber-600">
-                      <div className="truncate max-w-xs">{t.title}</div>
-                    </Link>
-                    {t.assignedTo && (
-                      <div className="text-xs text-slate-500 dark:text-gray-400">
-                        @{t.assignedTo.name}
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/vendors/${t.vendor.id}`}
-                      className="text-xs hover:text-amber-600"
-                    >
+            {(["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED"] as const).map((s) => {
+              const count = counts.find((c) => c.status === s)?._count._all ?? 0;
+              return (
+                <Link key={s} href={`/tasks?status=${s}`} className={chip(params.status === s)}>
+                  {TASK_STATUS_LABELS[s]} ({count})
+                </Link>
+              );
+            })}
+          </div>
+        )}
+
+        {view === "kanban" ? (
+          <TaskKanban tasks={tasks} />
+        ) : tasks.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+              No tasks yet.{" "}
+              <Link href="/tasks/new" className="text-amber-600 underline">
+                Create one
+              </Link>
+              .
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {tasks.map((t) => (
+              <Link
+                key={t.id}
+                href={`/tasks/${t.id}`}
+                className="block rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
+                      {t.title}
+                    </div>
+                    <div className="truncate text-xs text-slate-500 dark:text-gray-400">
                       {t.vendor.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-xs">
+                      {t.assignedTo ? ` · @${t.assignedTo.name}` : ""}
+                    </div>
+                  </div>
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  <Badge variant="outline" className={TASK_STATUS_COLORS[t.status as TaskStatus] ?? ""}>
+                    {TASK_STATUS_LABELS[t.status as TaskStatus] ?? t.status}
+                  </Badge>
+                  <Badge variant="outline" className={PRIORITY_COLORS[t.priority as TaskPriority] ?? ""}>
+                    {t.priority.toLowerCase()}
+                  </Badge>
+                  <Badge variant="outline">
                     {TASK_TYPE_LABELS[t.type as TaskType] ?? t.type}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={PRIORITY_COLORS[t.priority as TaskPriority] ?? ""}
-                    >
-                      {t.priority}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className={TASK_STATUS_COLORS[t.status as TaskStatus] ?? ""}
-                    >
-                      {TASK_STATUS_LABELS[t.status as TaskStatus] ?? t.status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-right text-xs text-slate-500 dark:text-gray-400">
+                  </Badge>
+                  <span className="ml-auto text-xs text-slate-400 dark:text-gray-500">
                     {formatDistanceToNow(t.updatedAt, { addSuffix: true })}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

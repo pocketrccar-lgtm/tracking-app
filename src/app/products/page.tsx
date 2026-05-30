@@ -3,14 +3,8 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { PageHeader } from "@/components/page-header";
+import { ChevronRight, Plus } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -31,114 +25,104 @@ export default async function ProductsPage({
     take: 200,
   });
 
+  const chip = (active: boolean) =>
+    `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center ${
+      active
+        ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+        : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
+    }`;
+
   return (
-    <div className="px-4 pt-5 pb-28 space-y-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Products</h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400">{products.length} products</p>
-        </div>
-        <Link href="/products/new" className={buttonVariants()}>
-          Add product
-        </Link>
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <Link
-          href="/products"
-          className={`rounded-full px-3 py-1 text-xs ${!params.drift ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
-        >
-          All
-        </Link>
-        <Link
-          href="/products?drift=yes"
-          className={`rounded-full px-3 py-1 text-xs ${params.drift === "yes" ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
-        >
-          Drift only
-        </Link>
-        {["1:18", "1:24", "1:64", "1:10"].map((sc) => (
+    <div>
+      <PageHeader
+        title="Products"
+        subtitle={`${products.length} SKU${products.length === 1 ? "" : "s"}`}
+        action={
           <Link
-            key={sc}
-            href={`/products?scale=${sc}`}
-            className={`rounded-full px-3 py-1 text-xs ${params.scale === sc ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
+            href="/products/new"
+            className={buttonVariants({ size: "sm" })}
           >
-            {sc}
+            <Plus className="h-4 w-4" /> Add
           </Link>
-        ))}
-      </div>
-
-      {products.length === 0 ? (
-        <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
-            No products match.{" "}
-            <Link href="/products/new" className="text-amber-600 underline">
-              Add one
+        }
+      />
+      <div className="px-4 pt-5 pb-28 space-y-4">
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <Link href="/products" className={chip(!params.drift && !params.scale)}>
+            All
+          </Link>
+          <Link href="/products?drift=yes" className={chip(params.drift === "yes")}>
+            Drift only
+          </Link>
+          {["1:18", "1:24", "1:64", "1:10"].map((sc) => (
+            <Link
+              key={sc}
+              href={`/products?scale=${sc}`}
+              className={chip(params.scale === sc)}
+            >
+              {sc}
             </Link>
-            .
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Vendor</TableHead>
-                <TableHead className="hidden md:table-cell">Brand</TableHead>
-                <TableHead>Scale</TableHead>
-                <TableHead>Drift</TableHead>
-                <TableHead className="text-right">Wholesale</TableHead>
-                <TableHead className="text-right">Retail</TableHead>
-                <TableHead className="text-right">MOQ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {products.map((p) => (
-                <TableRow key={p.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
-                  <TableCell className="font-medium">
-                    <Link href={`/products/${p.id}`} className="hover:text-amber-600">
+          ))}
+        </div>
+
+        {products.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+              No products match.{" "}
+              <Link href="/products/new" className="text-amber-600 underline">
+                Add one
+              </Link>
+              .
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {products.map((p) => (
+              <Link
+                key={p.id}
+                href={`/products/${p.id}`}
+                className="block rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 active:scale-[0.99] transition-transform"
+              >
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
                       {p.name}
-                    </Link>
-                    {p.bodyShell && (
-                      <div className="text-xs text-slate-500 dark:text-gray-400">{p.bodyShell}</div>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Link
-                      href={`/vendors/${p.vendor.id}`}
-                      className="text-xs hover:text-amber-600"
-                    >
+                    </div>
+                    <div className="truncate text-xs text-slate-500 dark:text-gray-400">
                       {p.vendor.name}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="hidden md:table-cell text-xs text-slate-600 dark:text-gray-300">
-                    {p.brand ?? "—"}
-                  </TableCell>
-                  <TableCell className="text-xs">{p.scale ?? "—"}</TableCell>
-                  <TableCell>
-                    {p.driftCapable ? (
-                      <Badge variant="outline" className="bg-emerald-100 text-emerald-800">
-                        drift
-                      </Badge>
-                    ) : (
-                      <span className="text-xs text-slate-400 dark:text-gray-500">—</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-xs">
-                    {p.wholesalePrice ? `₹${p.wholesalePrice}` : "—"}
-                  </TableCell>
-                  <TableCell className="text-right font-mono text-xs">
-                    {p.retailPrice ? `₹${p.retailPrice}` : "—"}
-                  </TableCell>
-                  <TableCell className="text-right text-xs">
-                    {p.moq ?? "—"}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-      )}
+                      {p.brand ? ` · ${p.brand}` : ""}
+                      {p.bodyShell ? ` · ${p.bodyShell}` : ""}
+                    </div>
+                  </div>
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                  {p.scale && <Badge variant="outline">{p.scale}</Badge>}
+                  {p.driftCapable && (
+                    <Badge
+                      variant="outline"
+                      className="bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                    >
+                      drift
+                    </Badge>
+                  )}
+                  {p.ledLights && <Badge variant="outline">LED</Badge>}
+                  {p.wholesalePrice != null && (
+                    <span className="ml-auto font-mono text-sm font-semibold text-slate-900 dark:text-gray-100">
+                      ₹{p.wholesalePrice}
+                    </span>
+                  )}
+                  {p.moq != null && (
+                    <span className="text-xs text-slate-400 dark:text-gray-500">
+                      MOQ {p.moq}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
