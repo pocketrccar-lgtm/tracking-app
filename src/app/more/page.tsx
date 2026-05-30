@@ -93,7 +93,7 @@ export default function MorePage() {
                     href={item.href}
                     className="flex items-center gap-3 px-4 py-3.5 min-h-[44px] active:scale-[0.99] transition-transform"
                   >
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 dark:bg-red-950/30 text-red-600">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">

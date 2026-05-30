@@ -36,14 +36,14 @@ export function BottomNav() {
               className={cn(
                 "flex-1 flex flex-col items-center py-3 gap-1 text-xs font-semibold min-h-[56px] transition-colors",
                 active
-                  ? "text-amber-600 dark:text-amber-500"
+                  ? "text-red-600 dark:text-red-500"
                   : "text-slate-400 dark:text-gray-500"
               )}
             >
               <Icon className="h-5 w-5" />
               <span>{tab.label}</span>
               {active && (
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-500 -mt-0.5" />
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600 -mt-0.5" />
               )}
             </Link>
           );

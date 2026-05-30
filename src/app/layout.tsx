@@ -18,13 +18,22 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BCH Sourcing OS",
-  description: "Vendor + task + cost tracker for BCH RC car launch",
+  title: "Pocket RC Cars",
+  description:
+    "Pocket RC Cars sourcing OS — vendors, quotes, tasks & supply-side research. pokketrccar.com",
   manifest: "/manifest.json",
+  applicationName: "Pocket RC Cars",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "BCH Sourcing",
+    title: "PRC Cars",
+  },
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
@@ -34,7 +43,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#f59e0b",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -49,7 +58,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
       <body className="min-h-full bg-[#fafafa] dark:bg-gray-900 text-slate-900 dark:text-gray-100 antialiased">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Toaster richColors position="top-center" />
           <main className="mx-auto max-w-lg min-h-full">{children}</main>
           <BottomNav />

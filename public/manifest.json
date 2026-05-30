@@ -1,13 +1,13 @@
 {
-  "name": "BCH Sourcing OS",
-  "short_name": "BCH Source",
-  "description": "Mobile-first vendor sourcing CRM for Bharath Cycle Hub — manage vendors, quotes, and supply-side research on the go.",
+  "name": "Pocket RC Cars",
+  "short_name": "PRC Cars",
+  "description": "Pocket RC Cars sourcing OS — vendors, quotes, tasks and supply-side research on the go. pokketrccar.com",
   "display": "standalone",
   "orientation": "portrait",
   "start_url": "/dashboard",
   "scope": "/",
-  "theme_color": "#f59e0b",
-  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "background_color": "#000000",
   "icons": [
     {
       "src": "/icon.svg",
@@ -19,13 +19,19 @@
       "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ]
 }

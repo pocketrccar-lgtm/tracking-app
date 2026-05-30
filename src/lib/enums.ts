@@ -164,7 +164,7 @@ export const TASK_TYPE_LABELS: Record<TaskType, string> = {
 
 export const TIER_COLORS: Record<VendorTier, string> = {
   T1_DRIFT_CONFIRMED: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  T2_STRONG_SIGNAL: "bg-amber-100 text-amber-800 border-amber-200",
+  T2_STRONG_SIGNAL: "bg-red-100 text-red-800 border-red-200",
   T3_VERIFY_DRIFT: "bg-blue-100 text-blue-800 border-blue-200",
   T4_INDIAMART_GATED: "bg-slate-100 text-slate-700 border-slate-200",
   CHINESE_FACTORY: "bg-red-100 text-red-800 border-red-200",
@@ -176,7 +176,7 @@ export const STATUS_COLORS: Record<VendorStatus, string> = {
   COLD: "bg-slate-100 text-slate-700",
   CONTACTED: "bg-blue-100 text-blue-700",
   ENGAGED: "bg-indigo-100 text-indigo-700",
-  QUOTED: "bg-amber-100 text-amber-700",
+  QUOTED: "bg-red-100 text-red-700",
   SAMPLE_ORDERED: "bg-purple-100 text-purple-700",
   ONBOARDED: "bg-emerald-100 text-emerald-700",
   PAUSED: "bg-yellow-100 text-yellow-700",
@@ -185,7 +185,7 @@ export const STATUS_COLORS: Record<VendorStatus, string> = {
 
 export const DRIFT_COLORS: Record<DriftStatus, string> = {
   YES_CONFIRMED: "bg-emerald-100 text-emerald-800",
-  LIKELY: "bg-amber-100 text-amber-800",
+  LIKELY: "bg-red-100 text-red-800",
   UNKNOWN: "bg-slate-100 text-slate-600",
   NO: "bg-zinc-200 text-zinc-500",
 };
@@ -201,7 +201,7 @@ export const TASK_STATUS_COLORS: Record<TaskStatus, string> = {
 export const PRIORITY_COLORS: Record<TaskPriority, string> = {
   LOW: "bg-slate-100 text-slate-600",
   MEDIUM: "bg-blue-100 text-blue-700",
-  HIGH: "bg-amber-100 text-amber-700",
+  HIGH: "bg-red-100 text-red-700",
   URGENT: "bg-red-100 text-red-700",
 };
 

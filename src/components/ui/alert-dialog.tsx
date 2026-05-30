@@ -86,7 +86,7 @@ export function AlertDialog({
               "min-h-[44px] rounded-xl px-4 text-sm font-semibold text-white transition-colors",
               destructive
                 ? "bg-red-600 hover:bg-red-700"
-                : "bg-amber-500 hover:bg-amber-600",
+                : "bg-red-600 hover:bg-red-700",
               "disabled:opacity-50"
             )}
           >

@@ -118,14 +118,14 @@ export default async function VendorsListPage({
             No vendors match these filters.{" "}
             <Link
               href="/vendors"
-              className="text-amber-600 underline"
+              className="text-red-600 underline"
             >
               Clear filters
             </Link>{" "}
             or{" "}
             <Link
               href="/vendors/new"
-              className="text-amber-600 underline"
+              className="text-red-600 underline"
             >
               add one manually
             </Link>
@@ -155,7 +155,7 @@ export default async function VendorsListPage({
                     <TableCell className="font-medium">
                       <Link
                         href={`/vendors/${v.id}`}
-                        className="hover:text-amber-600"
+                        className="hover:text-red-600"
                       >
                         {v.name}
                       </Link>

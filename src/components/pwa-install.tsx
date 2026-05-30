@@ -97,7 +97,7 @@ export function PwaInstall() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-[6.5rem] left-4 right-4 z-30 mx-auto max-w-lg rounded-2xl bg-amber-500 text-white shadow-lg shadow-amber-500/25 p-3 flex items-center gap-3">
+    <div className="fixed bottom-[6.5rem] left-4 right-4 z-30 mx-auto max-w-lg rounded-2xl bg-red-600 text-white shadow-lg shadow-red-600/30 p-3 flex items-center gap-3">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
         {showIOSHint ? (
           <Share className="h-5 w-5" aria-hidden />
@@ -123,7 +123,7 @@ export function PwaInstall() {
         <button
           type="button"
           onClick={install}
-          className="shrink-0 rounded-xl bg-white px-4 min-h-[44px] text-sm font-semibold text-amber-600 active:bg-white/90"
+          className="shrink-0 rounded-xl bg-white px-4 min-h-[44px] text-sm font-semibold text-red-600 active:bg-white/90"
         >
           Install
         </button>

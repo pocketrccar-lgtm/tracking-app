@@ -130,7 +130,7 @@ export default async function VendorDetailPage({
                 <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
                 <a
                   href={`tel:${p.phone}`}
-                  className="font-mono hover:text-amber-600"
+                  className="font-mono hover:text-red-600"
                 >
                   {p.phone}
                 </a>
@@ -146,7 +146,7 @@ export default async function VendorDetailPage({
                 <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
                 <a
                   href={`mailto:${e.email}`}
-                  className="hover:text-amber-600"
+                  className="hover:text-red-600"
                 >
                   {e.email}
                 </a>
@@ -163,7 +163,7 @@ export default async function VendorDetailPage({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="text-amber-600 hover:underline truncate"
+                  className="text-red-600 hover:underline truncate"
                 >
                   {vendor.websiteUrl}
                 </a>
@@ -176,7 +176,7 @@ export default async function VendorDetailPage({
                   href={`https://instagram.com/${vendor.igHandle.replace(/^@/, "")}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-amber-600 hover:underline"
+                  className="text-red-600 hover:underline"
                 >
                   @{vendor.igHandle.replace(/^@/, "")}
                 </a>
@@ -253,7 +253,7 @@ export default async function VendorDetailPage({
                     }
                     target="_blank"
                     rel="noreferrer"
-                    className="text-amber-600 hover:underline truncate"
+                    className="text-red-600 hover:underline truncate"
                   >
                     {vendor.founderLinkedin}
                   </a>

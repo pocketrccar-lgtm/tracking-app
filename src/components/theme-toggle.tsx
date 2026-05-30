@@ -48,7 +48,7 @@ export function ThemeToggle() {
             className={cn(
               "flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-md px-3 text-sm font-medium transition-colors",
               active
-                ? "bg-amber-500 text-white shadow-sm"
+                ? "bg-red-600 text-white shadow-sm"
                 : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
             )}
           >

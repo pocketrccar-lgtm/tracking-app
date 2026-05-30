@@ -41,13 +41,13 @@ export default async function POEditPage({
           PO #{po.id.slice(-6)}
         </h1>
         <p className="text-sm text-slate-500 dark:text-gray-400">
-          <Link href={`/vendors/${po.vendor.id}`} className="text-amber-600 hover:underline">
+          <Link href={`/vendors/${po.vendor.id}`} className="text-red-600 hover:underline">
             {po.vendor.name}
           </Link>
           {po.product && (
             <>
               {" · "}
-              <Link href={`/products/${po.product.id}`} className="text-amber-600 hover:underline">
+              <Link href={`/products/${po.product.id}`} className="text-red-600 hover:underline">
                 {po.product.name}
               </Link>
             </>

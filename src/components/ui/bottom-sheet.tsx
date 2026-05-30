@@ -64,7 +64,7 @@ export function ActionItem({
     "h-10 w-10 rounded-full flex items-center justify-center shrink-0",
     destructive
       ? "bg-red-50 dark:bg-red-950/30 text-red-600"
-      : "bg-amber-50 dark:bg-amber-950/30 text-amber-600"
+      : "bg-red-50 dark:bg-red-950/30 text-red-600"
   );
 
   const inner = (

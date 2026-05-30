@@ -53,7 +53,7 @@ export default async function DashboardPage() {
       value: vendorCount,
       sub: `${onboardedCount} onboarded`,
       href: "/vendors",
-      tone: "bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/40 text-amber-700 dark:text-amber-300",
+      tone: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-300",
     },
     {
       label: "Drift confirmed",
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Dashboard" subtitle="BCH RC sourcing — Syed + Shoaib" />
+      <PageHeader title="Pocket RC Cars" subtitle="Sourcing OS — Syed + Shoaib" />
       <PageTransition>
         <div className="px-4 pt-5 pb-28 space-y-6">
           {/* Funnel cards */}
@@ -108,7 +108,7 @@ export default async function DashboardPage() {
                 {byTier.length === 0 ? (
                   <p className="text-sm text-slate-500 dark:text-gray-400">
                     No vendors yet.{" "}
-                    <Link href="/vendors/new" className="text-amber-600 underline">
+                    <Link href="/vendors/new" className="text-red-600 underline">
                       Add one
                     </Link>
                     .
@@ -145,7 +145,7 @@ export default async function DashboardPage() {
               <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-500">
                 Recently updated
               </h2>
-              <Link href="/vendors" className="text-xs font-semibold text-amber-600">
+              <Link href="/vendors" className="text-xs font-semibold text-red-600">
                 See all
               </Link>
             </div>

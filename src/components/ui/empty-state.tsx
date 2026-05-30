@@ -20,7 +20,7 @@ function EmptyState({ icon, title, description, action, className }: EmptyStateP
       )}
     >
       {icon ? (
-        <div className="h-14 w-14 rounded-full bg-amber-50 dark:bg-amber-950/30 flex items-center justify-center mb-4 [&_svg]:h-7 [&_svg]:w-7 [&_svg]:text-amber-500">
+        <div className="h-14 w-14 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center mb-4 [&_svg]:h-7 [&_svg]:w-7 [&_svg]:text-red-500">
           {icon}
         </div>
       ) : null}

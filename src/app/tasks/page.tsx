@@ -48,7 +48,7 @@ export default async function TasksPage({
   const chip = (active: boolean) =>
     `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center whitespace-nowrap ${
       active
-        ? "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+        ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300"
         : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
     }`;
 
@@ -102,7 +102,7 @@ export default async function TasksPage({
           <Card>
             <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
               No tasks yet.{" "}
-              <Link href="/tasks/new" className="text-amber-600 underline">
+              <Link href="/tasks/new" className="text-red-600 underline">
                 Create one
               </Link>
               .

@@ -14,10 +14,10 @@ export default function ReportsLanding() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Link href="/reports/daily" className="block">
-          <Card className="hover:border-amber-400 transition-colors">
+          <Card className="hover:border-red-400 transition-colors">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-amber-600" />
+                <CalendarDays className="h-5 w-5 text-red-600" />
                 <CardTitle className="text-base">Daily report</CardTitle>
               </div>
             </CardHeader>
@@ -29,10 +29,10 @@ export default function ReportsLanding() {
         </Link>
 
         <Link href="/reports/weekly" className="block">
-          <Card className="hover:border-amber-400 transition-colors">
+          <Card className="hover:border-red-400 transition-colors">
             <CardHeader>
               <div className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-amber-600" />
+                <FileText className="h-5 w-5 text-red-600" />
                 <CardTitle className="text-base">Weekly summary</CardTitle>
               </div>
             </CardHeader>

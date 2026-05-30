@@ -21,7 +21,7 @@ function Progress({ value, max = 100, className }: ProgressProps) {
     >
       <div
         data-slot="progress-fill"
-        className="h-full rounded-full bg-amber-500 transition-all duration-500"
+        className="h-full rounded-full bg-red-600 transition-all duration-500"
         style={{ width: `${pct}%` }}
       />
     </div>

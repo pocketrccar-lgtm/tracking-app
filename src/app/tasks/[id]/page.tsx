@@ -32,7 +32,7 @@ export default async function EditTaskPage({
       </Link>
       <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Edit task</h1>
       <p className="text-sm text-slate-500 dark:text-gray-400">
-        Vendor: <Link href={`/vendors/${task.vendor.id}`} className="text-amber-600 underline">{task.vendor.name}</Link>
+        Vendor: <Link href={`/vendors/${task.vendor.id}`} className="text-red-600 underline">{task.vendor.name}</Link>
       </p>
       <TaskForm
         task={task}

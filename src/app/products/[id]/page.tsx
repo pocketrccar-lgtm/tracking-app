@@ -47,7 +47,7 @@ export default async function ProductDetailPage({
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">{product.name}</h1>
           <p className="text-sm text-slate-500 dark:text-gray-400">
-            <Link href={`/vendors/${product.vendor.id}`} className="text-amber-600 hover:underline">
+            <Link href={`/vendors/${product.vendor.id}`} className="text-red-600 hover:underline">
               {product.vendor.name}
             </Link>
             {product.brand ? ` · ${product.brand}` : ""}
@@ -59,7 +59,7 @@ export default async function ProductDetailPage({
               <Badge variant="outline" className="bg-emerald-100 text-emerald-800">drift</Badge>
             )}
             {product.ledLights && <Badge variant="outline">LED</Badge>}
-            <Badge variant="outline" className={product.inStock ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-500 dark:text-gray-400"}>
+            <Badge variant="outline" className={product.inStock ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-500 dark:text-gray-400"}>
               {product.inStock ? "in stock" : "out of stock"}
             </Badge>
             {product.category && (
@@ -158,7 +158,7 @@ export default async function ProductDetailPage({
               No POs.{" "}
               <Link
                 href={`/purchase-orders/new?vendorId=${product.vendor.id}&productId=${product.id}`}
-                className="text-amber-600 underline"
+                className="text-red-600 underline"
               >
                 Create one
               </Link>
@@ -180,7 +180,7 @@ export default async function ProductDetailPage({
                 {product.purchaseOrders.map((po) => (
                   <TableRow key={po.id}>
                     <TableCell>
-                      <Link href={`/purchase-orders/${po.id}`} className="text-xs hover:text-amber-600">
+                      <Link href={`/purchase-orders/${po.id}`} className="text-xs hover:text-red-600">
                         #{po.id.slice(-6)}
                       </Link>
                     </TableCell>
