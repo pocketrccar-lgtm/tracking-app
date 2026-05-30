@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
   ShoppingCart,
   FileText,
@@ -9,6 +8,7 @@ import {
   Users,
   Package,
   ListTodo,
+  MessageCircle,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -113,19 +113,32 @@ export default function MorePage() {
         ))}
 
         <div>
-          <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-neutral-500">
-            Appearance
+          <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400">
+            Settings
           </h2>
-          <div className="rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-4">
-            <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-neutral-100">
-              Theme
-            </div>
-            <ThemeToggle />
+          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white divide-y divide-slate-100">
+            <Link
+              href="/templates"
+              className="flex items-center gap-3 px-4 py-3.5 min-h-[44px] active:scale-[0.99] transition-transform"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green-50 text-green-600">
+                <MessageCircle className="h-5 w-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold text-slate-900">
+                  WhatsApp message templates
+                </div>
+                <div className="text-xs text-slate-500 truncate">
+                  Edit the catalog-request message sent to vendors
+                </div>
+              </div>
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
+            </Link>
           </div>
         </div>
 
-        <p className="px-1 text-center text-xs text-slate-400 dark:text-neutral-600">
-          BCH Sourcing OS · vendor + task + cost tracker
+        <p className="px-1 text-center text-xs text-slate-400">
+          Pocket RC Cars · pokketrccar.com
         </p>
       </div>
     </div>

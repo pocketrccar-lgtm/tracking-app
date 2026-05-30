@@ -1,21 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/bottom-nav";
 import { QuickAddFab } from "@/components/quick-add-fab";
 import PWAInstall from "@/components/pwa-install";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "Pocket RC Cars",
@@ -25,7 +14,7 @@ export const metadata: Metadata = {
   applicationName: "Pocket RC Cars",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "PRC Cars",
   },
   icons: {
@@ -43,7 +32,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#000000",
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -52,15 +41,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full`}
-    >
-      <body className="min-h-full bg-background text-foreground antialiased font-medium">
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <html lang="en" suppressHydrationWarning className="h-full">
+      <body className="min-h-full bg-[#f5f5f7] text-slate-900 antialiased text-[15px]">
+        {/* Light theme only — no dark mode, forced. */}
+        <ThemeProvider attribute="class" forcedTheme="light">
           <Toaster richColors position="top-center" />
-          <main className="mx-auto max-w-lg min-h-full">{children}</main>
+          <main className="mx-auto max-w-lg min-h-full bg-white shadow-sm">
+            {children}
+          </main>
           <BottomNav />
           <QuickAddFab />
           <PWAInstall />

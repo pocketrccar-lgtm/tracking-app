@@ -26,6 +26,7 @@ import {
   type VendorType,
 } from "@/lib/enums";
 import { formatDistanceToNow } from "date-fns";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 
 export const dynamic = "force-dynamic";
 
@@ -209,45 +210,50 @@ export default async function VendorsListPage({
           {/* Mobile cards */}
           <div className="space-y-2 md:hidden">
             {vendors.map((v) => (
-              <Link
+              <div
                 key={v.id}
-                href={`/vendors/${v.id}`}
-                className="block rounded-lg border border-slate-200 bg-white p-3 active:bg-slate-50"
+                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white p-3"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <div className="font-medium text-slate-900 dark:text-neutral-100 truncate">
-                      {v.name}
+                <Link
+                  href={`/vendors/${v.id}`}
+                  className="min-w-0 flex-1 active:scale-[0.99] transition-transform"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="font-semibold text-slate-900 truncate">
+                        {v.name}
+                      </div>
+                      <div className="mt-0.5 text-xs text-slate-500">
+                        {[v.city, v.state].filter(Boolean).join(", ") || "—"}
+                      </div>
+                      <div className="mt-1 font-mono text-xs text-slate-700">
+                        {v.phones[0]?.phone ?? "no phone"}
+                      </div>
                     </div>
-                    <div className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
-                      {[v.city, v.state].filter(Boolean).join(", ") || "—"}
-                    </div>
-                    <div className="mt-1 font-mono text-xs text-slate-700 dark:text-neutral-300">
-                      {v.phones[0]?.phone ?? "no phone"}
-                    </div>
+                    <Badge
+                      variant="outline"
+                      className={TIER_COLORS[v.tier as VendorTier] ?? ""}
+                    >
+                      {(v.tier as string).replace(/^T(\d).*/, "T$1")}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={TIER_COLORS[v.tier as VendorTier] ?? ""}
-                  >
-                    {(v.tier as string).replace(/^T(\d).*/, "T$1")}
-                  </Badge>
-                </div>
-                <div className="mt-2 flex gap-1.5">
-                  <Badge
-                    variant="outline"
-                    className={STATUS_COLORS[v.status as VendorStatus] ?? ""}
-                  >
-                    {v.status}
-                  </Badge>
-                  <Badge
-                    variant="outline"
-                    className={DRIFT_COLORS[v.driftStatus as DriftStatus] ?? ""}
-                  >
-                    drift: {v.driftStatus.replace("_", " ").toLowerCase()}
-                  </Badge>
-                </div>
-              </Link>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <Badge
+                      variant="outline"
+                      className={STATUS_COLORS[v.status as VendorStatus] ?? ""}
+                    >
+                      {VENDOR_STATUS_LABELS[v.status as VendorStatus] ?? v.status}
+                    </Badge>
+                    <Badge
+                      variant="outline"
+                      className={DRIFT_COLORS[v.driftStatus as DriftStatus] ?? ""}
+                    >
+                      drift: {v.driftStatus.replace("_", " ").toLowerCase()}
+                    </Badge>
+                  </div>
+                </Link>
+                <WhatsAppButton phone={v.phones[0]?.phone} vendorName={v.name} />
+              </div>
             ))}
           </div>
 

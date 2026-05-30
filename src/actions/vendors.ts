@@ -100,10 +100,21 @@ export async function deleteVendor(id: string) {
 }
 
 export async function updateVendorStatus(id: string, status: string) {
-  await db.vendor.update({
-    where: { id },
-    data: { status },
-  });
+  await db.vendor.update({ where: { id }, data: { status } });
+  revalidatePath(`/vendors/${id}`);
+  revalidatePath("/vendors");
+  revalidatePath("/dashboard");
+}
+
+export async function updateVendorTier(id: string, tier: string) {
+  await db.vendor.update({ where: { id }, data: { tier } });
+  revalidatePath(`/vendors/${id}`);
+  revalidatePath("/vendors");
+  revalidatePath("/dashboard");
+}
+
+export async function updateVendorType(id: string, type: string) {
+  await db.vendor.update({ where: { id }, data: { type } });
   revalidatePath(`/vendors/${id}`);
   revalidatePath("/vendors");
 }

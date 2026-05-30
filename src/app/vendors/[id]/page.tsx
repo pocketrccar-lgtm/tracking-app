@@ -36,7 +36,8 @@ import {
   AtSign,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-import { VendorStatusDropdown } from "@/components/vendor-status-dropdown";
+import { VendorControls } from "@/components/vendor-controls";
+import { WhatsAppButton } from "@/components/whatsapp-button";
 
 export const dynamic = "force-dynamic";
 
@@ -102,10 +103,11 @@ export default async function VendorDetailPage({
             <Badge variant="outline">BCH rel: {vendor.bchRelevance}/10</Badge>
           </div>
         </div>
-        <div className="flex items-start gap-2 shrink-0">
-          <VendorStatusDropdown
-            vendorId={vendor.id}
-            currentStatus={vendor.status}
+        <div className="flex items-center gap-2 shrink-0">
+          <WhatsAppButton
+            phone={vendor.phones[0]?.phone}
+            vendorName={vendor.name}
+            variant="full"
           />
           <Link
             href={`/vendors/${vendor.id}/edit`}
@@ -115,6 +117,14 @@ export default async function VendorDetailPage({
           </Link>
         </div>
       </div>
+
+      <VendorControls
+        vendorId={vendor.id}
+        vendorName={vendor.name}
+        status={vendor.status}
+        tier={vendor.tier}
+        type={vendor.type}
+      />
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

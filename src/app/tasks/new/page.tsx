@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { createTask } from "@/actions/tasks";
-import { TaskForm } from "@/components/task-form";
+import { NewTaskClient } from "@/components/new-task-client";
+import { PageHeader } from "@/components/page-header";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -18,21 +18,21 @@ export default async function NewTaskPage({
   ]);
 
   return (
-    <div className="px-4 pt-5 pb-28 space-y-4">
-      <Link
-        href="/tasks"
-        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-neutral-400 hover:text-slate-900"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to tasks
-      </Link>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">New task</h1>
-      <TaskForm
-        vendors={vendors}
-        users={users}
-        defaultVendorId={vendorId}
-        action={createTask}
-        submitLabel="Create task"
-      />
+    <div>
+      <PageHeader title="New task" subtitle="Speak it, or fill the form" />
+      <div className="px-4 pt-5 pb-28 space-y-4">
+        <Link
+          href="/tasks"
+          className="inline-flex items-center gap-1 text-sm text-slate-500"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Back to tasks
+        </Link>
+        <NewTaskClient
+          vendors={vendors}
+          users={users}
+          defaultVendorId={vendorId}
+        />
+      </div>
     </div>
   );
 }
