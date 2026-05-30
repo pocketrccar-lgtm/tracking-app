@@ -1,19 +1,287 @@
-// Stub — Agent A will replace with full list + filters + search
+import { db } from "@/lib/db";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { VendorListFilters } from "@/components/vendor-list-filters";
+import {
+  TIER_COLORS,
+  STATUS_COLORS,
+  DRIFT_COLORS,
+  VENDOR_TIER_LABELS,
+  VENDOR_STATUS_LABELS,
+  DRIFT_STATUS_LABELS,
+  VENDOR_TYPE_LABELS,
+  type VendorTier,
+  type VendorStatus,
+  type DriftStatus,
+  type VendorType,
+} from "@/lib/enums";
+import { formatDistanceToNow } from "date-fns";
 
-export default function VendorsPlaceholder() {
+export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 50;
+
+export default async function VendorsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    q?: string;
+    state?: string;
+    tier?: string;
+    type?: string;
+    status?: string;
+    drift?: string;
+    page?: string;
+  }>;
+}) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
+  const skip = (page - 1) * PAGE_SIZE;
+
+  const where: Record<string, unknown> = {};
+  if (params.state) where.state = params.state;
+  if (params.tier) where.tier = params.tier;
+  if (params.type) where.type = params.type;
+  if (params.status) where.status = params.status;
+  if (params.drift) where.driftStatus = params.drift;
+  if (params.q) {
+    const q = params.q;
+    where.OR = [
+      { name: { contains: q, mode: "insensitive" } },
+      { city: { contains: q, mode: "insensitive" } },
+      { phones: { some: { phone: { contains: q } } } },
+    ];
+  }
+
+  const [vendors, total, distinctStates] = await Promise.all([
+    db.vendor.findMany({
+      where,
+      orderBy: [{ bchRelevance: "desc" }, { updatedAt: "desc" }],
+      skip,
+      take: PAGE_SIZE,
+      include: { phones: { take: 1 } },
+    }),
+    db.vendor.count({ where }),
+    db.vendor.findMany({
+      where: { state: { not: null } },
+      select: { state: true },
+      distinct: ["state"],
+      orderBy: { state: "asc" },
+    }),
+  ]);
+
+  const states = distinctStates
+    .map((s) => s.state)
+    .filter((s): s is string => Boolean(s));
+
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 bg-white p-12 text-center">
-      <h2 className="text-xl font-semibold text-slate-900">Vendors</h2>
-      <p className="mt-2 text-sm text-slate-500">
-        Full list + filters coming from Agent A.
-      </p>
-      <div className="mt-4 flex justify-center gap-2">
-        <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
-          Back to dashboard
-        </Link>
+    <div className="space-y-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Vendors</h1>
+          <p className="text-sm text-slate-500">
+            {total.toLocaleString()} supply-side vendors · page {page} of{" "}
+            {pages}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link
+            href="/vendors/new"
+            className={buttonVariants()}
+          >
+            Add vendor
+          </Link>
+        </div>
       </div>
+
+      <Card>
+        <CardContent className="p-4">
+          <VendorListFilters states={states} />
+        </CardContent>
+      </Card>
+
+      {vendors.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center text-sm text-slate-500">
+            No vendors match these filters.{" "}
+            <Link
+              href="/vendors"
+              className="text-emerald-600 underline"
+            >
+              Clear filters
+            </Link>{" "}
+            or{" "}
+            <Link
+              href="/vendors/new"
+              className="text-emerald-600 underline"
+            >
+              add one manually
+            </Link>
+            .
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <Card className="hidden md:block overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Tier</TableHead>
+                  <TableHead>City, State</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Drift</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Updated</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {vendors.map((v) => (
+                  <TableRow key={v.id} className="hover:bg-slate-50">
+                    <TableCell className="font-medium">
+                      <Link
+                        href={`/vendors/${v.id}`}
+                        className="hover:text-emerald-600"
+                      >
+                        {v.name}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-600">
+                      {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={TIER_COLORS[v.tier as VendorTier] ?? ""}
+                      >
+                        {VENDOR_TIER_LABELS[v.tier as VendorTier] ?? v.tier}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-slate-600">
+                      {[v.city, v.state].filter(Boolean).join(", ") || "—"}
+                    </TableCell>
+                    <TableCell className="text-xs font-mono">
+                      {v.phones[0]?.phone ?? "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={
+                          DRIFT_COLORS[v.driftStatus as DriftStatus] ?? ""
+                        }
+                      >
+                        {DRIFT_STATUS_LABELS[v.driftStatus as DriftStatus] ??
+                          v.driftStatus}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={STATUS_COLORS[v.status as VendorStatus] ?? ""}
+                      >
+                        {VENDOR_STATUS_LABELS[v.status as VendorStatus] ??
+                          v.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right text-xs text-slate-500">
+                      {formatDistanceToNow(v.updatedAt, { addSuffix: true })}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+
+          {/* Mobile cards */}
+          <div className="space-y-2 md:hidden">
+            {vendors.map((v) => (
+              <Link
+                key={v.id}
+                href={`/vendors/${v.id}`}
+                className="block rounded-lg border border-slate-200 bg-white p-3 active:bg-slate-50"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="font-medium text-slate-900 truncate">
+                      {v.name}
+                    </div>
+                    <div className="mt-0.5 text-xs text-slate-500">
+                      {[v.city, v.state].filter(Boolean).join(", ") || "—"}
+                    </div>
+                    <div className="mt-1 font-mono text-xs text-slate-700">
+                      {v.phones[0]?.phone ?? "no phone"}
+                    </div>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={TIER_COLORS[v.tier as VendorTier] ?? ""}
+                  >
+                    {(v.tier as string).replace(/^T(\d).*/, "T$1")}
+                  </Badge>
+                </div>
+                <div className="mt-2 flex gap-1.5">
+                  <Badge
+                    variant="outline"
+                    className={STATUS_COLORS[v.status as VendorStatus] ?? ""}
+                  >
+                    {v.status}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={DRIFT_COLORS[v.driftStatus as DriftStatus] ?? ""}
+                  >
+                    drift: {v.driftStatus.replace("_", " ").toLowerCase()}
+                  </Badge>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          {pages > 1 && (
+            <div className="flex justify-center gap-2 pt-4">
+              {page > 1 && (
+                <Link
+                  href={`/vendors?${new URLSearchParams({
+                    ...(params as Record<string, string>),
+                    page: String(page - 1),
+                  })}`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  ← Prev
+                </Link>
+              )}
+              <span className="px-3 py-1.5 text-sm text-slate-500">
+                Page {page} of {pages}
+              </span>
+              {page < pages && (
+                <Link
+                  href={`/vendors?${new URLSearchParams({
+                    ...(params as Record<string, string>),
+                    page: String(page + 1),
+                  })}`}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  Next →
+                </Link>
+              )}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
