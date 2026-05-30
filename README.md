@@ -17,19 +17,22 @@ Built for Syed (admin) and Shoaib (field).
 
 ```bash
 npm install
-cp .env.example .env       # then fill in DATABASE_URL
+npx vercel link            # link this folder to the Vercel project (first time)
+npx vercel env pull .env   # pulls POSTGRES_PRISMA_URL + POSTGRES_URL_NON_POOLING
 npm run db:migrate         # create tables
 npm run dev                # http://localhost:3000
 ```
 
 ## Vercel deploy
 
-1. Push to GitHub — Vercel auto-detects Next.js and rebuilds.
-2. **Required env var in Vercel project settings:**
-   - `DATABASE_URL` — Postgres connection string from Vercel Postgres / Supabase / Neon
-3. After first deploy, run migrations against production DB:
+1. Push to GitHub — Vercel auto-detects Next.js (via `vercel.json` `framework: nextjs`).
+2. **Required env vars** (auto-set by the Supabase Vercel integration when you connect a Supabase project to this Vercel project — Storage tab):
+   - `POSTGRES_PRISMA_URL` (pooled, pgbouncer) — for app queries
+   - `POSTGRES_URL_NON_POOLING` (direct) — for `prisma migrate deploy`
+3. First-time seed against production DB:
    ```bash
-   DATABASE_URL="<prod-url>" npm run db:deploy
+   npx vercel env pull .env
+   npm run db:deploy && npm run db:seed && npm run db:import-vendors
    ```
 
 ## Data model (Prisma)
