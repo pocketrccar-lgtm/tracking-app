@@ -1,8 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AppNav } from "@/components/app-nav";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { BottomNav } from "@/components/bottom-nav";
+import { QuickAddFab } from "@/components/quick-add-fab";
+import PWAInstall from "@/components/pwa-install";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,6 +20,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "BCH Sourcing OS",
   description: "Vendor + task + cost tracker for BCH RC car launch",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "BCH Sourcing",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#f59e0b",
 };
 
 export default function RootLayout({
@@ -27,18 +45,22 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full bg-slate-50 text-slate-900">
-        <div className="flex min-h-screen flex-col md:flex-row">
-          <AppNav />
-          <main className="flex-1 min-w-0 pb-24 md:pb-6 md:pl-64">
-            <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-              {children}
-            </div>
-          </main>
-        </div>
-        <Toaster richColors position="top-right" />
+      <body className="min-h-full bg-[#fafafa] dark:bg-gray-900 text-slate-900 dark:text-gray-100 antialiased">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <Toaster richColors position="top-center" />
+          <main className="mx-auto max-w-lg min-h-full">{children}</main>
+          <BottomNav />
+          <QuickAddFab />
+          <PWAInstall />
+        </ThemeProvider>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}`,
+          }}
+        />
       </body>
     </html>
   );

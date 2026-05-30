@@ -55,11 +55,11 @@ export default async function TasksPage({
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 pt-5 pb-28 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Tasks</h1>
-          <p className="text-sm text-slate-500">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Tasks</h1>
+          <p className="text-sm text-slate-500 dark:text-gray-400">
             {tasks.length} task{tasks.length === 1 ? "" : "s"} shown
           </p>
         </div>
@@ -77,7 +77,7 @@ export default async function TasksPage({
         <div className="flex flex-wrap gap-2">
           <Link
             href={`/tasks${view === "kanban" ? "?view=kanban" : ""}`}
-            className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+            className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
           >
             All
           </Link>
@@ -88,7 +88,7 @@ export default async function TasksPage({
                 <Link
                   key={s}
                   href={`/tasks?status=${s}`}
-                  className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                  className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
                 >
                   {TASK_STATUS_LABELS[s]} ({count})
                 </Link>
@@ -99,13 +99,13 @@ export default async function TasksPage({
         <div className="flex gap-1 rounded-md bg-slate-100 p-0.5">
           <Link
             href="/tasks"
-            className={`rounded px-3 py-1 text-xs ${view === "list" ? "bg-white shadow-sm" : "text-slate-600"}`}
+            className={`rounded px-3 py-1 text-xs ${view === "list" ? "bg-white shadow-sm" : "text-slate-600 dark:text-gray-300"}`}
           >
             List
           </Link>
           <Link
             href="/tasks?view=kanban"
-            className={`rounded px-3 py-1 text-xs ${view === "kanban" ? "bg-white shadow-sm" : "text-slate-600"}`}
+            className={`rounded px-3 py-1 text-xs ${view === "kanban" ? "bg-white shadow-sm" : "text-slate-600 dark:text-gray-300"}`}
           >
             Kanban
           </Link>
@@ -116,9 +116,9 @@ export default async function TasksPage({
         <TaskKanban tasks={tasks} />
       ) : tasks.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500">
+          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
             No tasks yet.{" "}
-            <Link href="/tasks/new" className="text-emerald-600 underline">
+            <Link href="/tasks/new" className="text-amber-600 underline">
               Create one
             </Link>
             .
@@ -141,13 +141,13 @@ export default async function TasksPage({
             </TableHeader>
             <TableBody>
               {tasks.map((t) => (
-                <TableRow key={t.id} className="hover:bg-slate-50">
+                <TableRow key={t.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
                   <TableCell className="font-medium">
-                    <Link href={`/tasks/${t.id}`} className="hover:text-emerald-600">
+                    <Link href={`/tasks/${t.id}`} className="hover:text-amber-600">
                       <div className="truncate max-w-xs">{t.title}</div>
                     </Link>
                     {t.assignedTo && (
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-500 dark:text-gray-400">
                         @{t.assignedTo.name}
                       </div>
                     )}
@@ -155,7 +155,7 @@ export default async function TasksPage({
                   <TableCell>
                     <Link
                       href={`/vendors/${t.vendor.id}`}
-                      className="text-xs hover:text-emerald-600"
+                      className="text-xs hover:text-amber-600"
                     >
                       {t.vendor.name}
                     </Link>
@@ -179,7 +179,7 @@ export default async function TasksPage({
                       {TASK_STATUS_LABELS[t.status as TaskStatus] ?? t.status}
                     </Badge>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-right text-xs text-slate-500">
+                  <TableCell className="hidden md:table-cell text-right text-xs text-slate-500 dark:text-gray-400">
                     {formatDistanceToNow(t.updatedAt, { addSuffix: true })}
                   </TableCell>
                 </TableRow>

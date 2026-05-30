@@ -28,26 +28,26 @@ export default async function POEditPage({
   const action = updatePurchaseOrder.bind(null, id);
 
   return (
-    <div className="space-y-4">
+    <div className="px-4 pt-5 pb-28 space-y-4">
       <Link
         href="/purchase-orders"
-        className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-gray-400 hover:text-slate-900"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Back to POs
       </Link>
 
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">
           PO #{po.id.slice(-6)}
         </h1>
-        <p className="text-sm text-slate-500">
-          <Link href={`/vendors/${po.vendor.id}`} className="text-emerald-600 hover:underline">
+        <p className="text-sm text-slate-500 dark:text-gray-400">
+          <Link href={`/vendors/${po.vendor.id}`} className="text-amber-600 hover:underline">
             {po.vendor.name}
           </Link>
           {po.product && (
             <>
               {" · "}
-              <Link href={`/products/${po.product.id}`} className="text-emerald-600 hover:underline">
+              <Link href={`/products/${po.product.id}`} className="text-amber-600 hover:underline">
                 {po.product.name}
               </Link>
             </>

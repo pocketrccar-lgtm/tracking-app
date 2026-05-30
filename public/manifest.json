@@ -1,0 +1,31 @@
+{
+  "name": "BCH Sourcing OS",
+  "short_name": "BCH Source",
+  "description": "Mobile-first vendor sourcing CRM for Bharath Cycle Hub — manage vendors, quotes, and supply-side research on the go.",
+  "display": "standalone",
+  "orientation": "portrait",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "theme_color": "#f59e0b",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}

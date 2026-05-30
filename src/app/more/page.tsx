@@ -1,0 +1,133 @@
+import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
+import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  ShoppingCart,
+  FileText,
+  Tag,
+  ChevronRight,
+  Users,
+  Package,
+  ListTodo,
+} from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+type Item = {
+  href: string;
+  label: string;
+  desc: string;
+  icon: React.ComponentType<{ className?: string }>;
+};
+
+const SECTIONS: { title: string; items: Item[] }[] = [
+  {
+    title: "Operations",
+    items: [
+      {
+        href: "/purchase-orders",
+        label: "Purchase Orders",
+        desc: "Samples + bulk POs and their status",
+        icon: ShoppingCart,
+      },
+      {
+        href: "/reports",
+        label: "Reports",
+        desc: "Daily WhatsApp + weekly summaries",
+        icon: FileText,
+      },
+    ],
+  },
+  {
+    title: "Catalog",
+    items: [
+      {
+        href: "/vendors",
+        label: "Vendors",
+        desc: "All supply-side vendors",
+        icon: Users,
+      },
+      {
+        href: "/products",
+        label: "Products",
+        desc: "SKUs + price history",
+        icon: Package,
+      },
+      {
+        href: "/tasks",
+        label: "Tasks",
+        desc: "Calls, visits, follow-ups",
+        icon: ListTodo,
+      },
+    ],
+  },
+  {
+    title: "Setup",
+    items: [
+      {
+        href: "/categories",
+        label: "Categories",
+        desc: "Drift RC, parts, OEM, moulders…",
+        icon: Tag,
+      },
+    ],
+  },
+];
+
+export default function MorePage() {
+  return (
+    <div>
+      <PageHeader title="More" subtitle="Operations, setup & appearance" />
+      <div className="px-4 pt-5 pb-28 space-y-6">
+        {SECTIONS.map((section) => (
+          <div key={section.title}>
+            <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-500">
+              {section.title}
+            </h2>
+            <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 divide-y divide-slate-100 dark:divide-gray-800">
+              {section.items.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center gap-3 px-4 py-3.5 min-h-[44px] active:scale-[0.99] transition-transform"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-950/30 text-amber-600">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold text-slate-900 dark:text-gray-100">
+                        {item.label}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-gray-400 truncate">
+                        {item.desc}
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+
+        <div>
+          <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-500">
+            Appearance
+          </h2>
+          <div className="rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
+            <div className="mb-2 text-sm font-semibold text-slate-900 dark:text-gray-100">
+              Theme
+            </div>
+            <ThemeToggle />
+          </div>
+        </div>
+
+        <p className="px-1 text-center text-xs text-slate-400 dark:text-gray-600">
+          BCH Sourcing OS · vendor + task + cost tracker
+        </p>
+      </div>
+    </div>
+  );
+}

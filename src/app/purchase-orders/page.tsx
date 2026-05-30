@@ -33,11 +33,11 @@ export default async function PurchaseOrdersPage({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 pt-5 pb-28 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Purchase orders</h1>
-          <p className="text-sm text-slate-500">{pos.length} POs</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Purchase orders</h1>
+          <p className="text-sm text-slate-500 dark:text-gray-400">{pos.length} POs</p>
         </div>
         <Link href="/purchase-orders/new" className={buttonVariants()}>
           New PO
@@ -47,7 +47,7 @@ export default async function PurchaseOrdersPage({
       <div className="flex flex-wrap gap-2">
         <Link
           href="/purchase-orders"
-          className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+          className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
         >
           All
         </Link>
@@ -55,7 +55,7 @@ export default async function PurchaseOrdersPage({
           <Link
             key={s}
             href={`/purchase-orders?status=${s}`}
-            className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+            className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
           >
             {s.replace("_", " ")}
           </Link>
@@ -64,9 +64,9 @@ export default async function PurchaseOrdersPage({
 
       {pos.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500">
+          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
             No purchase orders yet.{" "}
-            <Link href="/purchase-orders/new" className="text-emerald-600 underline">
+            <Link href="/purchase-orders/new" className="text-amber-600 underline">
               Create one
             </Link>
             .
@@ -89,20 +89,20 @@ export default async function PurchaseOrdersPage({
             </TableHeader>
             <TableBody>
               {pos.map((po) => (
-                <TableRow key={po.id} className="hover:bg-slate-50">
+                <TableRow key={po.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
                   <TableCell className="text-xs font-mono">
-                    <Link href={`/purchase-orders/${po.id}`} className="hover:text-emerald-600">
+                    <Link href={`/purchase-orders/${po.id}`} className="hover:text-amber-600">
                       #{po.id.slice(-6)}
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Link href={`/vendors/${po.vendor.id}`} className="text-xs hover:text-emerald-600">
+                    <Link href={`/vendors/${po.vendor.id}`} className="text-xs hover:text-amber-600">
                       {po.vendor.name}
                     </Link>
                   </TableCell>
                   <TableCell className="text-xs">
                     {po.product ? (
-                      <Link href={`/products/${po.product.id}`} className="hover:text-emerald-600">
+                      <Link href={`/products/${po.product.id}`} className="hover:text-amber-600">
                         {po.product.name}
                       </Link>
                     ) : (

@@ -32,11 +32,11 @@ export default async function ProductsPage({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="px-4 pt-5 pb-28 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Products</h1>
-          <p className="text-sm text-slate-500">{products.length} products</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Products</h1>
+          <p className="text-sm text-slate-500 dark:text-gray-400">{products.length} products</p>
         </div>
         <Link href="/products/new" className={buttonVariants()}>
           Add product
@@ -46,13 +46,13 @@ export default async function ProductsPage({
       <div className="flex flex-wrap gap-2">
         <Link
           href="/products"
-          className={`rounded-full px-3 py-1 text-xs ${!params.drift ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+          className={`rounded-full px-3 py-1 text-xs ${!params.drift ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
         >
           All
         </Link>
         <Link
           href="/products?drift=yes"
-          className={`rounded-full px-3 py-1 text-xs ${params.drift === "yes" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+          className={`rounded-full px-3 py-1 text-xs ${params.drift === "yes" ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
         >
           Drift only
         </Link>
@@ -60,7 +60,7 @@ export default async function ProductsPage({
           <Link
             key={sc}
             href={`/products?scale=${sc}`}
-            className={`rounded-full px-3 py-1 text-xs ${params.scale === sc ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+            className={`rounded-full px-3 py-1 text-xs ${params.scale === sc ? "bg-amber-100 text-amber-700" : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 hover:bg-slate-200"}`}
           >
             {sc}
           </Link>
@@ -69,9 +69,9 @@ export default async function ProductsPage({
 
       {products.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500">
+          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
             No products match.{" "}
-            <Link href="/products/new" className="text-emerald-600 underline">
+            <Link href="/products/new" className="text-amber-600 underline">
               Add one
             </Link>
             .
@@ -94,24 +94,24 @@ export default async function ProductsPage({
             </TableHeader>
             <TableBody>
               {products.map((p) => (
-                <TableRow key={p.id} className="hover:bg-slate-50">
+                <TableRow key={p.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
                   <TableCell className="font-medium">
-                    <Link href={`/products/${p.id}`} className="hover:text-emerald-600">
+                    <Link href={`/products/${p.id}`} className="hover:text-amber-600">
                       {p.name}
                     </Link>
                     {p.bodyShell && (
-                      <div className="text-xs text-slate-500">{p.bodyShell}</div>
+                      <div className="text-xs text-slate-500 dark:text-gray-400">{p.bodyShell}</div>
                     )}
                   </TableCell>
                   <TableCell>
                     <Link
                       href={`/vendors/${p.vendor.id}`}
-                      className="text-xs hover:text-emerald-600"
+                      className="text-xs hover:text-amber-600"
                     >
                       {p.vendor.name}
                     </Link>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell text-xs text-slate-600">
+                  <TableCell className="hidden md:table-cell text-xs text-slate-600 dark:text-gray-300">
                     {p.brand ?? "—"}
                   </TableCell>
                   <TableCell className="text-xs">{p.scale ?? "—"}</TableCell>
@@ -121,7 +121,7 @@ export default async function ProductsPage({
                         drift
                       </Badge>
                     ) : (
-                      <span className="text-xs text-slate-400">—</span>
+                      <span className="text-xs text-slate-400 dark:text-gray-500">—</span>
                     )}
                   </TableCell>
                   <TableCell className="text-right font-mono text-xs">
