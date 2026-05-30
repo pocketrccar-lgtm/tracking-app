@@ -3,63 +3,63 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 
-const phoneSchema = z.object({
-  phone: z.string().min(4),
-  label: z.string().optional().nullable(),
-});
-
-const emailSchema = z.object({
-  email: z.string().email(),
-  label: z.string().optional().nullable(),
-});
-
-const vendorInputSchema = z.object({
-  name: z.string().min(1, "Name required"),
-  type: z.string().min(1),
-  tier: z.string().min(1),
-  status: z.string().default("COLD"),
-  state: z.string().optional().nullable(),
-  city: z.string().optional().nullable(),
-  address: z.string().optional().nullable(),
-  gst: z.string().optional().nullable(),
-  cin: z.string().optional().nullable(),
-  driftStatus: z.string().default("UNKNOWN"),
-  bchRelevance: z.coerce.number().int().min(0).max(10).default(0),
-  founderName: z.string().optional().nullable(),
-  founderLinkedin: z.string().optional().nullable(),
-  founderTitle: z.string().optional().nullable(),
-  websiteUrl: z.string().optional().nullable(),
-  igHandle: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
-  sourceMd: z.string().optional().nullable(),
-  sourceUrl: z.string().optional().nullable(),
-  phones: z.array(phoneSchema).default([]),
-  emails: z.array(emailSchema).default([]),
-});
-
-export type VendorInput = z.infer<typeof vendorInputSchema>;
-
-function cleanNullable<T extends Record<string, unknown>>(obj: T): T {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(obj)) {
-    if (v === "" || v === undefined) out[k] = null;
-    else out[k] = v;
-  }
-  return out as T;
+function s(v: FormDataEntryValue | null): string | null {
+  if (!v) return null;
+  const str = String(v).trim();
+  return str === "" ? null : str;
 }
 
-export async function createVendor(rawInput: VendorInput) {
-  const parsed = vendorInputSchema.parse(rawInput);
-  const { phones, emails, ...rest } = parsed;
-  const cleaned = cleanNullable(rest);
+function parsePhones(fd: FormData) {
+  const phones = fd.getAll("phone").map(String);
+  const labels = fd.getAll("phoneLabel").map(String);
+  return phones
+    .map((p, i) => ({ phone: p.trim(), label: labels[i]?.trim() || "main" }))
+    .filter((p) => p.phone.length >= 4);
+}
+
+function parseEmails(fd: FormData) {
+  const emails = fd.getAll("email").map(String);
+  return emails
+    .map((e) => ({ email: e.trim() }))
+    .filter((e) => e.email.includes("@"));
+}
+
+function fromFormData(fd: FormData) {
+  return {
+    name: String(fd.get("name") ?? "").trim(),
+    type: String(fd.get("type") ?? "WHOLESALER"),
+    tier: String(fd.get("tier") ?? "T3_VERIFY_DRIFT"),
+    status: String(fd.get("status") ?? "COLD"),
+    state: s(fd.get("state")),
+    city: s(fd.get("city")),
+    address: s(fd.get("address")),
+    gst: s(fd.get("gst")),
+    cin: s(fd.get("cin")),
+    driftStatus: String(fd.get("driftStatus") ?? "UNKNOWN"),
+    bchRelevance: Math.max(0, Math.min(10, Number(fd.get("bchRelevance") ?? 0))),
+    founderName: s(fd.get("founderName")),
+    founderLinkedin: s(fd.get("founderLinkedin")),
+    founderTitle: s(fd.get("founderTitle")),
+    websiteUrl: s(fd.get("websiteUrl")),
+    igHandle: s(fd.get("igHandle")),
+    notes: s(fd.get("notes")),
+    sourceMd: s(fd.get("sourceMd")),
+    sourceUrl: s(fd.get("sourceUrl")),
+  };
+}
+
+export async function createVendor(fd: FormData) {
+  const data = fromFormData(fd);
+  if (!data.name) throw new Error("Name required");
+  const phones = parsePhones(fd);
+  const emails = parseEmails(fd);
 
   const vendor = await db.vendor.create({
     data: {
-      ...cleaned,
-      phones: { create: phones.filter((p) => p.phone.trim()) },
-      emails: { create: emails.filter((e) => e.email.trim()) },
+      ...data,
+      phones: { create: phones },
+      emails: { create: emails },
     },
   });
 
@@ -68,10 +68,11 @@ export async function createVendor(rawInput: VendorInput) {
   redirect(`/vendors/${vendor.id}`);
 }
 
-export async function updateVendor(id: string, rawInput: VendorInput) {
-  const parsed = vendorInputSchema.parse(rawInput);
-  const { phones, emails, ...rest } = parsed;
-  const cleaned = cleanNullable(rest);
+export async function updateVendor(id: string, fd: FormData) {
+  const data = fromFormData(fd);
+  if (!data.name) throw new Error("Name required");
+  const phones = parsePhones(fd);
+  const emails = parseEmails(fd);
 
   await db.$transaction([
     db.vendorPhone.deleteMany({ where: { vendorId: id } }),
@@ -79,9 +80,9 @@ export async function updateVendor(id: string, rawInput: VendorInput) {
     db.vendor.update({
       where: { id },
       data: {
-        ...cleaned,
-        phones: { create: phones.filter((p) => p.phone.trim()) },
-        emails: { create: emails.filter((e) => e.email.trim()) },
+        ...data,
+        phones: { create: phones },
+        emails: { create: emails },
       },
     }),
   ]);

@@ -7,6 +7,8 @@ import {
   Users,
   ListTodo,
   Package,
+  ShoppingCart,
+  FileText,
   Tag,
   Settings,
 } from "lucide-react";
@@ -17,6 +19,8 @@ const navItems = [
   { href: "/vendors", label: "Vendors", icon: Users },
   { href: "/tasks", label: "Tasks", icon: ListTodo },
   { href: "/products", label: "Products", icon: Package },
+  { href: "/purchase-orders", label: "POs", icon: ShoppingCart },
+  { href: "/reports", label: "Reports", icon: FileText },
   { href: "/categories", label: "Categories", icon: Tag },
 ] as const;
 
@@ -78,7 +82,7 @@ export function AppNav() {
 
       {/* Mobile bottom bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white md:hidden">
-        <div className="grid grid-cols-5">
+        <div className="grid grid-cols-7">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active =

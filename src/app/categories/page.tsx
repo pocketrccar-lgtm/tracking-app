@@ -1,5 +1,10 @@
 import { db } from "@/lib/db";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { createCategory, deleteCategory } from "@/actions/categories";
+import { Trash2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -15,25 +20,67 @@ export default async function CategoriesPage() {
         <h1 className="text-2xl font-bold text-slate-900">Categories</h1>
         <p className="text-sm text-slate-500">Group vendors + products by category.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm">Add category</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form action={createCategory} className="grid gap-3 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="name">Name *</Label>
+              <Input id="name" name="name" required placeholder="e.g. Drift RC" />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Input id="description" name="description" />
+            </div>
+            <div className="flex items-end gap-2">
+              <div className="flex-1">
+                <Label htmlFor="color">Color</Label>
+                <select
+                  id="color"
+                  name="color"
+                  defaultValue="slate"
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                >
+                  {["slate", "emerald", "blue", "amber", "purple", "red", "indigo"].map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <Button type="submit">Add</Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+
       {categories.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center text-sm text-slate-500">
-            No categories yet. Seeded by the import script.
+            No categories yet. Add one above or run <code>npm run db:seed</code>.
           </CardContent>
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {categories.map((c) => (
             <Card key={c.id}>
-              <CardContent className="p-4">
-                <div className="font-medium text-slate-900">{c.name}</div>
-                {c.description && (
-                  <p className="mt-1 text-xs text-slate-500">{c.description}</p>
-                )}
-                <div className="mt-3 flex gap-3 text-xs text-slate-500">
-                  <span>{c._count.vendors} vendors</span>
-                  <span>{c._count.products} products</span>
+              <CardContent className="p-4 flex justify-between items-start">
+                <div className="min-w-0">
+                  <div className="font-medium text-slate-900">{c.name}</div>
+                  {c.description && (
+                    <p className="mt-1 text-xs text-slate-500">{c.description}</p>
+                  )}
+                  <div className="mt-3 flex gap-3 text-xs text-slate-500">
+                    <span>{c._count.vendors} vendors</span>
+                    <span>{c._count.products} products</span>
+                  </div>
                 </div>
+                <form action={deleteCategory.bind(null, c.id)}>
+                  <Button type="submit" variant="ghost" size="icon">
+                    <Trash2 className="h-3.5 w-3.5 text-slate-400 hover:text-red-500" />
+                  </Button>
+                </form>
               </CardContent>
             </Card>
           ))}

@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -20,37 +21,38 @@ import {
   type TaskPriority,
 } from "@/lib/enums";
 import { formatDistanceToNow } from "date-fns";
+import { TaskKanban } from "@/components/task-kanban";
 
 export const dynamic = "force-dynamic";
 
 export default async function TasksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; view?: string }>;
 }) {
   const params = await searchParams;
+  const view = params.view === "kanban" ? "kanban" : "list";
+
   const where: Record<string, unknown> = {};
-  if (params.status) where.status = params.status;
+  if (params.status && view === "list") where.status = params.status;
 
-  const tasks = await db.task.findMany({
-    where,
-    orderBy: [
-      { status: "asc" },
-      { priority: "desc" },
-      { dueDate: "asc" },
-      { createdAt: "desc" },
-    ],
-    take: 200,
-    include: {
-      vendor: true,
-      assignedTo: true,
-    },
-  });
-
-  const counts = await db.task.groupBy({
-    by: ["status"],
-    _count: { _all: true },
-  });
+  const [tasks, counts] = await Promise.all([
+    db.task.findMany({
+      where,
+      orderBy: [
+        { status: "asc" },
+        { priority: "desc" },
+        { dueDate: "asc" },
+        { createdAt: "desc" },
+      ],
+      take: 200,
+      include: { vendor: true, assignedTo: true },
+    }),
+    db.task.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -61,41 +63,65 @@ export default async function TasksPage({
             {tasks.length} task{tasks.length === 1 ? "" : "s"} shown
           </p>
         </div>
+        <div className="flex gap-2">
+          <Link
+            href="/tasks/new"
+            className={buttonVariants()}
+          >
+            New task
+          </Link>
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <Link
-          href="/tasks"
-          className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
-        >
-          All
-        </Link>
-        {(["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED"] as const).map(
-          (s) => {
-            const count = counts.find((c) => c.status === s)?._count._all ?? 0;
-            return (
-              <Link
-                key={s}
-                href={`/tasks?status=${s}`}
-                className={`rounded-full px-3 py-1 text-xs ${
-                  params.status === s
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                }`}
-              >
-                {TASK_STATUS_LABELS[s]} ({count})
-              </Link>
-            );
-          },
-        )}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={`/tasks${view === "kanban" ? "?view=kanban" : ""}`}
+            className={`rounded-full px-3 py-1 text-xs ${!params.status ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+          >
+            All
+          </Link>
+          {(["PENDING", "IN_PROGRESS", "COMPLETED", "BLOCKED"] as const).map(
+            (s) => {
+              const count = counts.find((c) => c.status === s)?._count._all ?? 0;
+              return (
+                <Link
+                  key={s}
+                  href={`/tasks?status=${s}`}
+                  className={`rounded-full px-3 py-1 text-xs ${params.status === s ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                >
+                  {TASK_STATUS_LABELS[s]} ({count})
+                </Link>
+              );
+            },
+          )}
+        </div>
+        <div className="flex gap-1 rounded-md bg-slate-100 p-0.5">
+          <Link
+            href="/tasks"
+            className={`rounded px-3 py-1 text-xs ${view === "list" ? "bg-white shadow-sm" : "text-slate-600"}`}
+          >
+            List
+          </Link>
+          <Link
+            href="/tasks?view=kanban"
+            className={`rounded px-3 py-1 text-xs ${view === "kanban" ? "bg-white shadow-sm" : "text-slate-600"}`}
+          >
+            Kanban
+          </Link>
+        </div>
       </div>
 
-      {tasks.length === 0 ? (
+      {view === "kanban" ? (
+        <TaskKanban tasks={tasks} />
+      ) : tasks.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center text-sm text-slate-500">
-            {params.status
-              ? `No ${TASK_STATUS_LABELS[params.status as TaskStatus] ?? params.status} tasks.`
-              : "No tasks yet. Open a vendor and add one."}
+            No tasks yet.{" "}
+            <Link href="/tasks/new" className="text-emerald-600 underline">
+              Create one
+            </Link>
+            .
           </CardContent>
         </Card>
       ) : (
@@ -117,7 +143,9 @@ export default async function TasksPage({
               {tasks.map((t) => (
                 <TableRow key={t.id} className="hover:bg-slate-50">
                   <TableCell className="font-medium">
-                    <div className="truncate max-w-xs">{t.title}</div>
+                    <Link href={`/tasks/${t.id}`} className="hover:text-emerald-600">
+                      <div className="truncate max-w-xs">{t.title}</div>
+                    </Link>
                     {t.assignedTo && (
                       <div className="text-xs text-slate-500">
                         @{t.assignedTo.name}
@@ -146,9 +174,7 @@ export default async function TasksPage({
                   <TableCell>
                     <Badge
                       variant="outline"
-                      className={
-                        TASK_STATUS_COLORS[t.status as TaskStatus] ?? ""
-                      }
+                      className={TASK_STATUS_COLORS[t.status as TaskStatus] ?? ""}
                     >
                       {TASK_STATUS_LABELS[t.status as TaskStatus] ?? t.status}
                     </Badge>

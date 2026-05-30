@@ -3,40 +3,69 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { z } from "zod";
 
-const taskInputSchema = z.object({
-  vendorId: z.string().min(1),
-  title: z.string().min(1, "Title required"),
-  description: z.string().optional().nullable(),
-  type: z.string().default("CALL"),
-  priority: z.string().default("MEDIUM"),
-  status: z.string().default("PENDING"),
-  assignedToId: z.string().optional().nullable(),
-  dueDate: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
-});
+function s(v: FormDataEntryValue | null): string | null {
+  if (!v) return null;
+  const str = String(v).trim();
+  return str === "" ? null : str;
+}
 
-export type TaskInput = z.infer<typeof taskInputSchema>;
+function fromForm(fd: FormData) {
+  return {
+    vendorId: String(fd.get("vendorId") ?? ""),
+    title: String(fd.get("title") ?? "").trim(),
+    description: s(fd.get("description")),
+    type: String(fd.get("type") ?? "CALL"),
+    priority: String(fd.get("priority") ?? "MEDIUM"),
+    status: String(fd.get("status") ?? "PENDING"),
+    assignedToId: s(fd.get("assignedToId")),
+    dueDate: s(fd.get("dueDate")),
+    notes: s(fd.get("notes")),
+  };
+}
 
-export async function createTask(input: TaskInput) {
-  const data = taskInputSchema.parse(input);
+export async function createTask(fd: FormData) {
+  const d = fromForm(fd);
+  if (!d.vendorId) throw new Error("Vendor required");
+  if (!d.title) throw new Error("Title required");
   const task = await db.task.create({
     data: {
-      vendorId: data.vendorId,
-      title: data.title,
-      description: data.description || null,
-      type: data.type,
-      priority: data.priority,
-      status: data.status,
-      assignedToId: data.assignedToId || null,
-      dueDate: data.dueDate ? new Date(data.dueDate) : null,
-      notes: data.notes || null,
+      vendorId: d.vendorId,
+      title: d.title,
+      description: d.description,
+      type: d.type,
+      priority: d.priority,
+      status: d.status,
+      assignedToId: d.assignedToId,
+      dueDate: d.dueDate ? new Date(d.dueDate) : null,
+      notes: d.notes,
     },
   });
   revalidatePath("/tasks");
-  revalidatePath(`/vendors/${data.vendorId}`);
-  redirect(`/vendors/${data.vendorId}`);
+  revalidatePath(`/vendors/${d.vendorId}`);
+  redirect(`/tasks/${task.id}`);
+}
+
+export async function updateTask(id: string, fd: FormData) {
+  const d = fromForm(fd);
+  await db.task.update({
+    where: { id },
+    data: {
+      title: d.title,
+      description: d.description,
+      type: d.type,
+      priority: d.priority,
+      status: d.status,
+      assignedToId: d.assignedToId,
+      dueDate: d.dueDate ? new Date(d.dueDate) : null,
+      notes: d.notes,
+      completedAt: d.status === "COMPLETED" ? new Date() : null,
+    },
+  });
+  revalidatePath("/tasks");
+  revalidatePath(`/tasks/${id}`);
+  revalidatePath(`/vendors/${d.vendorId}`);
+  redirect(`/tasks/${id}`);
 }
 
 export async function updateTaskStatus(id: string, status: string) {
