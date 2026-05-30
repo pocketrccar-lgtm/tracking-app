@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BCH Sourcing OS — Vendor Tracking App
 
-## Getting Started
+Vendor + task + purchase-cost tracker for the BCH RC car launch (drift RC, ₹800–₹2,500 retail).
 
-First, run the development server:
+Built for Syed (admin) and Shoaib (field).
+
+## Stack
+
+- **Next.js 16** App Router + Turbopack
+- **TypeScript** + Tailwind CSS v4
+- **shadcn/ui** components (base-ui under the hood)
+- **Prisma 6** ORM
+- **PostgreSQL** (Vercel Postgres / Supabase / Neon)
+- Deployed on **Vercel**, source on **GitHub**
+
+## Local development
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env       # then fill in DATABASE_URL
+npm run db:migrate         # create tables
+npm run dev                # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Vercel deploy
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Push to GitHub — Vercel auto-detects Next.js and rebuilds.
+2. **Required env var in Vercel project settings:**
+   - `DATABASE_URL` — Postgres connection string from Vercel Postgres / Supabase / Neon
+3. After first deploy, run migrations against production DB:
+   ```bash
+   DATABASE_URL="<prod-url>" npm run db:deploy
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Data model (Prisma)
 
-## Learn More
+- `Vendor` — name, type, tier, status, drift status, BCH relevance, GST/CIN, location, founder details
+- `VendorPhone` / `VendorEmail` — multiple per vendor
+- `Category` + `VendorCategory` — many-to-many tagging (drift RC, parts, OEM, moulders, etc.)
+- `Product` + `PriceHistory` — per-vendor SKUs with wholesale/retail/MOQ and price tracking over time
+- `Task` — call/visit/DM/sample-order tracking with priority + due date + assignee
+- `Interaction` — log every call/visit/message with outcome
+- `PurchaseOrder` — sample orders + bulk POs with status (sample → received → QA passed)
+- `User` — Syed (admin) + Shoaib (field)
 
-To learn more about Next.js, take a look at the following resources:
+## Source of vendor data
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Seed script imports ~130 supply-side vendors from the SOURCING_HQ research repo's
+[`SHOAIB_MASTER_CALL_LIST.md`](https://github.com/bharathcyclehub-a11y/SOURCING_HQ/blob/main/RC_RESEARCH/SHOAIB_MASTER_CALL_LIST.md) —
+Tier 1 drift-confirmed importers (Ratnaakar / Mayatra / Loty / Shine Traders / CTM Toys / etc.),
+Tier 2 strong-signal supply-side (Mirana / Bharat Hobby / Hemani Exim / KV Toys / DeoDap),
+Tier 3 verify-drift (~65 vendors), Tier 4 IndiaMART-gated, plus Chinese factories and Mumbai/Bangalore moulders.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Pages
 
-## Deploy on Vercel
+| Route | Purpose |
+|---|---|
+| `/dashboard` | Stats + recent vendors + tier breakdown |
+| `/vendors` | Searchable, filterable vendor list |
+| `/vendors/[id]` | Vendor detail: phones, products, tasks, interactions |
+| `/tasks` | Kanban board + per-assignee queues |
+| `/products` | Per-vendor SKUs + price history + purchase cost |
+| `/categories` | Category management + vendor count |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Roles
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **admin** (Syed) — full access
+- **field** (Shoaib) — assigned-task queue + intake forms
+
+## Status
+
+This commit is the **bootstrap**. Vendor / task / product UIs are placeholders, to be filled by parallel agents.
