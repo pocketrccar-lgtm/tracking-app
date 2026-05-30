@@ -12,13 +12,13 @@ const badgeVariants = cva(
         default:
           "bg-red-600 text-white [a]:hover:bg-red-700",
         secondary:
-          "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 [a]:hover:bg-gray-200 dark:[a]:hover:bg-gray-700",
+          "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 [a]:hover:bg-neutral-200 dark:[a]:hover:bg-neutral-700",
         destructive:
           "bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 [a]:hover:bg-red-200 dark:[a]:hover:bg-red-900/50",
         outline:
-          "border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 [a]:hover:bg-gray-100 dark:[a]:hover:bg-gray-800",
+          "border border-neutral-300 dark:border-neutral-700 text-neutral-700 dark:text-neutral-300 [a]:hover:bg-neutral-100 dark:[a]:hover:bg-neutral-800",
         ghost:
-          "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
+          "text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800",
         link: "text-red-600 underline-offset-4 hover:underline",
       },
     },

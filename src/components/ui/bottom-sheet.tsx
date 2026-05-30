@@ -22,10 +22,10 @@ export function BottomSheet({
     <Drawer.Root open={open} onOpenChange={onOpenChange}>
       <Drawer.Portal>
         <Drawer.Overlay className="fixed inset-0 bg-black/40 z-50" />
-        <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 rounded-t-2xl max-h-[85vh] flex flex-col">
-          <div className="mx-auto mt-3 mb-2 h-1.5 w-10 rounded-full bg-gray-300 dark:bg-gray-700" />
+        <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-neutral-900 rounded-t-2xl max-h-[85vh] flex flex-col">
+          <div className="mx-auto mt-3 mb-2 h-1.5 w-10 rounded-full bg-neutral-300 dark:bg-neutral-700" />
           {title ? (
-            <Drawer.Title className="px-4 pb-2 text-sm font-semibold border-b border-gray-100 dark:border-gray-800">
+            <Drawer.Title className="px-4 pb-2 text-sm font-semibold border-b border-neutral-100 dark:border-neutral-800">
               {title}
             </Drawer.Title>
           ) : (
@@ -56,7 +56,7 @@ export function ActionItem({
   destructive,
 }: ActionItemProps) {
   const rowClass = cn(
-    "flex items-center gap-3 w-full rounded-xl px-3 py-3 text-left active:scale-[0.98] transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
+    "flex items-center gap-3 w-full rounded-xl px-3 py-3 text-left active:scale-[0.98] transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-800",
     destructive && "text-red-600 dark:text-red-500"
   );
 

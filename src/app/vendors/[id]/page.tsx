@@ -74,7 +74,7 @@ export default async function VendorDetailPage({
       <div>
         <Link
           href="/vendors"
-          className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-gray-400 hover:text-slate-900"
+          className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-neutral-400 hover:text-slate-900"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Back to vendors
         </Link>
@@ -82,7 +82,7 @@ export default async function VendorDetailPage({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">{vendor.name}</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">{vendor.name}</h1>
           <div className="mt-2 flex flex-wrap gap-1.5">
             <Badge
               variant="outline"
@@ -123,11 +123,11 @@ export default async function VendorDetailPage({
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             {vendor.phones.length === 0 && vendor.emails.length === 0 && !vendor.websiteUrl && !vendor.igHandle ? (
-              <div className="text-slate-500 dark:text-gray-400">No contact info yet.</div>
+              <div className="text-slate-500 dark:text-neutral-400">No contact info yet.</div>
             ) : null}
             {vendor.phones.map((p) => (
               <div key={p.id} className="flex items-center gap-2">
-                <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                <Phone className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                 <a
                   href={`tel:${p.phone}`}
                   className="font-mono hover:text-red-600"
@@ -143,7 +143,7 @@ export default async function VendorDetailPage({
             ))}
             {vendor.emails.map((e) => (
               <div key={e.id} className="flex items-center gap-2">
-                <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                <Mail className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                 <a
                   href={`mailto:${e.email}`}
                   className="hover:text-red-600"
@@ -154,7 +154,7 @@ export default async function VendorDetailPage({
             ))}
             {vendor.websiteUrl && (
               <div className="flex items-center gap-2">
-                <Globe className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                <Globe className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                 <a
                   href={
                     vendor.websiteUrl.startsWith("http")
@@ -171,7 +171,7 @@ export default async function VendorDetailPage({
             )}
             {vendor.igHandle && (
               <div className="flex items-center gap-2">
-                <AtSign className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                <AtSign className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                 <a
                   href={`https://instagram.com/${vendor.igHandle.replace(/^@/, "")}`}
                   target="_blank"
@@ -192,13 +192,13 @@ export default async function VendorDetailPage({
           <CardContent className="space-y-2 text-sm">
             {(vendor.city || vendor.state || vendor.address) && (
               <div className="flex items-start gap-2">
-                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                 <div className="min-w-0">
                   <div>
                     {[vendor.city, vendor.state].filter(Boolean).join(", ")}
                   </div>
                   {vendor.address && (
-                    <div className="text-xs text-slate-500 dark:text-gray-400">
+                    <div className="text-xs text-slate-500 dark:text-neutral-400">
                       {vendor.address}
                     </div>
                   )}
@@ -207,18 +207,18 @@ export default async function VendorDetailPage({
             )}
             {vendor.gst && (
               <div className="text-xs">
-                <span className="text-slate-500 dark:text-gray-400">GST:</span>{" "}
+                <span className="text-slate-500 dark:text-neutral-400">GST:</span>{" "}
                 <span className="font-mono">{vendor.gst}</span>
               </div>
             )}
             {vendor.cin && (
               <div className="text-xs">
-                <span className="text-slate-500 dark:text-gray-400">CIN:</span>{" "}
+                <span className="text-slate-500 dark:text-neutral-400">CIN:</span>{" "}
                 <span className="font-mono">{vendor.cin}</span>
               </div>
             )}
             {!vendor.city && !vendor.state && !vendor.gst && !vendor.cin && (
-              <div className="text-slate-500 dark:text-gray-400">Not recorded yet.</div>
+              <div className="text-slate-500 dark:text-neutral-400">Not recorded yet.</div>
             )}
           </CardContent>
         </Card>
@@ -231,11 +231,11 @@ export default async function VendorDetailPage({
             <CardContent className="space-y-2 text-sm">
               {vendor.founderName && (
                 <div className="flex items-center gap-2">
-                  <User className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                  <User className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                   <div>
                     <div className="font-medium">{vendor.founderName}</div>
                     {vendor.founderTitle && (
-                      <div className="text-xs text-slate-500 dark:text-gray-400">
+                      <div className="text-xs text-slate-500 dark:text-neutral-400">
                         {vendor.founderTitle}
                       </div>
                     )}
@@ -244,7 +244,7 @@ export default async function VendorDetailPage({
               )}
               {vendor.founderLinkedin && (
                 <div className="flex items-center gap-2">
-                  <Briefcase className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-gray-500" />
+                  <Briefcase className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
                   <a
                     href={
                       vendor.founderLinkedin.startsWith("http")
@@ -269,7 +269,7 @@ export default async function VendorDetailPage({
               <CardTitle className="text-sm">Notes</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-slate-700 dark:text-gray-300 whitespace-pre-line">
+              <p className="text-sm text-slate-700 dark:text-neutral-300 whitespace-pre-line">
                 {vendor.notes}
               </p>
             </CardContent>
@@ -292,17 +292,17 @@ export default async function VendorDetailPage({
           </CardHeader>
           <CardContent>
             {vendor.tasks.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-gray-400">No tasks yet.</p>
+              <p className="text-sm text-slate-500 dark:text-neutral-400">No tasks yet.</p>
             ) : (
               <ul className="space-y-2">
                 {vendor.tasks.map((t) => (
                   <li key={t.id}>
                     <Link
                       href={`/tasks/${t.id}`}
-                      className="flex items-start justify-between gap-2 rounded-md p-2 -mx-2 hover:bg-slate-50 dark:hover:bg-gray-800"
+                      className="flex items-start justify-between gap-2 rounded-md p-2 -mx-2 hover:bg-slate-50 dark:hover:bg-neutral-800"
                     >
                       <div className="min-w-0">
-                        <div className="text-sm font-medium text-slate-900 dark:text-gray-100 truncate">
+                        <div className="text-sm font-medium text-slate-900 dark:text-neutral-100 truncate">
                           {t.title}
                         </div>
                         <div className="mt-0.5 flex items-center gap-1.5">
@@ -316,7 +316,7 @@ export default async function VendorDetailPage({
                             {t.priority}
                           </Badge>
                           {t.assignedTo && (
-                            <span className="text-xs text-slate-500 dark:text-gray-400">
+                            <span className="text-xs text-slate-500 dark:text-neutral-400">
                               {t.assignedTo.name}
                             </span>
                           )}
@@ -344,7 +344,7 @@ export default async function VendorDetailPage({
           </CardHeader>
           <CardContent>
             {vendor.interactions.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-gray-400">
+              <p className="text-sm text-slate-500 dark:text-neutral-400">
                 No calls / visits / messages logged.
               </p>
             ) : (
@@ -356,7 +356,7 @@ export default async function VendorDetailPage({
                   >
                     <div className="flex items-center justify-between text-xs">
                       <span className="font-medium">{i.type}</span>
-                      <span className="text-slate-500 dark:text-gray-400">
+                      <span className="text-slate-500 dark:text-neutral-400">
                         {formatDistanceToNow(i.occurredAt, { addSuffix: true })}
                       </span>
                     </div>
@@ -366,9 +366,9 @@ export default async function VendorDetailPage({
                       </Badge>
                     )}
                     {i.notes && (
-                      <p className="mt-1 text-xs text-slate-700 dark:text-gray-300">{i.notes}</p>
+                      <p className="mt-1 text-xs text-slate-700 dark:text-neutral-300">{i.notes}</p>
                     )}
-                    <div className="mt-1 text-xs text-slate-500 dark:text-gray-400">
+                    <div className="mt-1 text-xs text-slate-500 dark:text-neutral-400">
                       by {i.user.name}
                     </div>
                   </li>
@@ -393,7 +393,7 @@ export default async function VendorDetailPage({
                 >
                   <div className="font-medium text-sm">{p.name}</div>
                   {p.brand && (
-                    <div className="text-xs text-slate-500 dark:text-gray-400">{p.brand}</div>
+                    <div className="text-xs text-slate-500 dark:text-neutral-400">{p.brand}</div>
                   )}
                   <div className="mt-1 flex flex-wrap gap-1 text-xs">
                     {p.scale && (
@@ -405,12 +405,12 @@ export default async function VendorDetailPage({
                       </Badge>
                     )}
                     {p.wholesalePrice && (
-                      <span className="font-mono text-slate-700 dark:text-gray-300">
+                      <span className="font-mono text-slate-700 dark:text-neutral-300">
                         ₹{p.wholesalePrice}
                       </span>
                     )}
                     {p.moq && (
-                      <span className="text-slate-500 dark:text-gray-400">MOQ {p.moq}</span>
+                      <span className="text-slate-500 dark:text-neutral-400">MOQ {p.moq}</span>
                     )}
                   </div>
                 </li>
@@ -421,7 +421,7 @@ export default async function VendorDetailPage({
       )}
 
       {(vendor.sourceMd || vendor.sourceUrl) && (
-        <p className="text-xs text-slate-400 dark:text-gray-500">
+        <p className="text-xs text-slate-400 dark:text-neutral-500">
           Source: {vendor.sourceMd ?? vendor.sourceUrl}
         </p>
       )}

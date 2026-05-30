@@ -24,11 +24,11 @@ function EmptyState({ icon, title, description, action, className }: EmptyStateP
           {icon}
         </div>
       ) : null}
-      <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+      <p className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
         {title}
       </p>
       {description ? (
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 max-w-[280px]">
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400 max-w-[280px]">
           {description}
         </p>
       ) : null}

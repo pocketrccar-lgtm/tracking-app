@@ -53,11 +53,11 @@ export function AlertDialog({
         className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm"
         onClick={() => !loading && onOpenChange(false)}
       />
-      <div className="relative z-[100] bg-white dark:bg-gray-900 rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
+      <div className="relative z-[100] bg-white dark:bg-neutral-900 rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-4 animate-in fade-in zoom-in-95 duration-200">
         <div className="space-y-2">
           <h2 className="text-lg font-semibold">{title}</h2>
           {description && (
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
               {description}
             </p>
           )}
@@ -71,8 +71,8 @@ export function AlertDialog({
             onClick={() => onOpenChange(false)}
             className={cn(
               "min-h-[44px] rounded-xl px-4 text-sm font-semibold transition-colors",
-              "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100",
-              "hover:bg-gray-200 dark:hover:bg-gray-700",
+              "bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100",
+              "hover:bg-neutral-200 dark:hover:bg-neutral-700",
               "disabled:opacity-50"
             )}
           >

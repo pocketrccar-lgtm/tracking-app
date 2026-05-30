@@ -25,11 +25,11 @@ export default async function EditVendorPage({
     <div className="px-4 pt-5 pb-28 space-y-4">
       <Link
         href={`/vendors/${id}`}
-        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-gray-400 hover:text-slate-900"
+        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-neutral-400 hover:text-slate-900"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Back to vendor
       </Link>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Edit {vendor.name}</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Edit {vendor.name}</h1>
       <VendorForm
         vendor={vendor}
         action={updateAction}

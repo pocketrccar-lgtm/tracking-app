@@ -20,7 +20,7 @@ function Segmented({ options, value, onValueChange, className }: SegmentedProps)
       data-slot="segmented"
       role="tablist"
       className={cn(
-        "flex bg-slate-100 dark:bg-gray-800 rounded-xl p-1",
+        "flex bg-slate-100 dark:bg-neutral-800 rounded-xl p-1",
         className
       )}
     >
@@ -36,7 +36,7 @@ function Segmented({ options, value, onValueChange, className }: SegmentedProps)
             className={cn(
               "flex-1 py-2 min-h-[44px] rounded-lg text-xs font-bold transition-all",
               active
-                ? "bg-white dark:bg-gray-900 shadow-sm text-gray-900 dark:text-gray-100"
+                ? "bg-white dark:bg-neutral-900 shadow-sm text-neutral-900 dark:text-neutral-100"
                 : "text-slate-400"
             )}
           >

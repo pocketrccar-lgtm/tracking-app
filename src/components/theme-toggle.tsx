@@ -24,7 +24,7 @@ export function ThemeToggle() {
     return (
       <div
         aria-hidden
-        className="flex gap-1 p-1 rounded-lg bg-gray-100 dark:bg-gray-800 h-[44px]"
+        className="flex gap-1 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800 h-[44px]"
       />
     );
   }
@@ -33,7 +33,7 @@ export function ThemeToggle() {
     <div
       role="radiogroup"
       aria-label="Theme"
-      className="flex gap-1 p-1 rounded-lg bg-gray-100 dark:bg-gray-800"
+      className="flex gap-1 p-1 rounded-lg bg-neutral-100 dark:bg-neutral-800"
     >
       {OPTIONS.map(({ value, label, Icon }) => {
         const active = theme === value;
@@ -49,7 +49,7 @@ export function ThemeToggle() {
               "flex-1 inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-md px-3 text-sm font-medium transition-colors",
               active
                 ? "bg-red-600 text-white shadow-sm"
-                : "text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
+                : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-white"
             )}
           >
             <Icon className="size-4" />

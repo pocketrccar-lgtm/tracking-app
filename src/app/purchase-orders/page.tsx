@@ -30,7 +30,7 @@ export default async function PurchaseOrdersPage({
     `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center whitespace-nowrap ${
       active
         ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300"
-        : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
+        : "bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-300"
     }`;
 
   return (
@@ -62,7 +62,7 @@ export default async function PurchaseOrdersPage({
 
         {pos.length === 0 ? (
           <Card>
-            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-neutral-400">
               No purchase orders yet.{" "}
               <Link href="/purchase-orders/new" className="text-red-600 underline">
                 Create one
@@ -76,27 +76,27 @@ export default async function PurchaseOrdersPage({
               <Link
                 key={po.id}
                 href={`/purchase-orders/${po.id}`}
-                className="block rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 active:scale-[0.99] transition-transform"
+                className="block rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3.5 active:scale-[0.99] transition-transform"
               >
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
                       {po.vendor.name}
                     </div>
-                    <div className="truncate text-xs text-slate-500 dark:text-gray-400">
+                    <div className="truncate text-xs text-slate-500 dark:text-neutral-400">
                       {po.product ? po.product.name : "no product link"} · #{po.id.slice(-6)}
                     </div>
                   </div>
                   <Badge variant="outline" className="shrink-0">
                     {po.status.replace(/_/g, " ").toLowerCase()}
                   </Badge>
-                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-neutral-600" />
                 </div>
-                <div className="mt-2 flex items-center gap-3 text-xs text-slate-500 dark:text-gray-400">
+                <div className="mt-2 flex items-center gap-3 text-xs text-slate-500 dark:text-neutral-400">
                   <span>
                     {po.quantity} × <span className="font-mono">₹{po.unitCost}</span>
                   </span>
-                  <span className="font-mono font-semibold text-slate-900 dark:text-gray-100">
+                  <span className="font-mono font-semibold text-slate-900 dark:text-neutral-100">
                     = ₹{po.totalCost}
                   </span>
                   <span className="ml-auto">{format(po.orderedAt, "dd MMM")}</span>

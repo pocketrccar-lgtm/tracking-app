@@ -29,7 +29,7 @@ export default async function ProductsPage({
     `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center ${
       active
         ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300"
-        : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
+        : "bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-300"
     }`;
 
   return (
@@ -67,7 +67,7 @@ export default async function ProductsPage({
 
         {products.length === 0 ? (
           <Card>
-            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-neutral-400">
               No products match.{" "}
               <Link href="/products/new" className="text-red-600 underline">
                 Add one
@@ -81,20 +81,20 @@ export default async function ProductsPage({
               <Link
                 key={p.id}
                 href={`/products/${p.id}`}
-                className="block rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 active:scale-[0.99] transition-transform"
+                className="block rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3.5 active:scale-[0.99] transition-transform"
               >
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
                       {p.name}
                     </div>
-                    <div className="truncate text-xs text-slate-500 dark:text-gray-400">
+                    <div className="truncate text-xs text-slate-500 dark:text-neutral-400">
                       {p.vendor.name}
                       {p.brand ? ` · ${p.brand}` : ""}
                       {p.bodyShell ? ` · ${p.bodyShell}` : ""}
                     </div>
                   </div>
-                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-neutral-600" />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   {p.scale && <Badge variant="outline">{p.scale}</Badge>}
@@ -108,12 +108,12 @@ export default async function ProductsPage({
                   )}
                   {p.ledLights && <Badge variant="outline">LED</Badge>}
                   {p.wholesalePrice != null && (
-                    <span className="ml-auto font-mono text-sm font-semibold text-slate-900 dark:text-gray-100">
+                    <span className="ml-auto font-mono text-sm font-semibold text-slate-900 dark:text-neutral-100">
                       ₹{p.wholesalePrice}
                     </span>
                   )}
                   {p.moq != null && (
-                    <span className="text-xs text-slate-400 dark:text-gray-500">
+                    <span className="text-xs text-slate-400 dark:text-neutral-500">
                       MOQ {p.moq}
                     </span>
                   )}

@@ -49,7 +49,7 @@ export default async function TasksPage({
     `rounded-full px-3 py-1.5 text-xs font-semibold min-h-[44px] inline-flex items-center whitespace-nowrap ${
       active
         ? "bg-red-100 text-red-700 dark:bg-red-950/40 dark:text-red-300"
-        : "bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300"
+        : "bg-slate-100 dark:bg-neutral-800 text-slate-600 dark:text-neutral-300"
     }`;
 
   return (
@@ -65,16 +65,16 @@ export default async function TasksPage({
       />
       <div className="px-4 pt-5 pb-28 space-y-4">
         {/* view toggle */}
-        <div className="flex rounded-xl bg-slate-100 dark:bg-gray-800 p-1">
+        <div className="flex rounded-xl bg-slate-100 dark:bg-neutral-800 p-1">
           <Link
             href="/tasks"
-            className={`flex-1 rounded-lg py-2 min-h-[44px] flex items-center justify-center text-xs font-bold transition-all ${view === "list" ? "bg-white dark:bg-gray-900 shadow-sm" : "text-slate-400"}`}
+            className={`flex-1 rounded-lg py-2 min-h-[44px] flex items-center justify-center text-xs font-bold transition-all ${view === "list" ? "bg-white dark:bg-neutral-900 shadow-sm" : "text-slate-400"}`}
           >
             List
           </Link>
           <Link
             href="/tasks?view=kanban"
-            className={`flex-1 rounded-lg py-2 min-h-[44px] flex items-center justify-center text-xs font-bold transition-all ${view === "kanban" ? "bg-white dark:bg-gray-900 shadow-sm" : "text-slate-400"}`}
+            className={`flex-1 rounded-lg py-2 min-h-[44px] flex items-center justify-center text-xs font-bold transition-all ${view === "kanban" ? "bg-white dark:bg-neutral-900 shadow-sm" : "text-slate-400"}`}
           >
             Kanban
           </Link>
@@ -100,7 +100,7 @@ export default async function TasksPage({
           <TaskKanban tasks={tasks} />
         ) : tasks.length === 0 ? (
           <Card>
-            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+            <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-neutral-400">
               No tasks yet.{" "}
               <Link href="/tasks/new" className="text-red-600 underline">
                 Create one
@@ -114,19 +114,19 @@ export default async function TasksPage({
               <Link
                 key={t.id}
                 href={`/tasks/${t.id}`}
-                className="block rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3.5 active:scale-[0.99] transition-transform"
+                className="block rounded-2xl border border-slate-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 p-3.5 active:scale-[0.99] transition-transform"
               >
                 <div className="flex items-start gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
+                    <div className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
                       {t.title}
                     </div>
-                    <div className="truncate text-xs text-slate-500 dark:text-gray-400">
+                    <div className="truncate text-xs text-slate-500 dark:text-neutral-400">
                       {t.vendor.name}
                       {t.assignedTo ? ` · @${t.assignedTo.name}` : ""}
                     </div>
                   </div>
-                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                  <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-300 dark:text-neutral-600" />
                 </div>
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   <Badge variant="outline" className={TASK_STATUS_COLORS[t.status as TaskStatus] ?? ""}>
@@ -138,7 +138,7 @@ export default async function TasksPage({
                   <Badge variant="outline">
                     {TASK_TYPE_LABELS[t.type as TaskType] ?? t.type}
                   </Badge>
-                  <span className="ml-auto text-xs text-slate-400 dark:text-gray-500">
+                  <span className="ml-auto text-xs text-slate-400 dark:text-neutral-500">
                     {formatDistanceToNow(t.updatedAt, { addSuffix: true })}
                   </span>
                 </div>

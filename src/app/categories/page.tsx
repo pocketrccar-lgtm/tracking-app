@@ -17,8 +17,8 @@ export default async function CategoriesPage() {
   return (
     <div className="px-4 pt-5 pb-28 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Categories</h1>
-        <p className="text-sm text-slate-500 dark:text-gray-400">Group vendors + products by category.</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Categories</h1>
+        <p className="text-sm text-slate-500 dark:text-neutral-400">Group vendors + products by category.</p>
       </div>
 
       <Card>
@@ -42,7 +42,7 @@ export default async function CategoriesPage() {
                   id="color"
                   name="color"
                   defaultValue="slate"
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                  className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
                 >
                   {["slate", "emerald", "blue", "amber", "purple", "red", "indigo"].map((c) => (
                     <option key={c} value={c}>{c}</option>
@@ -57,7 +57,7 @@ export default async function CategoriesPage() {
 
       {categories.length === 0 ? (
         <Card>
-          <CardContent className="p-8 text-center text-sm text-slate-500 dark:text-gray-400">
+          <CardContent className="p-8 text-center text-sm text-slate-500 dark:text-neutral-400">
             No categories yet. Add one above or run <code>npm run db:seed</code>.
           </CardContent>
         </Card>
@@ -67,18 +67,18 @@ export default async function CategoriesPage() {
             <Card key={c.id}>
               <CardContent className="p-4 flex justify-between items-start">
                 <div className="min-w-0">
-                  <div className="font-medium text-slate-900 dark:text-gray-100">{c.name}</div>
+                  <div className="font-medium text-slate-900 dark:text-neutral-100">{c.name}</div>
                   {c.description && (
-                    <p className="mt-1 text-xs text-slate-500 dark:text-gray-400">{c.description}</p>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-neutral-400">{c.description}</p>
                   )}
-                  <div className="mt-3 flex gap-3 text-xs text-slate-500 dark:text-gray-400">
+                  <div className="mt-3 flex gap-3 text-xs text-slate-500 dark:text-neutral-400">
                     <span>{c._count.vendors} vendors</span>
                     <span>{c._count.products} products</span>
                   </div>
                 </div>
                 <form action={deleteCategory.bind(null, c.id)}>
                   <Button type="submit" variant="ghost" size="icon">
-                    <Trash2 className="h-3.5 w-3.5 text-slate-400 dark:text-gray-500 hover:text-red-500" />
+                    <Trash2 className="h-3.5 w-3.5 text-slate-400 dark:text-neutral-500 hover:text-red-500" />
                   </Button>
                 </form>
               </CardContent>

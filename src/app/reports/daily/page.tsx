@@ -27,15 +27,15 @@ export default async function DailyReportPage({
     <div className="px-4 pt-5 pb-28 space-y-6">
       <Link
         href="/reports"
-        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-gray-400 hover:text-slate-900"
+        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-neutral-400 hover:text-slate-900"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Back to reports
       </Link>
 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Daily report</h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Daily report</h1>
+          <p className="text-sm text-slate-500 dark:text-neutral-400">
             {dateStr}
             {user ? ` · ${user.name}` : ""}
           </p>
@@ -45,12 +45,12 @@ export default async function DailyReportPage({
             type="date"
             name="date"
             defaultValue={dateStr}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm"
+            className="h-11 rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
           />
           <select
             name="userId"
             defaultValue={userId ?? ""}
-            className="h-9 rounded-md border border-input bg-background px-2 text-sm shadow-sm"
+            className="h-11 rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
           >
             {users.map((u) => (
               <option key={u.id} value={u.id}>{u.name}</option>
@@ -68,25 +68,25 @@ export default async function DailyReportPage({
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs uppercase text-slate-500 dark:text-gray-400">Interactions</div>
+            <div className="text-xs uppercase text-slate-500 dark:text-neutral-400">Interactions</div>
             <div className="mt-1 text-3xl font-bold">{data.interactionsCount}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs uppercase text-slate-500 dark:text-gray-400">Tasks completed</div>
+            <div className="text-xs uppercase text-slate-500 dark:text-neutral-400">Tasks completed</div>
             <div className="mt-1 text-3xl font-bold">{data.tasksCompletedToday}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs uppercase text-slate-500 dark:text-gray-400">New vendors</div>
+            <div className="text-xs uppercase text-slate-500 dark:text-neutral-400">New vendors</div>
             <div className="mt-1 text-3xl font-bold">{data.newVendorsToday}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <div className="text-xs uppercase text-slate-500 dark:text-gray-400">Pending tasks</div>
+            <div className="text-xs uppercase text-slate-500 dark:text-neutral-400">Pending tasks</div>
             <div className="mt-1 text-3xl font-bold">{data.pendingTasks}</div>
           </CardContent>
         </Card>

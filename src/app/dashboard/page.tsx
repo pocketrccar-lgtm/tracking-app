@@ -100,13 +100,13 @@ export default async function DashboardPage() {
 
           {/* Vendors by tier */}
           <div>
-            <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-500">
+            <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-neutral-500">
               Vendors by tier
             </h2>
             <Card>
               <CardContent className="space-y-2.5 p-4">
                 {byTier.length === 0 ? (
-                  <p className="text-sm text-slate-500 dark:text-gray-400">
+                  <p className="text-sm text-slate-500 dark:text-neutral-400">
                     No vendors yet.{" "}
                     <Link href="/vendors/new" className="text-red-600 underline">
                       Add one
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
                           <Badge variant="outline" className={TIER_COLORS[tier] ?? ""}>
                             {VENDOR_TIER_LABELS[tier] ?? t.tier}
                           </Badge>
-                          <span className="text-sm font-semibold text-slate-700 dark:text-gray-300 tabular-nums">
+                          <span className="text-sm font-semibold text-slate-700 dark:text-neutral-300 tabular-nums">
                             {t._count._all}
                           </span>
                         </Link>
@@ -142,7 +142,7 @@ export default async function DashboardPage() {
           {/* Recently updated */}
           <div>
             <div className="flex items-center justify-between px-1 pb-2">
-              <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-gray-500">
+              <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-neutral-500">
                 Recently updated
               </h2>
               <Link href="/vendors" className="text-xs font-semibold text-red-600">
@@ -152,11 +152,11 @@ export default async function DashboardPage() {
             <Card>
               <CardContent className="p-0">
                 {recentVendors.length === 0 ? (
-                  <p className="p-4 text-sm text-slate-500 dark:text-gray-400">
+                  <p className="p-4 text-sm text-slate-500 dark:text-neutral-400">
                     No vendors yet.
                   </p>
                 ) : (
-                  <ul className="divide-y divide-slate-100 dark:divide-gray-800">
+                  <ul className="divide-y divide-slate-100 dark:divide-neutral-800">
                     {recentVendors.map((v) => (
                       <li key={v.id}>
                         <Link
@@ -164,10 +164,10 @@ export default async function DashboardPage() {
                           className="flex items-center gap-2 px-4 py-3 min-h-[44px] active:scale-[0.99] transition-transform"
                         >
                           <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-semibold text-slate-900 dark:text-gray-100">
+                            <div className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
                               {v.name}
                             </div>
-                            <div className="truncate text-xs text-slate-500 dark:text-gray-400">
+                            <div className="truncate text-xs text-slate-500 dark:text-neutral-400">
                               {[v.city, v.state].filter(Boolean).join(", ") || "—"} ·{" "}
                               {v.phones[0]?.phone ?? "no phone"}
                             </div>
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
                           >
                             {VENDOR_STATUS_LABELS[v.status as VendorStatus] ?? v.status}
                           </Badge>
-                          <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 dark:text-gray-600" />
+                          <ChevronRight className="h-4 w-4 shrink-0 text-slate-300 dark:text-neutral-600" />
                         </Link>
                       </li>
                     ))}

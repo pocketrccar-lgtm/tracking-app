@@ -28,11 +28,11 @@ export default async function NewPOPage({
     <div className="px-4 pt-5 pb-28 space-y-4">
       <Link
         href="/purchase-orders"
-        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-gray-400 hover:text-slate-900"
+        className="inline-flex items-center gap-1 text-sm text-slate-500 dark:text-neutral-400 hover:text-slate-900"
       >
         <ArrowLeft className="h-3.5 w-3.5" /> Back to POs
       </Link>
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">New purchase order</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">New purchase order</h1>
 
       <form action={createPurchaseOrder} className="space-y-4">
         <Card>
@@ -44,7 +44,7 @@ export default async function NewPOPage({
                 name="vendorId"
                 required
                 defaultValue={vendorId ?? defaultProduct?.vendorId ?? ""}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
               >
                 <option value="">Select vendor…</option>
                 {vendors.map((v) => (
@@ -58,7 +58,7 @@ export default async function NewPOPage({
                 id="productId"
                 name="productId"
                 defaultValue={productId ?? ""}
-                className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
               >
                 <option value="">(no product link)</option>
                 {products.map((p) => (
@@ -88,7 +88,7 @@ export default async function NewPOPage({
                   id="status"
                   name="status"
                   defaultValue="SAMPLE"
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                  className="flex h-11 w-full rounded-lg border border-slate-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20"
                 >
                   {PO_STATUSES.map((s) => (
                     <option key={s} value={s}>{s}</option>

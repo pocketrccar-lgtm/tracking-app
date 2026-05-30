@@ -6,8 +6,8 @@ export default function ReportsLanding() {
   return (
     <div className="px-4 pt-5 pb-28 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Reports</h1>
-        <p className="text-sm text-slate-500 dark:text-gray-400">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Reports</h1>
+        <p className="text-sm text-slate-500 dark:text-neutral-400">
           Auto-generated summaries for daily WhatsApp + weekly review.
         </p>
       </div>
@@ -21,7 +21,7 @@ export default function ReportsLanding() {
                 <CardTitle className="text-base">Daily report</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="text-sm text-slate-600 dark:text-gray-300">
+            <CardContent className="text-sm text-slate-600 dark:text-neutral-300">
               For Shoaib&apos;s 7 PM WhatsApp to Syed. Today&apos;s calls, visits,
               new vendors, pending tasks. One-click copy.
             </CardContent>
@@ -36,7 +36,7 @@ export default function ReportsLanding() {
                 <CardTitle className="text-base">Weekly summary</CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="text-sm text-slate-600 dark:text-gray-300">
+            <CardContent className="text-sm text-slate-600 dark:text-neutral-300">
               Friday review: tasks shipped, pipeline movement, top vendors,
               pending decisions. One-click copy.
             </CardContent>

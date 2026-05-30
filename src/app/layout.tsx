@@ -57,7 +57,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
-      <body className="min-h-full bg-[#fafafa] dark:bg-gray-900 text-slate-900 dark:text-gray-100 antialiased">
+      <body className="min-h-full bg-background text-foreground antialiased font-medium">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <Toaster richColors position="top-center" />
           <main className="mx-auto max-w-lg min-h-full">{children}</main>

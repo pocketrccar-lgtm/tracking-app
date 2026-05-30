@@ -23,7 +23,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-gray-800 pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-sm border-t border-slate-200 dark:border-neutral-800 pb-safe">
       <div className="flex max-w-lg mx-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -37,7 +37,7 @@ export function BottomNav() {
                 "flex-1 flex flex-col items-center py-3 gap-1 text-xs font-semibold min-h-[56px] transition-colors",
                 active
                   ? "text-red-600 dark:text-red-500"
-                  : "text-slate-400 dark:text-gray-500"
+                  : "text-slate-400 dark:text-neutral-500"
               )}
             >
               <Icon className="h-5 w-5" />

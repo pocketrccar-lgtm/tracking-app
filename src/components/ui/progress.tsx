@@ -17,7 +17,7 @@ function Progress({ value, max = 100, className }: ProgressProps) {
       aria-valuemin={0}
       aria-valuemax={safeMax}
       aria-valuenow={value}
-      className={cn("h-3 w-full rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden", className)}
+      className={cn("h-3 w-full rounded-full bg-neutral-200 dark:bg-neutral-700 overflow-hidden", className)}
     >
       <div
         data-slot="progress-fill"

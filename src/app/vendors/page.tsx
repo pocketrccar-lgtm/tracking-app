@@ -90,8 +90,8 @@ export default async function VendorsListPage({
     <div className="px-4 pt-5 pb-28 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Vendors</h1>
-          <p className="text-sm text-slate-500 dark:text-gray-400">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Vendors</h1>
+          <p className="text-sm text-slate-500 dark:text-neutral-400">
             {total.toLocaleString()} supply-side vendors · page {page} of{" "}
             {pages}
           </p>
@@ -114,7 +114,7 @@ export default async function VendorsListPage({
 
       {vendors.length === 0 ? (
         <Card>
-          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-gray-400">
+          <CardContent className="p-12 text-center text-sm text-slate-500 dark:text-neutral-400">
             No vendors match these filters.{" "}
             <Link
               href="/vendors"
@@ -151,7 +151,7 @@ export default async function VendorsListPage({
               </TableHeader>
               <TableBody>
                 {vendors.map((v) => (
-                  <TableRow key={v.id} className="hover:bg-slate-50 dark:hover:bg-gray-800">
+                  <TableRow key={v.id} className="hover:bg-slate-50 dark:hover:bg-neutral-800">
                     <TableCell className="font-medium">
                       <Link
                         href={`/vendors/${v.id}`}
@@ -160,7 +160,7 @@ export default async function VendorsListPage({
                         {v.name}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-xs text-slate-600 dark:text-gray-300">
+                    <TableCell className="text-xs text-slate-600 dark:text-neutral-300">
                       {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
                     </TableCell>
                     <TableCell>
@@ -171,7 +171,7 @@ export default async function VendorsListPage({
                         {VENDOR_TIER_LABELS[v.tier as VendorTier] ?? v.tier}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-slate-600 dark:text-gray-300">
+                    <TableCell className="text-xs text-slate-600 dark:text-neutral-300">
                       {[v.city, v.state].filter(Boolean).join(", ") || "—"}
                     </TableCell>
                     <TableCell className="text-xs font-mono">
@@ -197,7 +197,7 @@ export default async function VendorsListPage({
                           v.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right text-xs text-slate-500 dark:text-gray-400">
+                    <TableCell className="text-right text-xs text-slate-500 dark:text-neutral-400">
                       {formatDistanceToNow(v.updatedAt, { addSuffix: true })}
                     </TableCell>
                   </TableRow>
@@ -216,13 +216,13 @@ export default async function VendorsListPage({
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <div className="font-medium text-slate-900 dark:text-gray-100 truncate">
+                    <div className="font-medium text-slate-900 dark:text-neutral-100 truncate">
                       {v.name}
                     </div>
-                    <div className="mt-0.5 text-xs text-slate-500 dark:text-gray-400">
+                    <div className="mt-0.5 text-xs text-slate-500 dark:text-neutral-400">
                       {[v.city, v.state].filter(Boolean).join(", ") || "—"}
                     </div>
-                    <div className="mt-1 font-mono text-xs text-slate-700 dark:text-gray-300">
+                    <div className="mt-1 font-mono text-xs text-slate-700 dark:text-neutral-300">
                       {v.phones[0]?.phone ?? "no phone"}
                     </div>
                   </div>
@@ -264,7 +264,7 @@ export default async function VendorsListPage({
                   ← Prev
                 </Link>
               )}
-              <span className="px-3 py-1.5 text-sm text-slate-500 dark:text-gray-400">
+              <span className="px-3 py-1.5 text-sm text-slate-500 dark:text-neutral-400">
                 Page {page} of {pages}
               </span>
               {page < pages && (
