@@ -1,0 +1,233 @@
+// BCH Sourcing OS — Vendor CRM for the BCH RC car launch
+// SQLite for dev; swap provider to "postgresql" + DATABASE_URL for Supabase production
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Users ──────────────────────────────────────────────────────────────────
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String
+  role         String        @default("field") // "admin" (Syed) | "field" (Shoaib)
+  createdAt    DateTime      @default(now())
+  tasks        Task[]
+  interactions Interaction[]
+  intakes      Vendor[]      @relation("CreatedBy")
+}
+
+// ─── Vendors ────────────────────────────────────────────────────────────────
+
+model Vendor {
+  id              String   @id @default(cuid())
+  name            String
+  type            String   // MANUFACTURER | DISTRIBUTOR | WHOLESALER | TRADER | IMPORTER | OEM | MOULDER | MIXED
+  tier            String   // T1_DRIFT_CONFIRMED | T2_STRONG_SIGNAL | T3_VERIFY_DRIFT | T4_INDIAMART_GATED | CHINESE_FACTORY | MOULDER | AVOID
+  status          String   @default("COLD") // COLD | CONTACTED | ENGAGED | QUOTED | SAMPLE_ORDERED | ONBOARDED | PAUSED | DEAD
+
+  state           String?
+  city            String?
+  address         String?
+  gst             String?
+  cin             String?
+
+  driftStatus     String   @default("UNKNOWN") // YES_CONFIRMED | LIKELY | UNKNOWN | NO
+  bchRelevance    Int      @default(0)
+
+  founderName     String?
+  founderLinkedin String?
+  founderTitle   String?
+
+  websiteUrl      String?
+  igHandle        String?
+  notes           String?
+
+  sourceMd        String?
+  sourceUrl       String?
+
+  createdById     String?
+  createdBy       User?    @relation("CreatedBy", fields: [createdById], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  phones          VendorPhone[]
+  emails          VendorEmail[]
+  products        Product[]
+  tasks           Task[]
+  interactions    Interaction[]
+  categories      VendorCategory[]
+  purchaseOrders  PurchaseOrder[]
+
+  @@index([state])
+  @@index([type])
+  @@index([tier])
+  @@index([status])
+  @@index([driftStatus])
+}
+
+model VendorPhone {
+  id        String  @id @default(cuid())
+  vendorId  String
+  phone     String
+  label     String? // "main" | "whatsapp" | "founder" | "wholesale" | "retail"
+  verified  Boolean @default(false)
+  vendor    Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+model VendorEmail {
+  id       String  @id @default(cuid())
+  vendorId String
+  email    String
+  label    String?
+  vendor   Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId])
+}
+
+// ─── Categories ─────────────────────────────────────────────────────────────
+
+model Category {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  slug        String           @unique
+  description String?
+  color       String?
+  vendors     VendorCategory[]
+  products    Product[]
+}
+
+model VendorCategory {
+  vendorId   String
+  categoryId String
+  vendor     Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([vendorId, categoryId])
+}
+
+// ─── Products + Pricing ─────────────────────────────────────────────────────
+
+model Product {
+  id             String  @id @default(cuid())
+  vendorId       String
+  name           String
+  brand          String?
+  scale          String?
+  driftCapable   Boolean @default(false)
+  ledLights      Boolean @default(false)
+  bodyShell      String?
+
+  wholesalePrice Float?
+  retailPrice    Float?
+  moq            Int?
+
+  inStock        Boolean @default(true)
+  notes          String?
+
+  categoryId     String?
+
+  vendor         Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  category       Category? @relation(fields: [categoryId], references: [id])
+
+  priceHistory   PriceHistory[]
+  purchaseOrders PurchaseOrder[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([vendorId])
+  @@index([driftCapable])
+}
+
+model PriceHistory {
+  id             String   @id @default(cuid())
+  productId      String
+  wholesalePrice Float?
+  retailPrice    Float?
+  moq            Int?
+  recordedAt     DateTime @default(now())
+  recordedBy     String?
+  notes          String?
+  product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+// ─── Tasks ──────────────────────────────────────────────────────────────────
+
+model Task {
+  id           String    @id @default(cuid())
+  vendorId     String
+  type         String    // CALL | VISIT | WHATSAPP | EMAIL | LINKEDIN_DM | SAMPLE_ORDER | FOLLOW_UP | RESEARCH | OTHER
+  title        String
+  description  String?
+  assignedToId String?
+  status       String    @default("PENDING") // PENDING | IN_PROGRESS | COMPLETED | BLOCKED | CANCELLED
+  priority     String    @default("MEDIUM")  // LOW | MEDIUM | HIGH | URGENT
+  dueDate      DateTime?
+  completedAt  DateTime?
+  notes        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  vendor       Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  assignedTo   User?     @relation(fields: [assignedToId], references: [id])
+
+  @@index([vendorId])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+// ─── Interactions (call/visit/dm log) ───────────────────────────────────────
+
+model Interaction {
+  id          String   @id @default(cuid())
+  vendorId    String
+  userId      String
+  type        String   // CALL | WHATSAPP | EMAIL | VISIT | LINKEDIN_DM
+  occurredAt  DateTime @default(now())
+  notes       String?
+  outcome     String?  // NO_ANSWER | CONNECTED | QUOTED | REJECTED | ENGAGED | FOLLOW_UP_SCHEDULED
+  followUpBy  DateTime?
+  durationMin Int?
+
+  vendor      Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@index([vendorId])
+  @@index([userId])
+  @@index([occurredAt])
+}
+
+// ─── Purchase Orders / Samples ──────────────────────────────────────────────
+
+model PurchaseOrder {
+  id          String    @id @default(cuid())
+  vendorId    String
+  productId   String?
+  quantity    Int
+  unitCost    Float
+  totalCost   Float
+  status      String    @default("SAMPLE") // SAMPLE | PO_PLACED | IN_TRANSIT | RECEIVED | QA_PASSED | QA_FAILED | REJECTED
+  orderedAt   DateTime  @default(now())
+  receivedAt  DateTime?
+  notes       String?
+
+  vendor      Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  product     Product?  @relation(fields: [productId], references: [id])
+
+  @@index([vendorId])
+  @@index([status])
+}
