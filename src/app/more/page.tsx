@@ -9,6 +9,7 @@ import {
   Package,
   ListTodo,
   MessageCircle,
+  Compass,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -67,8 +68,14 @@ const SECTIONS: { title: string; items: Item[] }[] = [
       {
         href: "/categories",
         label: "Categories",
-        desc: "Drift RC, parts, OEM, moulders…",
+        desc: "Verticals — RC cars, helmets, fitness…",
         icon: Tag,
+      },
+      {
+        href: "/playbooks",
+        label: "Research playbooks",
+        desc: "Apify / YouTube / Gemini / Zauba funnels — editable",
+        icon: Compass,
       },
     ],
   },

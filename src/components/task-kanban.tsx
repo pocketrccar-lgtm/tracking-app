@@ -12,7 +12,7 @@ type KanbanTask = {
   title: string;
   status: string;
   priority: string;
-  vendor: { id: string; name: string };
+  vendor: { id: string; name: string } | null;
   assignedTo: { name: string } | null;
   dueDate: Date | null;
 };
@@ -68,7 +68,7 @@ export function TaskKanban({ tasks }: { tasks: KanbanTask[] }) {
                     </Badge>
                   </div>
                   <div className="mt-1 text-xs text-slate-500 truncate">
-                    {t.vendor.name}
+                    {t.vendor?.name ?? "No vendor"}
                   </div>
                   {t.assignedTo && (
                     <div className="mt-0.5 text-xs text-slate-400">

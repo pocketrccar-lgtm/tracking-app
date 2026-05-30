@@ -34,6 +34,8 @@ import {
   User,
   Briefcase,
   AtSign,
+  Video,
+  ShoppingBag,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { VendorControls } from "@/components/vendor-controls";
@@ -179,16 +181,45 @@ export default async function VendorDetailPage({
                 </a>
               </div>
             )}
-            {vendor.igHandle && (
+            {(vendor.instagramUrl || vendor.igHandle) && (
               <div className="flex items-center gap-2">
-                <AtSign className="h-3.5 w-3.5 shrink-0 text-slate-400 dark:text-neutral-500" />
+                <AtSign className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                 <a
-                  href={`https://instagram.com/${vendor.igHandle.replace(/^@/, "")}`}
+                  href={
+                    vendor.instagramUrl ??
+                    `https://instagram.com/${(vendor.igHandle ?? "").replace(/^@/, "")}`
+                  }
                   target="_blank"
                   rel="noreferrer"
-                  className="text-red-600 hover:underline"
+                  className="text-red-600 hover:underline truncate"
                 >
-                  @{vendor.igHandle.replace(/^@/, "")}
+                  Instagram
+                </a>
+              </div>
+            )}
+            {vendor.youtubeUrl && (
+              <div className="flex items-center gap-2">
+                <Video className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <a
+                  href={vendor.youtubeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-red-600 hover:underline truncate"
+                >
+                  YouTube
+                </a>
+              </div>
+            )}
+            {vendor.indiamartUrl && (
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <a
+                  href={vendor.indiamartUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-red-600 hover:underline truncate"
+                >
+                  IndiaMART
                 </a>
               </div>
             )}

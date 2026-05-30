@@ -49,10 +49,16 @@ model Vendor {
 
   websiteUrl      String?
   igHandle        String?
+  instagramUrl    String?
+  youtubeUrl      String?
+  indiamartUrl    String?
   notes           String?
 
   sourceMd        String?
   sourceUrl       String?
+
+  categoryId      String?
+  category        Category? @relation("PrimaryCategory", fields: [categoryId], references: [id])
 
   createdById     String?
   createdBy       User?    @relation("CreatedBy", fields: [createdById], references: [id])
@@ -99,13 +105,32 @@ model VendorEmail {
 // ─── Categories ─────────────────────────────────────────────────────────────
 
 model Category {
-  id          String           @id @default(cuid())
-  name        String           @unique
-  slug        String           @unique
-  description String?
-  color       String?
-  vendors     VendorCategory[]
-  products    Product[]
+  id             String           @id @default(cuid())
+  name           String           @unique
+  slug           String           @unique
+  description    String?
+  color          String?
+  order          Int              @default(0)
+  vendors        VendorCategory[]
+  primaryVendors Vendor[]         @relation("PrimaryCategory")
+  products       Product[]
+  playbooks      Playbook[]
+}
+
+// A research funnel / workflow stored in-app (Apify scan, YouTube scan,
+// Gemini classifier, etc.) — editable, optionally scoped to a category.
+model Playbook {
+  id         String    @id @default(cuid())
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  title      String
+  kind       String    @default("OTHER") // APIFY | YOUTUBE | GEMINI | MAPS | ZAUBA | OTHER
+  content    String
+  order      Int       @default(0)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([categoryId])
 }
 
 model VendorCategory {
@@ -169,7 +194,7 @@ model PriceHistory {
 
 model Task {
   id           String    @id @default(cuid())
-  vendorId     String
+  vendorId     String?
   type         String    // CALL | VISIT | WHATSAPP | EMAIL | LINKEDIN_DM | SAMPLE_ORDER | FOLLOW_UP | RESEARCH | OTHER
   title        String
   description  String?
@@ -182,7 +207,7 @@ model Task {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  vendor       Vendor    @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  vendor       Vendor?   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   assignedTo   User?     @relation(fields: [assignedToId], references: [id])
 
   @@index([vendorId])

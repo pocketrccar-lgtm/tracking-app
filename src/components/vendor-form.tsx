@@ -36,6 +36,9 @@ type Vendor = {
   founderTitle?: string | null;
   websiteUrl?: string | null;
   igHandle?: string | null;
+  instagramUrl?: string | null;
+  youtubeUrl?: string | null;
+  indiamartUrl?: string | null;
   notes?: string | null;
   sourceMd?: string | null;
   sourceUrl?: string | null;
@@ -286,7 +289,7 @@ export function VendorForm({ vendor, action, submitLabel }: Props) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Web</CardTitle>
+          <CardTitle className="text-sm">Web & social</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3 sm:grid-cols-2">
           <div>
@@ -299,12 +302,30 @@ export function VendorForm({ vendor, action, submitLabel }: Props) {
             />
           </div>
           <div>
-            <Label htmlFor="igHandle">IG handle</Label>
+            <Label htmlFor="instagramUrl">Instagram URL</Label>
             <Input
-              id="igHandle"
-              name="igHandle"
-              defaultValue={vendor?.igHandle ?? ""}
-              placeholder="@vendor"
+              id="instagramUrl"
+              name="instagramUrl"
+              defaultValue={vendor?.instagramUrl ?? ""}
+              placeholder="https://instagram.com/vendor"
+            />
+          </div>
+          <div>
+            <Label htmlFor="youtubeUrl">YouTube URL</Label>
+            <Input
+              id="youtubeUrl"
+              name="youtubeUrl"
+              defaultValue={vendor?.youtubeUrl ?? ""}
+              placeholder="https://youtube.com/@vendor"
+            />
+          </div>
+          <div>
+            <Label htmlFor="indiamartUrl">IndiaMART URL</Label>
+            <Input
+              id="indiamartUrl"
+              name="indiamartUrl"
+              defaultValue={vendor?.indiamartUrl ?? ""}
+              placeholder="https://indiamart.com/vendor"
             />
           </div>
         </CardContent>

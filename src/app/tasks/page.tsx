@@ -122,7 +122,7 @@ export default async function TasksPage({
                       {t.title}
                     </div>
                     <div className="truncate text-xs text-slate-500 dark:text-neutral-400">
-                      {t.vendor.name}
+                      {t.vendor?.name ?? "No vendor"}
                       {t.assignedTo ? ` · @${t.assignedTo.name}` : ""}
                     </div>
                   </div>

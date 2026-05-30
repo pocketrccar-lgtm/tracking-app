@@ -26,11 +26,10 @@ function fromForm(fd: FormData) {
 
 export async function createTask(fd: FormData) {
   const d = fromForm(fd);
-  if (!d.vendorId) throw new Error("Vendor required");
   if (!d.title) throw new Error("Title required");
   const task = await db.task.create({
     data: {
-      vendorId: d.vendorId,
+      vendorId: d.vendorId || null,
       title: d.title,
       description: d.description,
       type: d.type,
@@ -42,7 +41,7 @@ export async function createTask(fd: FormData) {
     },
   });
   revalidatePath("/tasks");
-  revalidatePath(`/vendors/${d.vendorId}`);
+  if (d.vendorId) revalidatePath(`/vendors/${d.vendorId}`);
   redirect(`/tasks/${task.id}`);
 }
 

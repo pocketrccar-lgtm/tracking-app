@@ -130,7 +130,7 @@ export function formatDailyReportText(
     lines.push("");
     lines.push("Due tomorrow:");
     for (const t of d.dueTomorrow) {
-      lines.push(`- ${t.title} · ${t.vendor.name}`);
+      lines.push(`- ${t.title} · ${t.vendor?.name ?? "—"}`);
     }
   }
   return lines.join("\n");
@@ -222,13 +222,13 @@ export function formatWeeklyReportText(
   lines.push("Top 5 vendors interacted with this week:");
   for (const t of d.topInteractedVendors) {
     if (!t.vendor) continue;
-    lines.push(`- ${t.vendor.name}: ${t.count} interactions`);
+    lines.push(`- ${t.vendor?.name ?? "—"}: ${t.count} interactions`);
   }
   if (d.pendingDecisions.length > 0) {
     lines.push("");
-    lines.push("Pending decisions (need Syed):");
+    lines.push("Pending decisions (need a partner):");
     for (const td of d.pendingDecisions) {
-      lines.push(`- ${td.title} · ${td.vendor.name}`);
+      lines.push(`- ${td.title} · ${td.vendor?.name ?? "—"}`);
     }
   }
   if (d.sampleOrders.length > 0) {
