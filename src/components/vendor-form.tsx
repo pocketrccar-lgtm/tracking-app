@@ -119,7 +119,7 @@ export function VendorForm({ vendor, action, submitLabel }: Props) {
             <select
               id="status"
               name="status"
-              defaultValue={vendor?.status ?? "COLD"}
+              defaultValue={vendor?.status ?? "NEW"}
               className="flex h-9 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
             >
               {VENDOR_STATUSES.map((s) => (

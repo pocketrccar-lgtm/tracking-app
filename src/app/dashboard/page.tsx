@@ -9,6 +9,7 @@ import {
   STATUS_COLORS,
   VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
+  VENDOR_STATUS_FUNNEL,
   type VendorTier,
   type VendorStatus,
 } from "@/lib/enums";
@@ -22,9 +23,10 @@ export default async function DashboardPage() {
     driftConfirmedCount,
     tasksPending,
     tasksDoneToday,
-    onboardedCount,
+    activeCount,
     samplesOrdered,
     byTier,
+    byStatus,
     recentVendors,
   ] = await Promise.all([
     db.vendor.count(),
@@ -36,9 +38,10 @@ export default async function DashboardPage() {
         completedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
       },
     }),
-    db.vendor.count({ where: { status: "ONBOARDED" } }),
+    db.vendor.count({ where: { status: "ACTIVE" } }),
     db.purchaseOrder.count(),
     db.vendor.groupBy({ by: ["tier"], _count: { _all: true } }),
+    db.vendor.groupBy({ by: ["status"], _count: { _all: true } }),
     db.vendor.findMany({
       orderBy: { updatedAt: "desc" },
       take: 8,
@@ -46,12 +49,16 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  // Sourcing funnel — count vendors at each stage (0 if none)
+  const statusCounts: Record<string, number> = {};
+  for (const row of byStatus) statusCounts[row.status] = row._count._all;
+
   // Funnel cards — tappable, colored, lead into filtered views
   const funnel = [
     {
       label: "Vendors",
       value: vendorCount,
-      sub: `${onboardedCount} onboarded`,
+      sub: `${activeCount} active`,
       href: "/vendors",
       tone: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-300",
     },
@@ -96,6 +103,59 @@ export default async function DashboardPage() {
                 <div className="text-xs opacity-70">{f.sub}</div>
               </Link>
             ))}
+          </div>
+
+          {/* Sourcing funnel — the path to getting products */}
+          <div>
+            <h2 className="px-1 pb-2 text-xs font-extrabold uppercase tracking-wider text-slate-400">
+              Sourcing funnel
+            </h2>
+            <Card>
+              <CardContent className="space-y-2 p-3">
+                {VENDOR_STATUS_FUNNEL.map((st, i) => {
+                  const count = statusCounts[st] ?? 0;
+                  const max = Math.max(
+                    1,
+                    ...VENDOR_STATUS_FUNNEL.map((s) => statusCounts[s] ?? 0),
+                  );
+                  const pct = Math.round((count / max) * 100);
+                  return (
+                    <Link
+                      key={st}
+                      href={`/vendors?status=${st}`}
+                      className="block active:scale-[0.99] transition-transform"
+                    >
+                      <div className="flex items-center justify-between pb-1">
+                        <span className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-500 tabular-nums">
+                            {i + 1}
+                          </span>
+                          {VENDOR_STATUS_LABELS[st]}
+                        </span>
+                        <span className="text-sm font-bold text-slate-900 tabular-nums">
+                          {count}
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className="h-full rounded-full bg-red-500 transition-all"
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </Link>
+                  );
+                })}
+                {(statusCounts["DROPPED"] ?? 0) > 0 && (
+                  <Link
+                    href="/vendors?status=DROPPED"
+                    className="flex items-center justify-between pt-1 text-xs text-slate-400"
+                  >
+                    <span>Dropped</span>
+                    <span className="tabular-nums">{statusCounts["DROPPED"]}</span>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Vendors by tier */}

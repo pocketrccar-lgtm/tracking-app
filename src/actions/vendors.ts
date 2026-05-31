@@ -30,7 +30,7 @@ function fromFormData(fd: FormData) {
     name: String(fd.get("name") ?? "").trim(),
     type: String(fd.get("type") ?? "WHOLESALER"),
     tier: String(fd.get("tier") ?? "T3_VERIFY_DRIFT"),
-    status: String(fd.get("status") ?? "COLD"),
+    status: String(fd.get("status") ?? "NEW"),
     state: s(fd.get("state")),
     city: s(fd.get("city")),
     address: s(fd.get("address")),

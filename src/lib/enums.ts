@@ -27,14 +27,21 @@ export const VENDOR_TIERS = [
 export type VendorTier = (typeof VENDOR_TIERS)[number];
 
 export const VENDOR_STATUSES = [
-  "COLD",
+  "NEW",
   "CONTACTED",
-  "ENGAGED",
-  "QUOTED",
-  "SAMPLE_ORDERED",
-  "ONBOARDED",
-  "PAUSED",
-  "DEAD",
+  "CATALOG_RECEIVED",
+  "ORDER_PLACED",
+  "ACTIVE",
+  "DROPPED",
+] as const;
+
+// The forward sourcing funnel (excludes the DROPPED exit state).
+export const VENDOR_STATUS_FUNNEL = [
+  "NEW",
+  "CONTACTED",
+  "CATALOG_RECEIVED",
+  "ORDER_PLACED",
+  "ACTIVE",
 ] as const;
 
 export type VendorStatus = (typeof VENDOR_STATUSES)[number];
@@ -123,14 +130,12 @@ export const VENDOR_TIER_LABELS: Record<VendorTier, string> = {
 };
 
 export const VENDOR_STATUS_LABELS: Record<VendorStatus, string> = {
-  COLD: "Cold",
-  CONTACTED: "Contacted",
-  ENGAGED: "Engaged",
-  QUOTED: "Quoted",
-  SAMPLE_ORDERED: "Sample ordered",
-  ONBOARDED: "Onboarded",
-  PAUSED: "Paused",
-  DEAD: "Dead",
+  NEW: "New",
+  CONTACTED: "Just contacted",
+  CATALOG_RECEIVED: "Catalog received",
+  ORDER_PLACED: "Order placed",
+  ACTIVE: "Active supplier",
+  DROPPED: "Dropped",
 };
 
 export const DRIFT_STATUS_LABELS: Record<DriftStatus, string> = {
@@ -173,14 +178,12 @@ export const TIER_COLORS: Record<VendorTier, string> = {
 };
 
 export const STATUS_COLORS: Record<VendorStatus, string> = {
-  COLD: "bg-slate-100 text-slate-700",
+  NEW: "bg-slate-100 text-slate-700",
   CONTACTED: "bg-blue-100 text-blue-700",
-  ENGAGED: "bg-indigo-100 text-indigo-700",
-  QUOTED: "bg-red-100 text-red-700",
-  SAMPLE_ORDERED: "bg-purple-100 text-purple-700",
-  ONBOARDED: "bg-emerald-100 text-emerald-700",
-  PAUSED: "bg-yellow-100 text-yellow-700",
-  DEAD: "bg-zinc-200 text-zinc-500 line-through",
+  CATALOG_RECEIVED: "bg-amber-100 text-amber-700",
+  ORDER_PLACED: "bg-purple-100 text-purple-700",
+  ACTIVE: "bg-emerald-100 text-emerald-700",
+  DROPPED: "bg-zinc-200 text-zinc-500 line-through",
 };
 
 export const DRIFT_COLORS: Record<DriftStatus, string> = {

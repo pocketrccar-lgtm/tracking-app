@@ -67,15 +67,15 @@ export async function buildDailyReport(
       take: 5,
     }),
     db.vendor.findMany({
-      where: { status: "QUOTED", updatedAt: { gte: dayStart, lte: dayEnd } },
+      where: { status: "CATALOG_RECEIVED", updatedAt: { gte: dayStart, lte: dayEnd } },
       take: 10,
     }),
     db.vendor.findMany({
-      where: { status: "ENGAGED", updatedAt: { gte: dayStart, lte: dayEnd } },
+      where: { status: "CONTACTED", updatedAt: { gte: dayStart, lte: dayEnd } },
       take: 10,
     }),
     db.vendor.count({
-      where: { status: "SAMPLE_ORDERED", updatedAt: { gte: dayStart, lte: dayEnd } },
+      where: { status: "ORDER_PLACED", updatedAt: { gte: dayStart, lte: dayEnd } },
     }),
   ]);
 
@@ -112,9 +112,9 @@ export function formatDailyReportText(
   lines.push(`- Tasks completed: ${d.tasksCompletedToday}`);
   lines.push(`- Vendors contacted: ${d.vendorsContactedToday}`);
   lines.push(`- New vendors added: ${d.newVendorsToday}`);
-  lines.push(`- Newly quoted: ${d.newlyQuoted.length}`);
-  lines.push(`- Newly engaged: ${d.newlyEngaged.length}`);
-  if (d.sampleOrderedToday) lines.push(`- Sample orders: ${d.sampleOrderedToday}`);
+  lines.push(`- Catalogs received: ${d.newlyQuoted.length}`);
+  lines.push(`- Newly contacted: ${d.newlyEngaged.length}`);
+  if (d.sampleOrderedToday) lines.push(`- Orders placed: ${d.sampleOrderedToday}`);
   lines.push("");
   if (d.topInteractions.length > 0) {
     lines.push("Top calls/visits today:");
