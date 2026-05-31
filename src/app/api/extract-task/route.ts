@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/db";
-import { TASK_TYPES, TASK_PRIORITIES } from "@/lib/enums";
+import { TASK_PRIORITIES } from "@/lib/enums";
 
 export const runtime = "nodejs";
 
@@ -26,31 +26,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Empty transcript" }, { status: 400 });
   }
 
-  // give the model the vendor list so it can match by name
-  const vendors = await db.vendor.findMany({
-    select: { id: true, name: true, city: true },
-    orderBy: { name: "asc" },
-    take: 500,
-  });
+  // give the model the vendor + partner lists so it can match by name
+  const [vendors, users] = await Promise.all([
+    db.vendor.findMany({
+      select: { id: true, name: true, city: true },
+      orderBy: { name: "asc" },
+      take: 500,
+    }),
+    db.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
+  ]);
   const vendorList = vendors
     .map((v) => `${v.id} | ${v.name}${v.city ? ` (${v.city})` : ""}`)
     .join("\n");
+  const userList = users.map((u) => `${u.id} | ${u.name}`).join("\n");
 
   const today = new Date().toISOString().slice(0, 10);
 
   const anthropic = new Anthropic({ apiKey });
 
-  const system = `You convert a spoken note into a structured sourcing task for an RC-car vendor CRM.
+  const system = `You convert a spoken note into a structured sourcing task for an RC-car vendor CRM used by two partners.
 Return ONLY a JSON object (no markdown, no prose) with these keys:
 {
   "title": string (short imperative, e.g. "Call about drift RC catalogue"),
   "vendorId": string|null (pick the BEST matching id from the vendor list, else null),
-  "type": one of ${JSON.stringify(TASK_TYPES)},
+  "assignedToId": string|null (pick the partner id if a person is named — "ask Shoaib to...", "Syed will..." — else null),
   "priority": one of ${JSON.stringify(TASK_PRIORITIES)},
-  "dueDate": "YYYY-MM-DD"|null (resolve relative dates against today=${today}),
+  "dueDate": "YYYY-MM-DD" (resolve relative dates against today=${today}; if no date is mentioned, default to today=${today}),
   "notes": string (any extra detail from the note, else "")
 }
-Rules: infer type from intent (call/visit/whatsapp/email/sample order/follow up). Default priority MEDIUM. If no vendor is clearly named, vendorId=null.`;
+Rules: Default priority MEDIUM. dueDate is ALWAYS a real date (never null) — use today if unspecified. If no vendor is clearly named, vendorId=null. If no person is named, assignedToId=null.`;
 
   try {
     const msg = await anthropic.messages.create({
@@ -60,7 +64,7 @@ Rules: infer type from intent (call/visit/whatsapp/email/sample order/follow up)
       messages: [
         {
           role: "user",
-          content: `Vendor list (id | name):\n${vendorList}\n\nVoice note:\n"${transcript}"\n\nReturn the JSON.`,
+          content: `Partners (id | name):\n${userList}\n\nVendor list (id | name):\n${vendorList}\n\nVoice note:\n"${transcript}"\n\nReturn the JSON.`,
         },
       ],
     });
@@ -77,10 +81,14 @@ Rules: infer type from intent (call/visit/whatsapp/email/sample order/follow up)
       );
     }
     const parsed = JSON.parse(match[0]);
-    // validate vendorId actually exists
+    // validate ids actually exist
     if (parsed.vendorId && !vendors.some((v) => v.id === parsed.vendorId)) {
       parsed.vendorId = null;
     }
+    if (parsed.assignedToId && !users.some((u) => u.id === parsed.assignedToId)) {
+      parsed.assignedToId = null;
+    }
+    if (!parsed.dueDate) parsed.dueDate = today;
     return NextResponse.json({ task: parsed });
   } catch (e) {
     return NextResponse.json(

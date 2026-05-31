@@ -7,10 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  TASK_TYPES,
   TASK_PRIORITIES,
   TASK_STATUSES,
-  TASK_TYPE_LABELS,
   TASK_STATUS_LABELS,
 } from "@/lib/enums";
 import { ChevronDown } from "lucide-react";
@@ -36,6 +34,7 @@ type Props = {
   vendors: Vendor[];
   users: User[];
   defaultVendorId?: string;
+  defaultAssigneeId?: string;
   action: (fd: FormData) => void;
   submitLabel: string;
 };
@@ -68,6 +67,7 @@ export function TaskForm({
   vendors,
   users,
   defaultVendorId,
+  defaultAssigneeId,
   action,
   submitLabel,
 }: Props) {
@@ -159,21 +159,6 @@ export function TaskForm({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="type">Type</Label>
-                  <select
-                    id="type"
-                    name="type"
-                    defaultValue={task?.type ?? "CALL"}
-                    className={selectClass}
-                  >
-                    {TASK_TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {TASK_TYPE_LABELS[t]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
                   <Label htmlFor="priority">Priority</Label>
                   <select
                     id="priority"
@@ -208,7 +193,7 @@ export function TaskForm({
                   <select
                     id="assignedToId"
                     name="assignedToId"
-                    defaultValue={task?.assignedToId ?? ""}
+                    defaultValue={task?.assignedToId ?? defaultAssigneeId ?? ""}
                     className={selectClass}
                   >
                     <option value="">Anyone</option>

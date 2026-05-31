@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export type ExtractedTask = {
   title?: string;
   vendorId?: string | null;
-  type?: string;
+  assignedToId?: string | null;
   priority?: string;
   dueDate?: string | null;
   notes?: string;
@@ -109,7 +109,7 @@ export function VoiceTaskInput({
       </div>
       <p className="text-xs text-slate-500">
         {supported
-          ? "Tap the mic and describe the task. AI fills the form below."
+          ? "Tap the mic and just say it naturally. AI fills the form below — review & save."
           : "Voice not supported on this browser — type the note, then tap AI fill."}
       </p>
 
@@ -117,8 +117,20 @@ export function VoiceTaskInput({
         rows={3}
         value={transcript}
         onChange={(e) => setTranscript(e.target.value)}
-        placeholder='e.g. "Call Ratnaakar tomorrow, high priority, ask for the 1:18 drift catalogue"'
+        placeholder={
+          "Just say it naturally. For example:\n" +
+          "“Ask Shoaib to call DeoDap tomorrow about the no-MOQ drift cars, high priority.”\n" +
+          "“Get the 1:18 drift catalogue from Ratnaakar this week.”"
+        }
       />
+      <p className="text-[11px] leading-relaxed text-slate-400">
+        Tip — mention any of: <span className="font-medium text-slate-500">who</span> does it
+        (Syed / Shoaib) · <span className="font-medium text-slate-500">what</span> to do ·
+        which <span className="font-medium text-slate-500">vendor</span> ·
+        <span className="font-medium text-slate-500"> when</span> (today, tomorrow, this week) ·
+        <span className="font-medium text-slate-500"> priority</span>. Skip anything you don&apos;t
+        know — AI fills the rest.
+      </p>
 
       <div className="flex gap-2">
         {supported &&

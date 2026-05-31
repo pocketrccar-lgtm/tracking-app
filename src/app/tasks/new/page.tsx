@@ -16,6 +16,9 @@ export default async function NewTaskPage({
     db.vendor.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
     db.user.findMany({ orderBy: { name: "asc" } }),
   ]);
+  // Auto-assign new tasks to the account owner (Syed) by default; AI/voice can override.
+  const defaultAssigneeId =
+    users.find((u) => /syed/i.test(u.name))?.id ?? users[0]?.id;
 
   return (
     <div>
@@ -31,6 +34,7 @@ export default async function NewTaskPage({
           vendors={vendors}
           users={users}
           defaultVendorId={vendorId}
+          defaultAssigneeId={defaultAssigneeId}
         />
       </div>
     </div>
