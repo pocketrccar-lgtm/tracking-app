@@ -1,7 +1,7 @@
 // BCH Sourcing OS — Service Worker (§10.2)
 // Strategy: network-first with cache fallback.
 
-const CACHE_NAME = "bch-sourcing-v1";
+const CACHE_NAME = "bch-sourcing-v2";
 
 self.addEventListener("install", (event) => {
   // Activate this SW as soon as it's finished installing.
@@ -35,6 +35,12 @@ self.addEventListener("fetch", (event) => {
     url.protocol === "chrome-extension:" ||
     url.pathname.startsWith("/_next/data")
   ) {
+    return;
+  }
+
+  // Page loads (HTML documents) always go straight to the network so the app
+  // can never be served stale. Only hashed static assets get cached below.
+  if (request.mode === "navigate") {
     return;
   }
 
