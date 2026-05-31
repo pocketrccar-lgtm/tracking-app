@@ -12,18 +12,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { VendorListFilters } from "@/components/vendor-list-filters";
+import { RankBadge } from "@/components/rank-badge";
 import {
-  TIER_COLORS,
   STATUS_COLORS,
-  DRIFT_COLORS,
-  VENDOR_TIER_LABELS,
+  MARKET_LEVEL_COLORS,
+  MARKET_LEVEL_LABELS,
   VENDOR_STATUS_LABELS,
-  DRIFT_STATUS_LABELS,
   VENDOR_TYPE_LABELS,
-  type VendorTier,
   type VendorStatus,
-  type DriftStatus,
   type VendorType,
+  type MarketLevel,
 } from "@/lib/enums";
 import { formatDistanceToNow } from "date-fns";
 import { WhatsAppButton } from "@/components/whatsapp-button";
@@ -42,6 +40,9 @@ export default async function VendorsListPage({
     type?: string;
     status?: string;
     drift?: string;
+    marketLevel?: string;
+    supply?: string;
+    sort?: string;
     page?: string;
   }>;
 }) {
@@ -55,6 +56,8 @@ export default async function VendorsListPage({
   if (params.type) where.type = params.type;
   if (params.status) where.status = params.status;
   if (params.drift) where.driftStatus = params.drift;
+  if (params.marketLevel) where.marketLevel = params.marketLevel;
+  if (params.supply === "1") where.rank = { not: null };
   if (params.q) {
     const q = params.q;
     where.OR = [
@@ -64,10 +67,23 @@ export default async function VendorsListPage({
     ];
   }
 
+  // Default sort = supply rank (ranked suppliers first, #1 at top), then volume.
+  const sort = params.sort ?? "rank";
+  const orderBy =
+    sort === "volume"
+      ? [{ volumeScore: { sort: "desc", nulls: "last" } as const }, { updatedAt: "desc" as const }]
+      : sort === "recent"
+        ? [{ updatedAt: "desc" as const }]
+        : [
+            { rank: { sort: "asc", nulls: "last" } as const },
+            { volumeScore: { sort: "desc", nulls: "last" } as const },
+            { bchRelevance: "desc" as const },
+          ];
+
   const [vendors, total, distinctStates] = await Promise.all([
     db.vendor.findMany({
       where,
-      orderBy: [{ bchRelevance: "desc" }, { updatedAt: "desc" }],
+      orderBy,
       skip,
       take: PAGE_SIZE,
       include: { phones: { take: 1 } },
@@ -140,12 +156,13 @@ export default async function VendorsListPage({
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">#</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead>Tier</TableHead>
+                  <TableHead>Market</TableHead>
+                  <TableHead>Volume</TableHead>
                   <TableHead>City, State</TableHead>
                   <TableHead>Phone</TableHead>
-                  <TableHead>Drift</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Updated</TableHead>
                 </TableRow>
@@ -153,6 +170,13 @@ export default async function VendorsListPage({
               <TableBody>
                 {vendors.map((v) => (
                   <TableRow key={v.id} className="hover:bg-slate-50 dark:hover:bg-neutral-800">
+                    <TableCell>
+                      {v.rank ? (
+                        <RankBadge rank={v.rank} />
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="font-medium">
                       <Link
                         href={`/vendors/${v.id}`}
@@ -165,29 +189,39 @@ export default async function VendorsListPage({
                       {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={TIER_COLORS[v.tier as VendorTier] ?? ""}
-                      >
-                        {VENDOR_TIER_LABELS[v.tier as VendorTier] ?? v.tier}
-                      </Badge>
+                      {v.marketLevel ? (
+                        <Badge
+                          variant="outline"
+                          className={MARKET_LEVEL_COLORS[v.marketLevel as MarketLevel] ?? ""}
+                        >
+                          {MARKET_LEVEL_LABELS[v.marketLevel as MarketLevel] ?? v.marketLevel}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {v.volumeScore != null ? (
+                        <div className="flex items-center gap-1.5">
+                          <div className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-100">
+                            <div
+                              className="h-full rounded-full bg-red-500"
+                              style={{ width: `${v.volumeScore}%` }}
+                            />
+                          </div>
+                          <span className="text-xs tabular-nums text-slate-500">
+                            {v.volumeScore}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-300">—</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-xs text-slate-600 dark:text-neutral-300">
                       {[v.city, v.state].filter(Boolean).join(", ") || "—"}
                     </TableCell>
                     <TableCell className="text-xs font-mono">
                       {v.phones[0]?.phone ?? "—"}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={
-                          DRIFT_COLORS[v.driftStatus as DriftStatus] ?? ""
-                        }
-                      >
-                        {DRIFT_STATUS_LABELS[v.driftStatus as DriftStatus] ??
-                          v.driftStatus}
-                      </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -219,37 +253,50 @@ export default async function VendorsListPage({
                   className="min-w-0 flex-1 active:scale-[0.99] transition-transform"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="font-semibold text-slate-900 truncate">
-                        {v.name}
-                      </div>
-                      <div className="mt-0.5 text-xs text-slate-500">
-                        {[v.city, v.state].filter(Boolean).join(", ") || "—"}
-                      </div>
-                      <div className="mt-1 font-mono text-xs text-slate-700">
-                        {v.phones[0]?.phone ?? "no phone"}
+                    <div className="flex min-w-0 items-center gap-2">
+                      {v.rank ? (
+                        <RankBadge rank={v.rank} className="shrink-0" />
+                      ) : null}
+                      <div className="min-w-0">
+                        <div className="font-semibold text-slate-900 truncate">
+                          {v.name}
+                        </div>
+                        <div className="mt-0.5 text-xs text-slate-500">
+                          {[v.city, v.state].filter(Boolean).join(", ") || "—"}
+                        </div>
                       </div>
                     </div>
-                    <Badge
-                      variant="outline"
-                      className={TIER_COLORS[v.tier as VendorTier] ?? ""}
-                    >
-                      {(v.tier as string).replace(/^T(\d).*/, "T$1")}
-                    </Badge>
+                    {v.marketLevel ? (
+                      <Badge
+                        variant="outline"
+                        className={`shrink-0 ${MARKET_LEVEL_COLORS[v.marketLevel as MarketLevel] ?? ""}`}
+                      >
+                        {(v.marketLevel as string) === "ABOVE_GREY"
+                          ? "Above grey"
+                          : (v.marketLevel as string) === "GREY"
+                            ? "Grey"
+                            : "Retail"}
+                      </Badge>
+                    ) : null}
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
+                  <div className="mt-1 font-mono text-xs text-slate-700">
+                    {v.phones[0]?.phone ?? "no phone"}
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                      {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
+                    </Badge>
                     <Badge
                       variant="outline"
                       className={STATUS_COLORS[v.status as VendorStatus] ?? ""}
                     >
                       {VENDOR_STATUS_LABELS[v.status as VendorStatus] ?? v.status}
                     </Badge>
-                    <Badge
-                      variant="outline"
-                      className={DRIFT_COLORS[v.driftStatus as DriftStatus] ?? ""}
-                    >
-                      drift: {v.driftStatus.replace("_", " ").toLowerCase()}
-                    </Badge>
+                    {v.volumeScore != null ? (
+                      <span className="text-xs font-medium text-slate-400">
+                        vol {v.volumeScore}
+                      </span>
+                    ) : null}
                   </div>
                 </Link>
                 <WhatsAppButton phone={v.phones[0]?.phone} vendorName={v.name} />

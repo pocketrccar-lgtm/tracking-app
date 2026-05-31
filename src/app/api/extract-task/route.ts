@@ -6,10 +6,11 @@ import { TASK_TYPES, TASK_PRIORITIES } from "@/lib/enums";
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  // Accept either the standard name or the `claude_api` name set in Vercel.
+  const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.claude_api;
   if (!apiKey) {
     return NextResponse.json(
-      { error: "AI not configured. Add ANTHROPIC_API_KEY in Vercel env vars." },
+      { error: "AI not configured. Add ANTHROPIC_API_KEY (or claude_api) in Vercel env vars." },
       { status: 503 },
     );
   }

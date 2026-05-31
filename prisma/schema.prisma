@@ -43,6 +43,13 @@ model Vendor {
   driftStatus     String   @default("UNKNOWN") // YES_CONFIRMED | LIKELY | UNKNOWN | NO
   bchRelevance    Int      @default(0)
 
+  // Supply ranking (set by the categorize+rank workflow)
+  marketLevel     String?  // BELOW_GREY | GREY | ABOVE_GREY  (gate: GREY or above = a real supply tunnel)
+  volumeScore     Int?     // 0-100 business-volume estimate
+  acceptScore     Int?     // 0-100 likelihood they'd accept us as a customer
+  rank            Int?     // global rank among gated-in suppliers (1 = top); null = not in the supply funnel
+  rankReason      String?  // one-line evidence for the rank/level
+
   founderName     String?
   founderLinkedin String?
   founderTitle   String?
@@ -79,6 +86,8 @@ model Vendor {
   @@index([tier])
   @@index([status])
   @@index([driftStatus])
+  @@index([rank])
+  @@index([marketLevel])
 }
 
 model VendorPhone {

@@ -11,6 +11,8 @@ import {
   DRIFT_COLORS,
   TASK_STATUS_COLORS,
   PRIORITY_COLORS,
+  MARKET_LEVEL_COLORS,
+  MARKET_LEVEL_LABELS,
   VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
   DRIFT_STATUS_LABELS,
@@ -21,10 +23,12 @@ import {
   type VendorStatus,
   type DriftStatus,
   type VendorType,
+  type MarketLevel,
   type TaskStatus,
   type TaskType,
   type TaskPriority,
 } from "@/lib/enums";
+import { RankBadge } from "@/components/rank-badge";
 import {
   ArrowLeft,
   Phone,
@@ -85,16 +89,27 @@ export default async function VendorDetailPage({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">{vendor.name}</h1>
+          <div className="flex items-center gap-2">
+            {vendor.rank ? <RankBadge rank={vendor.rank} /> : null}
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">{vendor.name}</h1>
+          </div>
           <div className="mt-2 flex flex-wrap gap-1.5">
+            {vendor.marketLevel ? (
+              <Badge
+                variant="outline"
+                className={MARKET_LEVEL_COLORS[vendor.marketLevel as MarketLevel] ?? ""}
+              >
+                {MARKET_LEVEL_LABELS[vendor.marketLevel as MarketLevel] ?? vendor.marketLevel}
+              </Badge>
+            ) : null}
+            <Badge variant="outline">
+              {VENDOR_TYPE_LABELS[vendor.type as VendorType] ?? vendor.type}
+            </Badge>
             <Badge
               variant="outline"
               className={TIER_COLORS[vendor.tier as VendorTier] ?? ""}
             >
               {VENDOR_TIER_LABELS[vendor.tier as VendorTier] ?? vendor.tier}
-            </Badge>
-            <Badge variant="outline">
-              {VENDOR_TYPE_LABELS[vendor.type as VendorType] ?? vendor.type}
             </Badge>
             <Badge
               variant="outline"
@@ -102,7 +117,6 @@ export default async function VendorDetailPage({
             >
               drift: {DRIFT_STATUS_LABELS[vendor.driftStatus as DriftStatus] ?? vendor.driftStatus}
             </Badge>
-            <Badge variant="outline">BCH rel: {vendor.bchRelevance}/10</Badge>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -127,6 +141,75 @@ export default async function VendorDetailPage({
         tier={vendor.tier}
         type={vendor.type}
       />
+
+      {(vendor.marketLevel || vendor.volumeScore != null) && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-sm">Supply ranking</CardTitle>
+            {vendor.rank ? (
+              <span className="text-xs font-semibold text-slate-500">
+                Rank #{vendor.rank} of supply-ready vendors
+              </span>
+            ) : (
+              <span className="text-xs font-semibold text-slate-400">
+                Not in the supply funnel
+              </span>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {vendor.rank ? <RankBadge rank={vendor.rank} /> : null}
+              {vendor.marketLevel ? (
+                <Badge
+                  variant="outline"
+                  className={MARKET_LEVEL_COLORS[vendor.marketLevel as MarketLevel] ?? ""}
+                >
+                  {MARKET_LEVEL_LABELS[vendor.marketLevel as MarketLevel] ?? vendor.marketLevel}
+                </Badge>
+              ) : null}
+              <Badge variant="outline" className="bg-slate-50 text-slate-600">
+                {VENDOR_TYPE_LABELS[vendor.type as VendorType] ?? vendor.type}
+              </Badge>
+            </div>
+
+            {vendor.volumeScore != null && (
+              <div>
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-500">Business volume</span>
+                  <span className="tabular-nums text-slate-700">{vendor.volumeScore}/100</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-red-500"
+                    style={{ width: `${vendor.volumeScore}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {vendor.acceptScore != null && (
+              <div>
+                <div className="mb-1 flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-500">
+                    Will accept us as customer
+                  </span>
+                  <span className="tabular-nums text-slate-700">{vendor.acceptScore}/100</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                  <div
+                    className="h-full rounded-full bg-emerald-500"
+                    style={{ width: `${vendor.acceptScore}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {vendor.rankReason && (
+              <p className="text-xs text-slate-500">{vendor.rankReason}</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>

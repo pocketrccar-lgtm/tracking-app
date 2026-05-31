@@ -9,6 +9,7 @@ export const VENDOR_TYPES = [
   "IMPORTER",
   "OEM",
   "MOULDER",
+  "RETAIL",
   "MIXED",
 ] as const;
 
@@ -116,7 +117,25 @@ export const VENDOR_TYPE_LABELS: Record<VendorType, string> = {
   IMPORTER: "Importer",
   OEM: "OEM",
   MOULDER: "Moulder",
+  RETAIL: "Retail",
   MIXED: "Mixed",
+};
+
+// ─── Market level — the supply gate ──────────────────────────────────────────
+// Only GREY or ABOVE_GREY vendors are real supply tunnels worth ranking.
+export const MARKET_LEVELS = ["BELOW_GREY", "GREY", "ABOVE_GREY"] as const;
+export type MarketLevel = (typeof MARKET_LEVELS)[number];
+
+export const MARKET_LEVEL_LABELS: Record<MarketLevel, string> = {
+  BELOW_GREY: "Below grey (retail)",
+  GREY: "Grey market",
+  ABOVE_GREY: "Above grey (formal)",
+};
+
+export const MARKET_LEVEL_COLORS: Record<MarketLevel, string> = {
+  BELOW_GREY: "bg-zinc-200 text-zinc-500",
+  GREY: "bg-amber-100 text-amber-800 border-amber-200",
+  ABOVE_GREY: "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
 export const VENDOR_TIER_LABELS: Record<VendorTier, string> = {

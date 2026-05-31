@@ -9,10 +9,12 @@ import {
   VENDOR_TIERS,
   VENDOR_STATUSES,
   DRIFT_STATUSES,
+  MARKET_LEVELS,
   VENDOR_TYPE_LABELS,
   VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
   DRIFT_STATUS_LABELS,
+  MARKET_LEVEL_LABELS,
 } from "@/lib/enums";
 import { useCallback, useEffect, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
@@ -50,17 +52,30 @@ export function VendorListFilters({ states }: { states: string[] }) {
   };
 
   // count active filters (excluding search + page)
-  const activeKeys = ["state", "tier", "type", "status", "drift"].filter((k) =>
+  const activeKeys = ["state", "tier", "type", "status", "drift", "marketLevel"].filter((k) =>
     sp.get(k),
   );
   const activeCount = activeKeys.length;
 
+  const sort = sp.get("sort") ?? "rank";
+  const supplyOnly = sp.get("supply") === "1";
+
+  const setSort = (value: string) => updateParam("sort", value === "rank" ? null : value);
+  const toggleSupply = () => updateParam("supply", supplyOnly ? null : "1");
+
   const fields: { key: string; label: string; options: { value: string; label: string }[] }[] = [
+    { key: "marketLevel", label: "Market level", options: MARKET_LEVELS.map((m) => ({ value: m, label: MARKET_LEVEL_LABELS[m] })) },
     { key: "state", label: "State", options: states.map((s) => ({ value: s, label: s })) },
     { key: "tier", label: "Tier", options: VENDOR_TIERS.map((t) => ({ value: t, label: VENDOR_TIER_LABELS[t] })) },
     { key: "type", label: "Type", options: VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] })) },
     { key: "status", label: "Status", options: VENDOR_STATUSES.map((s) => ({ value: s, label: VENDOR_STATUS_LABELS[s] })) },
     { key: "drift", label: "Drift", options: DRIFT_STATUSES.map((d) => ({ value: d, label: DRIFT_STATUS_LABELS[d] })) },
+  ];
+
+  const SORTS = [
+    { value: "rank", label: "Rank" },
+    { value: "volume", label: "Volume" },
+    { value: "recent", label: "Recent" },
   ];
 
   return (
@@ -85,6 +100,35 @@ export function VendorListFilters({ states }: { states: string[] }) {
             </span>
           )}
         </Button>
+      </div>
+
+      {/* Sort + supply-ready quick controls */}
+      <div className="mt-2 flex items-center gap-2">
+        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
+          {SORTS.map((s) => (
+            <button
+              key={s.value}
+              onClick={() => setSort(s.value)}
+              className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
+                sort === s.value
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={toggleSupply}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+            supplyOnly
+              ? "bg-emerald-600 text-white"
+              : "bg-slate-100 text-slate-500"
+          }`}
+        >
+          Supply-ready only
+        </button>
       </div>
 
       {/* active filter chips */}

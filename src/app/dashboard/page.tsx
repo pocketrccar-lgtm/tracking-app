@@ -7,12 +7,15 @@ import { PageTransition } from "@/components/page-transition";
 import {
   TIER_COLORS,
   STATUS_COLORS,
+  MARKET_LEVEL_COLORS,
   VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
   VENDOR_STATUS_FUNNEL,
   type VendorTier,
   type VendorStatus,
+  type MarketLevel,
 } from "@/lib/enums";
+import { RankBadge } from "@/components/rank-badge";
 import { ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +31,7 @@ export default async function DashboardPage() {
     byTier,
     byStatus,
     recentVendors,
+    topSuppliers,
   ] = await Promise.all([
     db.vendor.count(),
     db.vendor.count({ where: { driftStatus: "YES_CONFIRMED" } }),
@@ -45,6 +49,12 @@ export default async function DashboardPage() {
     db.vendor.findMany({
       orderBy: { updatedAt: "desc" },
       take: 8,
+      include: { phones: { take: 1 } },
+    }),
+    db.vendor.findMany({
+      where: { rank: { not: null } },
+      orderBy: { rank: "asc" },
+      take: 10,
       include: { phones: { take: 1 } },
     }),
   ]);
@@ -104,6 +114,64 @@ export default async function DashboardPage() {
               </Link>
             ))}
           </div>
+
+          {/* Top suppliers — ranked grey-market+ vendors by business volume */}
+          {topSuppliers.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between px-1 pb-2">
+                <h2 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">
+                  Top suppliers
+                </h2>
+                <Link
+                  href="/vendors?supply=1"
+                  className="text-xs font-semibold text-red-600"
+                >
+                  See all ranked
+                </Link>
+              </div>
+              <Card>
+                <CardContent className="p-0">
+                  <ul className="divide-y divide-slate-100">
+                    {topSuppliers.map((v) => (
+                      <li key={v.id}>
+                        <Link
+                          href={`/vendors/${v.id}`}
+                          className="flex items-center gap-2.5 px-3 py-2.5 min-h-[44px] active:scale-[0.99] transition-transform"
+                        >
+                          <RankBadge rank={v.rank} className="shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-sm font-semibold text-slate-900">
+                              {v.name}
+                            </div>
+                            <div className="truncate text-xs text-slate-500">
+                              {[v.city, v.state].filter(Boolean).join(", ") || "—"}
+                            </div>
+                          </div>
+                          {v.marketLevel ? (
+                            <Badge
+                              variant="outline"
+                              className={`shrink-0 ${MARKET_LEVEL_COLORS[v.marketLevel as MarketLevel] ?? ""}`}
+                            >
+                              {(v.marketLevel as string) === "ABOVE_GREY"
+                                ? "Above grey"
+                                : (v.marketLevel as string) === "GREY"
+                                  ? "Grey"
+                                  : "Retail"}
+                            </Badge>
+                          ) : null}
+                          {v.volumeScore != null && (
+                            <span className="hidden shrink-0 text-xs font-semibold tabular-nums text-slate-400 sm:inline">
+                              vol {v.volumeScore}
+                            </span>
+                          )}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           {/* Sourcing funnel — the path to getting products */}
           <div>
@@ -223,6 +291,9 @@ export default async function DashboardPage() {
                           href={`/vendors/${v.id}`}
                           className="flex items-center gap-2 px-4 py-3 min-h-[44px] active:scale-[0.99] transition-transform"
                         >
+                          {v.rank ? (
+                            <RankBadge rank={v.rank} className="shrink-0" />
+                          ) : null}
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-sm font-semibold text-slate-900 dark:text-neutral-100">
                               {v.name}
