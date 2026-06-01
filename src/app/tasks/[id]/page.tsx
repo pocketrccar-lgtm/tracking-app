@@ -1,11 +1,12 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, User, Phone, ShoppingBag } from "lucide-react";
+import { ArrowLeft, Calendar, User, Phone, ShoppingBag, Key, Target, CircleDot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TaskViewActions } from "@/components/task-view-actions";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { buildGraph, doneWhen as parseDoneWhen, type RoadmapTask } from "@/lib/roadmap";
 import {
   TASK_STATUS_COLORS,
   TASK_STATUS_LABELS,
@@ -27,14 +28,38 @@ export default async function TaskViewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const task = await db.task.findUnique({
-    where: { id },
-    include: {
-      vendor: { include: { phones: { take: 1 } } },
-      assignedTo: true,
-    },
-  });
+  const [task, allTasks] = await Promise.all([
+    db.task.findUnique({
+      where: { id },
+      include: {
+        vendor: { include: { phones: { take: 1 } } },
+        assignedTo: true,
+      },
+    }),
+    db.task.findMany({
+      select: {
+        id: true,
+        title: true,
+        status: true,
+        priority: true,
+        dueDate: true,
+        completedAt: true,
+        effortDays: true,
+        type: true,
+        notes: true,
+        description: true,
+      },
+    }),
+  ]);
   if (!task) notFound();
+
+  // dependency graph → what finishing this task unlocks / what it waits on
+  const graph = buildGraph(allTasks as RoadmapTask[]);
+  const unlocksCount = graph.unlocks.get(task.id) ?? 0;
+  const openBlockers = (graph.blockers.get(task.id) ?? []).filter(
+    (b) => b.status !== "COMPLETED",
+  );
+  const dw = parseDoneWhen(task);
 
   let dueLabel = "No due date";
   let overdue = false;
@@ -97,6 +122,61 @@ export default async function TaskViewPage({
           <Calendar className="h-4 w-4" /> {dueLabel}
         </div>
       </div>
+
+      {/* why this matters — goal impact */}
+      {(unlocksCount > 0 || dw || openBlockers.length > 0) && (
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-slate-400">
+              <Target className="h-3.5 w-3.5" /> Why this matters
+            </div>
+
+            {unlocksCount > 0 ? (
+              <div className="flex items-start gap-2 rounded-xl bg-teal-50 p-3">
+                <Key className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" />
+                <p className="text-sm font-semibold text-teal-900">
+                  Finishing this unlocks {unlocksCount} task
+                  {unlocksCount === 1 ? "" : "s"} and moves ₹30L one step closer.
+                </p>
+              </div>
+            ) : (
+              <p className="text-sm text-slate-600">
+                A leaf task — completing it directly burns down the roadmap toward ₹30L.
+              </p>
+            )}
+
+            {dw && (
+              <div>
+                <div className="mb-0.5 text-xs font-semibold text-slate-400">
+                  Done when
+                </div>
+                <p className="text-sm text-slate-700">{dw}</p>
+              </div>
+            )}
+
+            {openBlockers.length > 0 && (
+              <div className="rounded-xl bg-amber-50 p-3">
+                <div className="mb-1 flex items-center gap-1.5 text-xs font-bold text-amber-700">
+                  <CircleDot className="h-3.5 w-3.5" /> Waiting on{" "}
+                  {openBlockers.length} task{openBlockers.length === 1 ? "" : "s"}
+                </div>
+                <ul className="space-y-1">
+                  {openBlockers.slice(0, 4).map((b) => (
+                    <li key={b.id}>
+                      <Link
+                        href={`/tasks/${b.id}`}
+                        className="text-sm font-medium text-amber-900 underline-offset-2 hover:underline"
+                      >
+                        {b.title}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* meta */}
       <Card>

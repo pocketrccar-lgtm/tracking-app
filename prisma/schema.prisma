@@ -212,6 +212,7 @@ model Task {
   priority     String    @default("MEDIUM")  // LOW | MEDIUM | HIGH | URGENT
   dueDate      DateTime?
   completedAt  DateTime?
+  effortDays   Int       @default(1) // working-days of effort (for goal ETA math)
   notes        String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

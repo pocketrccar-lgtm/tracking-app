@@ -20,6 +20,7 @@ function fromForm(fd: FormData) {
     status: String(fd.get("status") ?? "PENDING"),
     assignedToId: s(fd.get("assignedToId")),
     dueDate: s(fd.get("dueDate")),
+    effortDays: Math.max(1, Math.min(30, Math.round(Number(fd.get("effortDays") ?? 1)) || 1)),
     notes: s(fd.get("notes")),
   };
 }
@@ -37,6 +38,7 @@ export async function createTask(fd: FormData) {
       status: d.status,
       assignedToId: d.assignedToId,
       dueDate: d.dueDate ? new Date(d.dueDate) : null,
+      effortDays: d.effortDays,
       notes: d.notes,
     },
   });
@@ -57,6 +59,7 @@ export async function updateTask(id: string, fd: FormData) {
       status: d.status,
       assignedToId: d.assignedToId,
       dueDate: d.dueDate ? new Date(d.dueDate) : null,
+      effortDays: d.effortDays,
       notes: d.notes,
       completedAt: d.status === "COMPLETED" ? new Date() : null,
     },

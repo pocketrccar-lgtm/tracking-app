@@ -27,6 +27,7 @@ type Task = {
   status?: string;
   assignedToId?: string | null;
   dueDate?: Date | null;
+  effortDays?: number | null;
   notes?: string | null;
 };
 
@@ -220,6 +221,22 @@ export function TaskForm({
                 </option>
               ))}
             </select>
+          </div>
+
+          <div>
+            <Label htmlFor="effortDays">Effort (working days)</Label>
+            <Input
+              id="effortDays"
+              name="effortDays"
+              type="number"
+              min={1}
+              max={30}
+              defaultValue={task?.effortDays ?? 1}
+              className="h-12"
+            />
+            <p className="mt-1 text-xs text-slate-400">
+              Each day of effort ≈ one day on your ₹30L goal date.
+            </p>
           </div>
 
           <div>

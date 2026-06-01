@@ -17,6 +17,7 @@ export function TaskRow({
   catLabel,
   dueLabel,
   overdue,
+  note,
 }: {
   id: string;
   title: string;
@@ -27,6 +28,7 @@ export function TaskRow({
   catLabel?: string | null;
   dueLabel?: string | null;
   overdue?: boolean;
+  note?: string | null;
 }) {
   const router = useRouter();
   const [, start] = useTransition();
@@ -92,6 +94,11 @@ export function TaskRow({
           )}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5 text-xs">
+          {note && !done && (
+            <span className="shrink-0 rounded-full bg-teal-50 px-1.5 font-bold text-teal-700">
+              {note}
+            </span>
+          )}
           {dueLabel && (
             <span
               className={`font-semibold ${

@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { TaskKanban } from "@/components/task-kanban";
 import { TaskRow } from "@/components/task-row";
+import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
 import { Plus } from "lucide-react";
 import { format } from "date-fns";
@@ -30,19 +31,43 @@ export default async function TasksPage({
   searchParams: Promise<{ who?: string; view?: string; cat?: string }>;
 }) {
   const params = await searchParams;
-  const view = params.view === "kanban" ? "kanban" : "list";
+  const view =
+    params.view === "list" || params.view === "kanban"
+      ? params.view
+      : "roadmap";
+
+  // ─── ROADMAP (default) ─────────────────────────────────────────────────────
+  if (view === "roadmap") {
+    const tasks = await db.task.findMany({
+      orderBy: [{ dueDate: "asc" }, { createdAt: "asc" }],
+      take: 400,
+      include: {
+        assignedTo: { select: { name: true } },
+        vendor: { select: { name: true } },
+      },
+    });
+    return (
+      <div>
+        <PageHeader title="Roadmap" subtitle="Your climb to ₹30L / month" />
+        <div className="px-4 pt-5 pb-32 space-y-4">
+          <ViewToggle view={view} />
+          <Roadmap tasks={tasks} />
+        </div>
+        <NewTaskFab />
+      </div>
+    );
+  }
+
+  // ─── LIST / BOARD ──────────────────────────────────────────────────────────
   const who =
     params.who === "mine" || params.who === "theirs" ? params.who : "all";
   const cat = params.cat ?? "";
 
   const users = await db.user.findMany({ orderBy: { name: "asc" } });
-  // Match the two partners by email so names like "Shared (Syed + Shoaib)"
-  // can't be picked up by a loose name match.
   const me =
     users.find((u) => u.email?.toLowerCase().startsWith("syed@")) ??
     users.find((u) => /^syed\b/i.test(u.name)) ??
     users[0];
-  // The "theirs" segment is specifically Shoaib.
   const other =
     users.find((u) => u.email?.toLowerCase().startsWith("shoaib@")) ??
     users.find((u) => u.name.trim().toLowerCase() === "shoaib");
@@ -124,29 +149,25 @@ export default async function TasksPage({
         ? `${todayCount} due today`
         : `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
 
-  // categories that actually have tasks, for the filter row
   const catChips = byCat
     .filter((c) => c._count._all > 0)
     .map((c) => ({ value: c.type, label: TASK_TYPE_LABELS[c.type as TaskType] ?? c.type, count: c._count._all }))
     .sort((a, b) => b.count - a.count);
 
-  const hrefFor = (next: { who?: string; view?: string; cat?: string }) => {
+  const hrefFor = (next: { who?: string; cat?: string }) => {
     const w = next.who ?? who;
-    const v = next.view ?? view;
     const c = next.cat ?? cat;
     const q = new URLSearchParams();
+    q.set("view", view);
     if (w !== "all") q.set("who", w);
-    if (v === "kanban") q.set("view", v);
     if (c) q.set("cat", c);
-    const s = q.toString();
-    return s ? `/tasks?${s}` : "/tasks";
+    return `/tasks?${q.toString()}`;
   };
 
   const seg = (active: boolean) =>
     `flex-1 rounded-lg py-2 min-h-[40px] flex items-center justify-center text-xs font-bold transition-all ${
       active ? "bg-white shadow-sm text-slate-900" : "text-slate-400"
     }`;
-
   const chip = (active: boolean) =>
     `shrink-0 rounded-full px-3 min-h-[36px] inline-flex items-center text-xs font-semibold whitespace-nowrap ${
       active ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
@@ -156,30 +177,22 @@ export default async function TasksPage({
     <div>
       <PageHeader title="Tasks" subtitle={subtitle} />
       <div className="px-4 pt-5 pb-32 space-y-3">
-        {/* who segment + view toggle in one row */}
-        <div className="flex gap-2">
-          <div className="flex flex-1 rounded-xl bg-slate-100 p-1">
-            <Link href={hrefFor({ who: "all" })} className={seg(who === "all")}>
-              All
-            </Link>
-            <Link href={hrefFor({ who: "mine" })} className={seg(who === "mine")}>
-              Mine
-            </Link>
-            <Link href={hrefFor({ who: "theirs" })} className={seg(who === "theirs")}>
-              {other ? other.name.split(" ")[0] : "Theirs"}
-            </Link>
-          </div>
-          <div className="flex rounded-xl bg-slate-100 p-1">
-            <Link href={hrefFor({ view: "list" })} className={`${seg(view === "list")} px-3`}>
-              List
-            </Link>
-            <Link href={hrefFor({ view: "kanban" })} className={`${seg(view === "kanban")} px-3`}>
-              Board
-            </Link>
-          </div>
+        <ViewToggle view={view} />
+
+        {/* who segment */}
+        <div className="flex rounded-xl bg-slate-100 p-1">
+          <Link href={hrefFor({ who: "all" })} className={seg(who === "all")}>
+            All
+          </Link>
+          <Link href={hrefFor({ who: "mine" })} className={seg(who === "mine")}>
+            Mine
+          </Link>
+          <Link href={hrefFor({ who: "theirs" })} className={seg(who === "theirs")}>
+            {other ? other.name.split(" ")[0] : "Theirs"}
+          </Link>
         </div>
 
-        {/* category filter (only categories that have tasks) */}
+        {/* category filter */}
         {catChips.length > 1 && (
           <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
             <Link href={hrefFor({ cat: "" })} className={chip(!cat)}>
@@ -238,14 +251,39 @@ export default async function TasksPage({
         )}
       </div>
 
-      {/* thumb-zone FAB */}
-      <Link
-        href="/tasks/new"
-        aria-label="New task"
-        className="fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg active:scale-95 transition-transform"
-      >
-        <Plus className="h-6 w-6" strokeWidth={2.5} />
+      <NewTaskFab />
+    </div>
+  );
+}
+
+function ViewToggle({ view }: { view: string }) {
+  const seg = (active: boolean) =>
+    `flex-1 rounded-lg py-2 min-h-[40px] flex items-center justify-center text-xs font-bold transition-all ${
+      active ? "bg-white shadow-sm text-slate-900" : "text-slate-400"
+    }`;
+  return (
+    <div className="flex rounded-xl bg-slate-100 p-1">
+      <Link href="/tasks" className={seg(view === "roadmap")}>
+        Roadmap
+      </Link>
+      <Link href="/tasks?view=list" className={seg(view === "list")}>
+        List
+      </Link>
+      <Link href="/tasks?view=kanban" className={seg(view === "kanban")}>
+        Board
       </Link>
     </div>
+  );
+}
+
+function NewTaskFab() {
+  return (
+    <Link
+      href="/tasks/new"
+      aria-label="New task"
+      className="fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg active:scale-95 transition-transform"
+    >
+      <Plus className="h-6 w-6" strokeWidth={2.5} />
+    </Link>
   );
 }
