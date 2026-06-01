@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { db } from "@/lib/db";
-import { TASK_PRIORITIES } from "@/lib/enums";
+import { TASK_PRIORITIES, TASK_TYPES } from "@/lib/enums";
 
 export const runtime = "nodejs";
 
@@ -50,6 +50,7 @@ Return ONLY a JSON object (no markdown, no prose) with these keys:
   "title": string (short imperative, e.g. "Call about drift RC catalogue"),
   "vendorId": string|null (pick the BEST matching id from the vendor list, else null),
   "assignedToId": string|null (pick the partner id if a person is named — "ask Shoaib to...", "Syed will..." — else null),
+  "type": one of ${JSON.stringify(TASK_TYPES)} (the business CATEGORY of the task — infer from intent: a call/visit/whatsapp/email/sample/follow-up/research, or a function like LEGAL, FINANCE, OPS, INVENTORY, MARKETING, CONTENT, PRODUCT, SOURCING, STRATEGY; default SOURCING),
   "priority": one of ${JSON.stringify(TASK_PRIORITIES)},
   "dueDate": "YYYY-MM-DD" (resolve relative dates against today=${today}; if no date is mentioned, default to today=${today}),
   "notes": string (any extra detail from the note, else "")
@@ -87,6 +88,9 @@ Rules: Default priority MEDIUM. dueDate is ALWAYS a real date (never null) — u
     }
     if (parsed.assignedToId && !users.some((u) => u.id === parsed.assignedToId)) {
       parsed.assignedToId = null;
+    }
+    if (!parsed.type || !(TASK_TYPES as readonly string[]).includes(parsed.type)) {
+      parsed.type = "SOURCING";
     }
     if (!parsed.dueDate) parsed.dueDate = today;
     return NextResponse.json({ task: parsed });

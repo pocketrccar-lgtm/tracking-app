@@ -23,6 +23,7 @@ export function NewTaskClient({
   const [prefill, setPrefill] = useState<{
     vendorId?: string;
     title?: string;
+    type?: string;
     priority?: string;
     assignedToId?: string | null;
     dueDate?: Date | null;
@@ -34,6 +35,7 @@ export function NewTaskClient({
     setPrefill({
       vendorId: t.vendorId ?? defaultVendorId,
       title: t.title,
+      type: t.type,
       priority: t.priority,
       assignedToId: t.assignedToId ?? defaultAssigneeId ?? null,
       dueDate: t.dueDate ? new Date(t.dueDate) : new Date(),

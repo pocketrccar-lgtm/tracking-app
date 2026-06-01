@@ -12,7 +12,8 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
-    "db:import-vendors": "tsx scripts/import-vendors.ts"
+    "db:import-vendors": "tsx scripts/import-vendors.ts",
+    "db:seed-tasks": "tsx scripts/seed-rc-tasks.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

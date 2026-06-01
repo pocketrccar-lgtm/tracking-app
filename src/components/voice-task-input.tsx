@@ -10,6 +10,7 @@ export type ExtractedTask = {
   title?: string;
   vendorId?: string | null;
   assignedToId?: string | null;
+  type?: string;
   priority?: string;
   dueDate?: string | null;
   notes?: string;

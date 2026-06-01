@@ -76,9 +76,22 @@ export async function updateTaskStatus(id: string, status: string) {
     },
   });
   revalidatePath("/tasks");
+  revalidatePath(`/tasks/${id}`);
+}
+
+// Push the due date out by N days (from the current due date, or today).
+export async function snoozeTask(id: string, days: number) {
+  const task = await db.task.findUnique({ where: { id }, select: { dueDate: true } });
+  const base = task?.dueDate ? new Date(task.dueDate) : new Date();
+  base.setHours(0, 0, 0, 0);
+  base.setDate(base.getDate() + days);
+  await db.task.update({ where: { id }, data: { dueDate: base } });
+  revalidatePath("/tasks");
+  revalidatePath(`/tasks/${id}`);
 }
 
 export async function deleteTask(id: string) {
   await db.task.delete({ where: { id } });
   revalidatePath("/tasks");
+  redirect("/tasks");
 }

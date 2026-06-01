@@ -66,6 +66,16 @@ export const TASK_TYPES = [
   "FOLLOW_UP",
   "RESEARCH",
   "OTHER",
+  // ─── Business-execution categories (RC launch task system) ───
+  "LEGAL",
+  "FINANCE",
+  "OPS",
+  "INVENTORY",
+  "MARKETING",
+  "CONTENT",
+  "PRODUCT",
+  "SOURCING",
+  "STRATEGY",
 ] as const;
 
 export type TaskType = (typeof TASK_TYPES)[number];
@@ -182,6 +192,16 @@ export const TASK_TYPE_LABELS: Record<TaskType, string> = {
   FOLLOW_UP: "Follow up",
   RESEARCH: "Research",
   OTHER: "Other",
+  // Business-execution categories
+  LEGAL: "Legal",
+  FINANCE: "Finance",
+  OPS: "Ops",
+  INVENTORY: "Inventory",
+  MARKETING: "Marketing",
+  CONTENT: "Content",
+  PRODUCT: "Product",
+  SOURCING: "Sourcing",
+  STRATEGY: "Strategy",
 };
 
 // ─── Badge color classes (Tailwind) ─────────────────────────────────────────

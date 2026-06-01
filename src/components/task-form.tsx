@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
-  TASK_PRIORITIES,
+  TASK_TYPES,
   TASK_STATUSES,
+  TASK_TYPE_LABELS,
   TASK_STATUS_LABELS,
 } from "@/lib/enums";
 import { ChevronDown } from "lucide-react";
@@ -37,10 +38,11 @@ type Props = {
   defaultAssigneeId?: string;
   action: (fd: FormData) => void;
   submitLabel: string;
+  cancelHref?: string;
 };
 
 const selectClass =
-  "h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20";
+  "h-12 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20";
 
 const ymd = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(
@@ -54,13 +56,42 @@ function plusDays(n: number) {
 }
 
 const DUE_CHIPS = [
-  { label: "No date", value: "" },
   { label: "Today", value: plusDays(0) },
   { label: "Tomorrow", value: plusDays(1) },
   { label: "3 days", value: plusDays(3) },
   { label: "Week", value: plusDays(7) },
   { label: "Month", value: plusDays(30) },
+  { label: "No date", value: "" },
 ];
+
+const PRIORITIES = [
+  { value: "LOW", label: "Low" },
+  { value: "MEDIUM", label: "Med" },
+  { value: "HIGH", label: "High" },
+  { value: "URGENT", label: "Urgent" },
+];
+
+function Seg({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`min-h-[46px] rounded-xl px-2 text-sm font-semibold transition-colors active:scale-[0.97] ${
+        active ? "bg-red-600 text-white shadow-sm" : "bg-slate-100 text-slate-600"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
 
 export function TaskForm({
   task,
@@ -70,159 +101,189 @@ export function TaskForm({
   defaultAssigneeId,
   action,
   submitLabel,
+  cancelHref,
 }: Props) {
-  const initialDue = task?.dueDate ? ymd(new Date(task.dueDate)) : "";
-  const [due, setDue] = useState(initialDue);
-
-  const hasDetails = !!(
-    task?.id ||
-    task?.vendorId ||
-    defaultVendorId ||
-    task?.type ||
-    task?.priority ||
-    task?.assignedToId ||
-    task?.notes ||
-    task?.description
+  const [due, setDue] = useState(task?.dueDate ? ymd(new Date(task.dueDate)) : "");
+  const [assignee, setAssignee] = useState(
+    task?.assignedToId ?? defaultAssigneeId ?? "",
   );
-  const [showDetails, setShowDetails] = useState(hasDetails);
+  const [priority, setPriority] = useState(task?.priority ?? "MEDIUM");
+  const [showMore, setShowMore] = useState(
+    !!(
+      task?.vendorId ||
+      defaultVendorId ||
+      task?.notes ||
+      (task?.status && task.status !== "PENDING")
+    ),
+  );
 
-  // match a known chip, else "custom" (no chip highlighted)
   const activeChip = DUE_CHIPS.find((c) => c.value === due)?.value ?? null;
 
   return (
-    <form action={action} className="space-y-4">
-      <Card>
-        <CardContent className="space-y-4 p-4">
-          <div>
-            <Label htmlFor="title">What&apos;s the task? *</Label>
-            <Input
-              id="title"
-              name="title"
-              required
-              defaultValue={task?.title ?? ""}
-              placeholder="e.g. Call Ratnaakar about 1:18 drift catalogue"
-              autoFocus
-            />
-          </div>
+    <form action={action} className="space-y-5 pb-40">
+      {/* controlled values */}
+      <input type="hidden" name="dueDate" value={due} />
+      <input type="hidden" name="assignedToId" value={assignee} />
+      <input type="hidden" name="priority" value={priority} />
 
+      <div>
+        <Label htmlFor="title">What&apos;s the task? *</Label>
+        <Input
+          id="title"
+          name="title"
+          required
+          defaultValue={task?.title ?? ""}
+          placeholder="e.g. Call DeoDap about no-MOQ drift cars"
+          autoFocus
+          className="h-12 text-base"
+        />
+      </div>
+
+      <div>
+        <Label>When</Label>
+        <div className="flex flex-wrap gap-2">
+          {DUE_CHIPS.map((c) => (
+            <button
+              key={c.label}
+              type="button"
+              onClick={() => setDue(c.value)}
+              className={`min-h-[44px] rounded-full px-4 text-sm font-semibold transition-colors active:scale-[0.97] ${
+                activeChip === c.value
+                  ? "bg-red-600 text-white"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {c.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>Who does it</Label>
+        <div className="grid grid-cols-3 gap-2">
+          <Seg active={assignee === ""} onClick={() => setAssignee("")}>
+            Anyone
+          </Seg>
+          {users.map((u) => (
+            <Seg
+              key={u.id}
+              active={assignee === u.id}
+              onClick={() => setAssignee(u.id)}
+            >
+              {u.name.split(" ")[0]}
+            </Seg>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label>Priority</Label>
+        <div className="grid grid-cols-4 gap-2">
+          {PRIORITIES.map((p) => (
+            <Seg
+              key={p.value}
+              active={priority === p.value}
+              onClick={() => setPriority(p.value)}
+            >
+              {p.label}
+            </Seg>
+          ))}
+        </div>
+      </div>
+
+      {/* More: vendor, status, notes */}
+      <button
+        type="button"
+        onClick={() => setShowMore((s) => !s)}
+        className="flex w-full items-center justify-between rounded-xl bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-600"
+      >
+        More details
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${showMore ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {showMore && (
+        <div className="space-y-4">
           <div>
-            <Label>Due</Label>
-            <input type="hidden" name="dueDate" value={due} />
-            <div className="flex flex-wrap gap-2">
-              {DUE_CHIPS.map((c) => (
-                <button
-                  key={c.label}
-                  type="button"
-                  onClick={() => setDue(c.value)}
-                  className={`rounded-full px-3.5 py-2 min-h-[40px] text-sm font-semibold transition-colors ${
-                    activeChip === c.value
-                      ? "bg-red-600 text-white"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  {c.label}
-                </button>
+            <Label htmlFor="type">Category</Label>
+            <select
+              id="type"
+              name="type"
+              defaultValue={task?.type ?? "SOURCING"}
+              className={selectClass}
+            >
+              {TASK_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {TASK_TYPE_LABELS[t]}
+                </option>
               ))}
-            </div>
+            </select>
           </div>
 
-          {/* collapsible details */}
-          <button
-            type="button"
-            onClick={() => setShowDetails((s) => !s)}
-            className="flex w-full items-center justify-between rounded-lg bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-600"
-          >
-            Details (optional)
-            <ChevronDown
-              className={`h-4 w-4 transition-transform ${showDetails ? "rotate-180" : ""}`}
+          <div>
+            <Label htmlFor="vendorId">Vendor</Label>
+            <select
+              id="vendorId"
+              name="vendorId"
+              defaultValue={task?.vendorId ?? defaultVendorId ?? ""}
+              className={selectClass}
+            >
+              <option value="">— none —</option>
+              {vendors.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <select
+              id="status"
+              name="status"
+              defaultValue={task?.status ?? "PENDING"}
+              className={selectClass}
+            >
+              {TASK_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {TASK_STATUS_LABELS[s]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              name="notes"
+              rows={3}
+              defaultValue={task?.notes ?? task?.description ?? ""}
+              placeholder="Any extra detail…"
             />
-          </button>
+          </div>
+        </div>
+      )}
 
-          {showDetails && (
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="vendorId">Vendor</Label>
-                <select
-                  id="vendorId"
-                  name="vendorId"
-                  defaultValue={task?.vendorId ?? defaultVendorId ?? ""}
-                  className={selectClass}
-                >
-                  <option value="">— none —</option>
-                  {vendors.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="priority">Priority</Label>
-                  <select
-                    id="priority"
-                    name="priority"
-                    defaultValue={task?.priority ?? "MEDIUM"}
-                    className={selectClass}
-                  >
-                    {TASK_PRIORITIES.map((p) => (
-                      <option key={p} value={p}>
-                        {p}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="status">Status</Label>
-                  <select
-                    id="status"
-                    name="status"
-                    defaultValue={task?.status ?? "PENDING"}
-                    className={selectClass}
-                  >
-                    {TASK_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {TASK_STATUS_LABELS[s]}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <Label htmlFor="assignedToId">Assigned to</Label>
-                  <select
-                    id="assignedToId"
-                    name="assignedToId"
-                    defaultValue={task?.assignedToId ?? defaultAssigneeId ?? ""}
-                    className={selectClass}
-                  >
-                    <option value="">Anyone</option>
-                    {users.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {u.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="notes">Notes</Label>
-                <Textarea
-                  id="notes"
-                  name="notes"
-                  rows={3}
-                  defaultValue={task?.notes ?? task?.description ?? ""}
-                />
-              </div>
-            </div>
+      {/* Sticky thumb-zone action bar (sits above the bottom nav) */}
+      <div className="fixed inset-x-0 bottom-[calc(3.5rem+env(safe-area-inset-bottom))] z-30 border-t border-slate-200 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-lg gap-2 p-3">
+          {cancelHref && (
+            <Link
+              href={cancelHref}
+              className={buttonVariants({ variant: "outline" })}
+            >
+              Cancel
+            </Link>
           )}
-        </CardContent>
-      </Card>
-
-      <Button type="submit" className="w-full">
-        {submitLabel}
-      </Button>
+          <Button type="submit" size="lg" className="flex-1">
+            {submitLabel}
+          </Button>
+        </div>
+      </div>
     </form>
   );
 }
