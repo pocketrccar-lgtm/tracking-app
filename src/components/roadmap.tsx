@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { format } from "date-fns";
-import { Flag, Lock, Check, AlertTriangle } from "lucide-react";
+import { Flag, Lock, Check, AlertTriangle, ChevronRight } from "lucide-react";
 import { ProgressRing } from "@/components/progress-ring";
 import { TaskRow } from "@/components/task-row";
 import {
@@ -193,9 +194,10 @@ function PhaseNode({ p, isLast }: { p: PhaseRollup; isLast: boolean }) {
         {!isLast && <div className="my-1 w-0.5 flex-1 rounded-full bg-slate-200" />}
       </div>
 
-      {/* card */}
-      <div
-        className={`mb-3 flex-1 rounded-2xl border p-3.5 ${
+      {/* card → tap to curate this phase's tasks */}
+      <Link
+        href={`/tasks?view=list&phase=${p.key}`}
+        className={`mb-3 flex-1 rounded-2xl border p-3.5 transition-transform active:scale-[0.99] ${
           current
             ? "border-slate-300 bg-white shadow-sm"
             : done
@@ -218,8 +220,9 @@ function PhaseNode({ p, isLast }: { p: PhaseRollup; isLast: boolean }) {
           {!current && !done && p.total > 0 && (
             <Lock className="h-3 w-3 text-slate-300" />
           )}
-          <span className="ml-auto text-xs font-semibold tabular-nums text-slate-500">
+          <span className="ml-auto flex items-center gap-1 text-xs font-semibold tabular-nums text-slate-500">
             {p.done}/{p.total}
+            <ChevronRight className="h-3.5 w-3.5 text-slate-300" />
           </span>
         </div>
         <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
@@ -230,7 +233,7 @@ function PhaseNode({ p, isLast }: { p: PhaseRollup; isLast: boolean }) {
             </span>
           )}
         </div>
-      </div>
+      </Link>
     </div>
   );
 }

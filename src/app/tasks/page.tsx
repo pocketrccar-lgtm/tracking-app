@@ -6,6 +6,7 @@ import { TaskKanban } from "@/components/task-kanban";
 import { TaskRow } from "@/components/task-row";
 import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
+import { PHASES, phaseForTask } from "@/lib/roadmap";
 import { Plus } from "lucide-react";
 import { format } from "date-fns";
 
@@ -23,12 +24,13 @@ type Row = {
   catLabel: string | null;
   dueLabel: string | null;
   overdue: boolean;
+  phaseKey: string | null;
 };
 
 export default async function TasksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ who?: string; view?: string; cat?: string }>;
+  searchParams: Promise<{ who?: string; view?: string; phase?: string }>;
 }) {
   const params = await searchParams;
   const view =
@@ -61,7 +63,7 @@ export default async function TasksPage({
   // ─── LIST / BOARD ──────────────────────────────────────────────────────────
   const who =
     params.who === "mine" || params.who === "theirs" ? params.who : "all";
-  const cat = params.cat ?? "";
+  const phaseFilter = params.phase ?? "";
 
   const users = await db.user.findMany({ orderBy: { name: "asc" } });
   const me =
@@ -75,20 +77,26 @@ export default async function TasksPage({
   const where: Record<string, unknown> = {};
   if (who === "mine" && me) where.assignedToId = me.id;
   if (who === "theirs" && other) where.assignedToId = other.id;
-  if (cat) where.type = cat;
 
-  const [tasks, byCat] = await Promise.all([
-    db.task.findMany({
-      where,
-      orderBy: [{ dueDate: "asc" }, { priority: "desc" }, { createdAt: "desc" }],
-      take: 300,
-      include: {
-        vendor: { select: { id: true, name: true } },
-        assignedTo: { select: { name: true } },
-      },
-    }),
-    db.task.groupBy({ by: ["type"], _count: { _all: true } }),
-  ]);
+  const allWho = await db.task.findMany({
+    where,
+    orderBy: [{ dueDate: "asc" }, { priority: "desc" }, { createdAt: "desc" }],
+    take: 400,
+    include: {
+      vendor: { select: { id: true, name: true } },
+      assignedTo: { select: { name: true } },
+    },
+  });
+
+  // effective phase per task (manual override or auto), counts, then filter
+  const phaseCounts: Record<string, number> = {};
+  for (const t of allWho) {
+    const k = phaseForTask(t);
+    phaseCounts[k] = (phaseCounts[k] ?? 0) + 1;
+  }
+  const tasks = phaseFilter
+    ? allWho.filter((t) => phaseForTask(t) === phaseFilter)
+    : allWho;
 
   const todayMs = Date.parse(isoDate(new Date()));
   const groups: Record<string, Row[]> = {
@@ -112,6 +120,7 @@ export default async function TasksPage({
       catLabel: TASK_TYPE_LABELS[t.type as TaskType] ?? null,
       dueLabel: null,
       overdue: false,
+      phaseKey: phaseForTask(t),
     };
     if (t.status === "COMPLETED") {
       groups.done.push(base);
@@ -149,18 +158,19 @@ export default async function TasksPage({
         ? `${todayCount} due today`
         : `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
 
-  const catChips = byCat
-    .filter((c) => c._count._all > 0)
-    .map((c) => ({ value: c.type, label: TASK_TYPE_LABELS[c.type as TaskType] ?? c.type, count: c._count._all }))
-    .sort((a, b) => b.count - a.count);
+  const phaseChips = PHASES.map((p) => ({
+    value: p.key,
+    label: p.label,
+    count: phaseCounts[p.key] ?? 0,
+  }));
 
-  const hrefFor = (next: { who?: string; cat?: string }) => {
+  const hrefFor = (next: { who?: string; phase?: string }) => {
     const w = next.who ?? who;
-    const c = next.cat ?? cat;
+    const ph = next.phase ?? phaseFilter;
     const q = new URLSearchParams();
     q.set("view", view);
     if (w !== "all") q.set("who", w);
-    if (c) q.set("cat", c);
+    if (ph) q.set("phase", ph);
     return `/tasks?${q.toString()}`;
   };
 
@@ -192,19 +202,20 @@ export default async function TasksPage({
           </Link>
         </div>
 
-        {/* category filter */}
-        {catChips.length > 1 && (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
-            <Link href={hrefFor({ cat: "" })} className={chip(!cat)}>
-              All
+        {/* phase filter — tap a chip to see & curate that milestone */}
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
+          <Link href={hrefFor({ phase: "" })} className={chip(!phaseFilter)}>
+            All phases
+          </Link>
+          {phaseChips.map((c) => (
+            <Link key={c.value} href={hrefFor({ phase: c.value })} className={chip(phaseFilter === c.value)}>
+              {c.label} {c.count > 0 ? `· ${c.count}` : ""}
             </Link>
-            {catChips.map((c) => (
-              <Link key={c.value} href={hrefFor({ cat: c.value })} className={chip(cat === c.value)}>
-                {c.label}
-              </Link>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
+        <p className="px-1 text-[11px] text-slate-400">
+          Tap a task&apos;s phase chip to move it between milestones.
+        </p>
 
         {view === "kanban" ? (
           <TaskKanban
@@ -241,7 +252,7 @@ export default async function TasksPage({
                   </h2>
                   <div className="space-y-2">
                     {rows.map((r) => (
-                      <TaskRow key={r.id} {...r} />
+                      <TaskRow key={r.id} {...r} showPhase />
                     ))}
                   </div>
                 </section>

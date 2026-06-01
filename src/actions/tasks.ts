@@ -21,6 +21,7 @@ function fromForm(fd: FormData) {
     assignedToId: s(fd.get("assignedToId")),
     dueDate: s(fd.get("dueDate")),
     effortDays: Math.max(1, Math.min(30, Math.round(Number(fd.get("effortDays") ?? 1)) || 1)),
+    phase: s(fd.get("phase")),
     notes: s(fd.get("notes")),
   };
 }
@@ -39,6 +40,7 @@ export async function createTask(fd: FormData) {
       assignedToId: d.assignedToId,
       dueDate: d.dueDate ? new Date(d.dueDate) : null,
       effortDays: d.effortDays,
+      phase: d.phase,
       notes: d.notes,
     },
   });
@@ -60,6 +62,7 @@ export async function updateTask(id: string, fd: FormData) {
       assignedToId: d.assignedToId,
       dueDate: d.dueDate ? new Date(d.dueDate) : null,
       effortDays: d.effortDays,
+      phase: d.phase,
       notes: d.notes,
       completedAt: d.status === "COMPLETED" ? new Date() : null,
     },
@@ -68,6 +71,12 @@ export async function updateTask(id: string, fd: FormData) {
   revalidatePath(`/tasks/${id}`);
   revalidatePath(`/vendors/${d.vendorId}`);
   redirect(`/tasks/${id}`);
+}
+
+export async function setTaskPhase(id: string, phase: string) {
+  await db.task.update({ where: { id }, data: { phase: phase || null } });
+  revalidatePath("/tasks");
+  revalidatePath(`/tasks/${id}`);
 }
 
 export async function updateTaskStatus(id: string, status: string) {

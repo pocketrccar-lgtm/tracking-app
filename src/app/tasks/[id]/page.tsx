@@ -46,6 +46,7 @@ export default async function TaskViewPage({
         completedAt: true,
         effortDays: true,
         type: true,
+        phase: true,
         notes: true,
         description: true,
       },

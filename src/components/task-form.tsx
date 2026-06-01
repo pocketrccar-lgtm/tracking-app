@@ -12,6 +12,7 @@ import {
   TASK_TYPE_LABELS,
   TASK_STATUS_LABELS,
 } from "@/lib/enums";
+import { PHASES } from "@/lib/roadmap";
 import { ChevronDown } from "lucide-react";
 
 type Vendor = { id: string; name: string };
@@ -28,6 +29,7 @@ type Task = {
   assignedToId?: string | null;
   dueDate?: Date | null;
   effortDays?: number | null;
+  phase?: string | null;
   notes?: string | null;
 };
 
@@ -218,6 +220,23 @@ export function TaskForm({
               {TASK_TYPES.map((t) => (
                 <option key={t} value={t}>
                   {TASK_TYPE_LABELS[t]}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <Label htmlFor="phase">Roadmap phase</Label>
+            <select
+              id="phase"
+              name="phase"
+              defaultValue={task?.phase ?? ""}
+              className={selectClass}
+            >
+              <option value="">Auto (from plan)</option>
+              {PHASES.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label} — {p.tagline}
                 </option>
               ))}
             </select>

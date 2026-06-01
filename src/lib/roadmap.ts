@@ -35,6 +35,13 @@ const SPRINT_TO_PHASE: Record<string, string> = {
   "3": "scale",
 };
 
+export const PHASE_KEYS = PHASES.map((p) => p.key);
+export const PHASE_LABEL: Record<string, string> = Object.fromEntries(
+  PHASES.map((p) => [p.key, p.label]),
+);
+const isPhaseKey = (k: string | null | undefined): k is string =>
+  !!k && PHASE_KEYS.includes(k);
+
 export type RoadmapTask = {
   id: string;
   title: string;
@@ -44,6 +51,7 @@ export type RoadmapTask = {
   completedAt: Date | null;
   effortDays: number | null;
   type: string;
+  phase: string | null;
   notes: string | null;
   description: string | null;
   assignedTo?: { name: string } | null;
@@ -55,7 +63,13 @@ const eff = (t: { effortDays: number | null }) => Math.max(1, t.effortDays ?? 1)
 
 // ─── parsing helpers ─────────────────────────────────────────────────────────
 
-export function phaseForTask(t: { notes: string | null; type: string }): string {
+export function phaseForTask(t: {
+  phase?: string | null;
+  notes: string | null;
+  type: string;
+}): string {
+  // Manual assignment always wins over the seed's auto-guess.
+  if (isPhaseKey(t.phase)) return t.phase;
   const m = (t.notes ?? "").match(/Sprint\s*([0-3])/i);
   if (m && SPRINT_TO_PHASE[m[1]]) return SPRINT_TO_PHASE[m[1]];
   return "launch"; // lone/un-tagged tasks sit in the launch sprint

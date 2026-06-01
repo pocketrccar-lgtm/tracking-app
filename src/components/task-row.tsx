@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { updateTaskStatus } from "@/actions/tasks";
+import { TaskPhasePicker } from "@/components/task-phase-picker";
 import { toast } from "sonner";
 
 export function TaskRow({
@@ -18,6 +19,8 @@ export function TaskRow({
   dueLabel,
   overdue,
   note,
+  showPhase,
+  phaseKey,
 }: {
   id: string;
   title: string;
@@ -29,6 +32,8 @@ export function TaskRow({
   dueLabel?: string | null;
   overdue?: boolean;
   note?: string | null;
+  showPhase?: boolean;
+  phaseKey?: string | null;
 }) {
   const router = useRouter();
   const [, start] = useTransition();
@@ -42,7 +47,7 @@ export function TaskRow({
       try {
         await updateTaskStatus(id, next ? "COMPLETED" : "PENDING");
         router.refresh();
-        if (next) toast.success("Marked complete");
+        if (next) toast.success("✅ Done — one step closer to ₹30L");
       } catch {
         setDone(!next);
         toast.error("Couldn't update");
@@ -117,6 +122,8 @@ export function TaskRow({
           </span>
         </div>
       </Link>
+
+      {showPhase && <TaskPhasePicker taskId={id} phase={phaseKey ?? null} />}
     </div>
   );
 }
