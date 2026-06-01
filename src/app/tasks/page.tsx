@@ -37,7 +37,10 @@ export default async function TasksPage({
 
   const users = await db.user.findMany({ orderBy: { name: "asc" } });
   const me = users.find((u) => /syed/i.test(u.name)) ?? users[0];
-  const other = users.find((u) => u.id !== me?.id);
+  // The "theirs" segment is specifically Shoaib (not just any other team member).
+  const other =
+    users.find((u) => /shoaib/i.test(u.name)) ??
+    users.find((u) => u.id !== me?.id);
 
   const where: Record<string, unknown> = {};
   if (who === "mine" && me) where.assignedToId = me.id;
