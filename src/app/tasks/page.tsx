@@ -36,11 +36,16 @@ export default async function TasksPage({
   const cat = params.cat ?? "";
 
   const users = await db.user.findMany({ orderBy: { name: "asc" } });
-  const me = users.find((u) => /syed/i.test(u.name)) ?? users[0];
-  // The "theirs" segment is specifically Shoaib (not just any other team member).
+  // Match the two partners by email so names like "Shared (Syed + Shoaib)"
+  // can't be picked up by a loose name match.
+  const me =
+    users.find((u) => u.email?.toLowerCase().startsWith("syed@")) ??
+    users.find((u) => /^syed\b/i.test(u.name)) ??
+    users[0];
+  // The "theirs" segment is specifically Shoaib.
   const other =
-    users.find((u) => /shoaib/i.test(u.name)) ??
-    users.find((u) => u.id !== me?.id);
+    users.find((u) => u.email?.toLowerCase().startsWith("shoaib@")) ??
+    users.find((u) => u.name.trim().toLowerCase() === "shoaib");
 
   const where: Record<string, unknown> = {};
   if (who === "mine" && me) where.assignedToId = me.id;
