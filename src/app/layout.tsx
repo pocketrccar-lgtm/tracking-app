@@ -3,7 +3,6 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/bottom-nav";
-import { QuickAddFab } from "@/components/quick-add-fab";
 import PWAInstall from "@/components/pwa-install";
 
 export const metadata: Metadata = {
@@ -50,7 +49,6 @@ export default function RootLayout({
             {children}
           </main>
           <BottomNav />
-          <QuickAddFab />
           <PWAInstall />
         </ThemeProvider>
         <script

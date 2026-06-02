@@ -6,15 +6,19 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TaskViewActions } from "@/components/task-view-actions";
 import { WhatsAppButton } from "@/components/whatsapp-button";
-import { buildGraph, doneWhen as parseDoneWhen, type RoadmapTask } from "@/lib/roadmap";
+import {
+  buildGraph,
+  doneWhen as parseDoneWhen,
+  phaseForTask,
+  PHASE_LABEL,
+  type RoadmapTask,
+} from "@/lib/roadmap";
 import {
   TASK_STATUS_COLORS,
   TASK_STATUS_LABELS,
-  PRIORITY_COLORS,
   TASK_TYPE_LABELS,
   type TaskStatus,
   type TaskType,
-  type TaskPriority,
 } from "@/lib/enums";
 import { format } from "date-fns";
 
@@ -102,11 +106,8 @@ export default async function TaskViewPage({
           >
             {TASK_STATUS_LABELS[task.status as TaskStatus] ?? task.status}
           </Badge>
-          <Badge
-            variant="outline"
-            className={PRIORITY_COLORS[task.priority as TaskPriority] ?? ""}
-          >
-            {task.priority.toLowerCase()}
+          <Badge variant="outline" className="bg-purple-50 text-purple-700">
+            {PHASE_LABEL[phaseForTask(task)] ?? "Stage"}
           </Badge>
           <Badge variant="outline" className="bg-slate-50 text-slate-600">
             {TASK_TYPE_LABELS[task.type as TaskType] ?? task.type}

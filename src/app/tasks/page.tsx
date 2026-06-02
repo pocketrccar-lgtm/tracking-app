@@ -6,7 +6,7 @@ import { TaskKanban } from "@/components/task-kanban";
 import { TaskRow } from "@/components/task-row";
 import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
-import { PHASES, phaseForTask } from "@/lib/roadmap";
+import { phaseForTask, PHASE_LABEL } from "@/lib/roadmap";
 import { Plus } from "lucide-react";
 import { format } from "date-fns";
 
@@ -30,7 +30,12 @@ type Row = {
 export default async function TasksPage({
   searchParams,
 }: {
-  searchParams: Promise<{ who?: string; view?: string; phase?: string }>;
+  searchParams: Promise<{
+    who?: string;
+    view?: string;
+    phase?: string;
+    h?: string;
+  }>;
 }) {
   const params = await searchParams;
   const view =
@@ -62,25 +67,31 @@ export default async function TasksPage({
 
   // ─── LIST / BOARD ──────────────────────────────────────────────────────────
   const who =
-    params.who === "mine" || params.who === "theirs" ? params.who : "all";
+    params.who === "mine" || params.who === "shoaib" ? params.who : "both";
   const phaseFilter = params.phase ?? "";
+  const horizon = params.h ?? ""; // "" | today | tomorrow | d3 | week | month
 
   const users = await db.user.findMany({ orderBy: { name: "asc" } });
-  const me =
+  const syed =
     users.find((u) => u.email?.toLowerCase().startsWith("syed@")) ??
-    users.find((u) => /^syed\b/i.test(u.name)) ??
-    users[0];
-  const other =
+    users.find((u) => /^syed\b/i.test(u.name));
+  const shoaib =
     users.find((u) => u.email?.toLowerCase().startsWith("shoaib@")) ??
     users.find((u) => u.name.trim().toLowerCase() === "shoaib");
+  const shared = users.find((u) =>
+    u.email?.toLowerCase().startsWith("shared@"),
+  );
 
+  // Both = the two partners' combined work (incl. shared), excluding the CA.
+  const partnerIds = [syed?.id, shoaib?.id, shared?.id].filter(Boolean) as string[];
   const where: Record<string, unknown> = {};
-  if (who === "mine" && me) where.assignedToId = me.id;
-  if (who === "theirs" && other) where.assignedToId = other.id;
+  if (who === "mine" && syed) where.assignedToId = syed.id;
+  else if (who === "shoaib" && shoaib) where.assignedToId = shoaib.id;
+  else if (partnerIds.length) where.assignedToId = { in: partnerIds };
 
   const allWho = await db.task.findMany({
     where,
-    orderBy: [{ dueDate: "asc" }, { priority: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
     take: 400,
     include: {
       vendor: { select: { id: true, name: true } },
@@ -88,17 +99,28 @@ export default async function TasksPage({
     },
   });
 
-  // effective phase per task (manual override or auto), counts, then filter
-  const phaseCounts: Record<string, number> = {};
-  for (const t of allWho) {
-    const k = phaseForTask(t);
-    phaseCounts[k] = (phaseCounts[k] ?? 0) + 1;
-  }
-  const tasks = phaseFilter
-    ? allWho.filter((t) => phaseForTask(t) === phaseFilter)
-    : allWho;
-
   const todayMs = Date.parse(isoDate(new Date()));
+
+  // horizon = how far ahead to show (cumulative; overdue always included)
+  const H_MAX: Record<string, number> = {
+    today: 0,
+    tomorrow: 1,
+    d3: 3,
+    week: 7,
+    month: 31,
+  };
+  const hMax = horizon in H_MAX ? H_MAX[horizon] : Infinity;
+  const diffOf = (t: { dueDate: Date | null }) =>
+    t.dueDate ? Math.round((Date.parse(isoDate(t.dueDate)) - todayMs) / 86400000) : null;
+
+  const tasks = allWho.filter((t) => {
+    if (phaseFilter && phaseForTask(t) !== phaseFilter) return false;
+    if (hMax === Infinity) return true; // "All" shows everything
+    if (t.status === "COMPLETED") return false; // hide done in a horizon view
+    const d = diffOf(t);
+    if (d === null) return false; // no-date tasks aren't on a horizon
+    return d <= hMax; // includes overdue + within window
+  });
   const groups: Record<string, Row[]> = {
     overdue: [],
     today: [],
@@ -158,19 +180,25 @@ export default async function TasksPage({
         ? `${todayCount} due today`
         : `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
 
-  const phaseChips = PHASES.map((p) => ({
-    value: p.key,
-    label: p.label,
-    count: phaseCounts[p.key] ?? 0,
-  }));
+  const HORIZONS = [
+    { value: "", label: "All" },
+    { value: "today", label: "Today" },
+    { value: "tomorrow", label: "Tomorrow" },
+    { value: "d3", label: "3 days" },
+    { value: "week", label: "This week" },
+    { value: "month", label: "This month" },
+  ];
+  const phaseName = phaseFilter ? PHASE_LABEL[phaseFilter] ?? phaseFilter : "";
 
-  const hrefFor = (next: { who?: string; phase?: string }) => {
+  const hrefFor = (next: { who?: string; phase?: string; h?: string }) => {
     const w = next.who ?? who;
     const ph = next.phase ?? phaseFilter;
+    const h = next.h ?? horizon;
     const q = new URLSearchParams();
     q.set("view", view);
-    if (w !== "all") q.set("who", w);
+    if (w !== "both") q.set("who", w);
     if (ph) q.set("phase", ph);
+    if (h) q.set("h", h);
     return `/tasks?${q.toString()}`;
   };
 
@@ -189,33 +217,37 @@ export default async function TasksPage({
       <div className="px-4 pt-5 pb-32 space-y-3">
         <ViewToggle view={view} />
 
-        {/* who segment */}
+        {/* who: the two partners */}
         <div className="flex rounded-xl bg-slate-100 p-1">
-          <Link href={hrefFor({ who: "all" })} className={seg(who === "all")}>
-            All
+          <Link href={hrefFor({ who: "both" })} className={seg(who === "both")}>
+            Both
           </Link>
           <Link href={hrefFor({ who: "mine" })} className={seg(who === "mine")}>
-            Mine
+            {syed ? syed.name.split(" ")[0] : "Mine"}
           </Link>
-          <Link href={hrefFor({ who: "theirs" })} className={seg(who === "theirs")}>
-            {other ? other.name.split(" ")[0] : "Theirs"}
+          <Link href={hrefFor({ who: "shoaib" })} className={seg(who === "shoaib")}>
+            {shoaib ? shoaib.name.split(" ")[0] : "Shoaib"}
           </Link>
         </div>
 
-        {/* phase filter — tap a chip to see & curate that milestone */}
+        {/* time-horizon filter */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
-          <Link href={hrefFor({ phase: "" })} className={chip(!phaseFilter)}>
-            All phases
-          </Link>
-          {phaseChips.map((c) => (
-            <Link key={c.value} href={hrefFor({ phase: c.value })} className={chip(phaseFilter === c.value)}>
-              {c.label} {c.count > 0 ? `· ${c.count}` : ""}
+          {HORIZONS.map((hz) => (
+            <Link key={hz.value} href={hrefFor({ h: hz.value })} className={chip(horizon === hz.value)}>
+              {hz.label}
             </Link>
           ))}
         </div>
-        <p className="px-1 text-[11px] text-slate-400">
-          Tap a task&apos;s phase chip to move it between milestones.
-        </p>
+
+        {/* phase context (when arrived from the roadmap) */}
+        {phaseFilter && (
+          <Link
+            href={hrefFor({ phase: "" })}
+            className="inline-flex items-center gap-1.5 rounded-full bg-purple-100 px-3 py-1.5 text-xs font-bold text-purple-700"
+          >
+            Stage: {phaseName} ✕
+          </Link>
+        )}
 
         {view === "kanban" ? (
           <TaskKanban

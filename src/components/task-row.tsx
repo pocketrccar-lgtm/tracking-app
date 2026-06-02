@@ -38,7 +38,7 @@ export function TaskRow({
   const router = useRouter();
   const [, start] = useTransition();
   const [done, setDone] = useState(status === "COMPLETED");
-  const hot = priority === "HIGH" || priority === "URGENT";
+  void priority;
 
   const toggle = () => {
     const next = !done;
@@ -78,13 +78,6 @@ export function TaskRow({
       {/* tap to view */}
       <Link href={`/tasks/${id}`} className="min-w-0 flex-1 py-2.5 active:opacity-70">
         <div className="flex items-center gap-1.5">
-          {hot && !done && (
-            <span
-              className={`h-2 w-2 shrink-0 rounded-full ${
-                priority === "URGENT" ? "bg-red-600" : "bg-amber-500"
-              }`}
-            />
-          )}
           <span
             className={`min-w-0 flex-1 truncate text-sm font-semibold ${
               done ? "text-slate-400 line-through" : "text-slate-900"

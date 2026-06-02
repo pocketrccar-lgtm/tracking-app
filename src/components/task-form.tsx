@@ -67,13 +67,6 @@ const DUE_CHIPS = [
   { label: "No date", value: "" },
 ];
 
-const PRIORITIES = [
-  { value: "LOW", label: "Low" },
-  { value: "MEDIUM", label: "Med" },
-  { value: "HIGH", label: "High" },
-  { value: "URGENT", label: "Urgent" },
-];
-
 function Seg({
   active,
   onClick,
@@ -110,7 +103,7 @@ export function TaskForm({
   const [assignee, setAssignee] = useState(
     task?.assignedToId ?? defaultAssigneeId ?? "",
   );
-  const [priority, setPriority] = useState(task?.priority ?? "MEDIUM");
+  const [phase, setPhase] = useState(task?.phase ?? "");
   const [showMore, setShowMore] = useState(
     !!(
       task?.vendorId ||
@@ -122,12 +115,23 @@ export function TaskForm({
 
   const activeChip = DUE_CHIPS.find((c) => c.value === due)?.value ?? null;
 
+  // Partners only (drop the CA advisor + "Anyone"); the shared user shows as "Both".
+  const partners = users.filter((u) => u.role !== "advisor");
+  const assigneeOptions = [
+    ...partners.filter((u) => /syed/i.test(u.name)),
+    ...partners.filter((u) => /^shoaib/i.test(u.name)),
+    ...partners.filter((u) => /shared/i.test(u.name)),
+  ].map((u) => ({
+    id: u.id,
+    label: /shared/i.test(u.name) ? "Both" : u.name.split(" ")[0],
+  }));
+
   return (
     <form action={action} className="space-y-5 pb-40">
       {/* controlled values */}
       <input type="hidden" name="dueDate" value={due} />
       <input type="hidden" name="assignedToId" value={assignee} />
-      <input type="hidden" name="priority" value={priority} />
+      <input type="hidden" name="phase" value={phase} />
 
       <div>
         <Label htmlFor="title">What&apos;s the task? *</Label>
@@ -165,32 +169,41 @@ export function TaskForm({
       <div>
         <Label>Who does it</Label>
         <div className="grid grid-cols-3 gap-2">
-          <Seg active={assignee === ""} onClick={() => setAssignee("")}>
-            Anyone
-          </Seg>
-          {users.map((u) => (
+          {assigneeOptions.map((o) => (
             <Seg
-              key={u.id}
-              active={assignee === u.id}
-              onClick={() => setAssignee(u.id)}
+              key={o.id}
+              active={assignee === o.id}
+              onClick={() => setAssignee(o.id)}
             >
-              {u.name.split(" ")[0]}
+              {o.label}
             </Seg>
           ))}
         </div>
       </div>
 
       <div>
-        <Label>Priority</Label>
-        <div className="grid grid-cols-4 gap-2">
-          {PRIORITIES.map((p) => (
-            <Seg
-              key={p.value}
-              active={priority === p.value}
-              onClick={() => setPriority(p.value)}
+        <Label>Stage</Label>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setPhase("")}
+            className={`min-h-[44px] rounded-full px-4 text-sm font-semibold transition-colors active:scale-[0.97] ${
+              phase === "" ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            Auto
+          </button>
+          {PHASES.map((p) => (
+            <button
+              key={p.key}
+              type="button"
+              onClick={() => setPhase(p.key)}
+              className={`min-h-[44px] rounded-full px-4 text-sm font-semibold transition-colors active:scale-[0.97] ${
+                phase === p.key ? "bg-red-600 text-white" : "bg-slate-100 text-slate-600"
+              }`}
             >
               {p.label}
-            </Seg>
+            </button>
           ))}
         </div>
       </div>
@@ -220,23 +233,6 @@ export function TaskForm({
               {TASK_TYPES.map((t) => (
                 <option key={t} value={t}>
                   {TASK_TYPE_LABELS[t]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <Label htmlFor="phase">Roadmap phase</Label>
-            <select
-              id="phase"
-              name="phase"
-              defaultValue={task?.phase ?? ""}
-              className={selectClass}
-            >
-              <option value="">Auto (from plan)</option>
-              {PHASES.map((p) => (
-                <option key={p.key} value={p.key}>
-                  {p.label} — {p.tagline}
                 </option>
               ))}
             </select>

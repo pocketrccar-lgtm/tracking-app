@@ -20,18 +20,20 @@ export type Phase = {
   color: string; // tailwind hue base
 };
 
-// The journey to ₹30L, in sprint order. Each phase makes the next possible.
+// The journey to ₹30L, in funnel order. Each stage makes the next possible:
+// set up → go live organic → win prepaid trust → scale with paid → scale channels.
 export const PHASES: Phase[] = [
   { key: "foundation", label: "Foundation", tagline: "Legal + money rails", color: "blue" },
-  { key: "launch", label: "Launch (Organic)", tagline: "Live & first sales", color: "amber" },
-  { key: "paid", label: "Prepaid + Paid", tagline: "Demand engine + paid push", color: "purple" },
+  { key: "launch", label: "Launch", tagline: "Live & first organic sales", color: "amber" },
+  { key: "prepaid", label: "Prepaid", tagline: "Prepaid orders, build trust", color: "purple" },
+  { key: "paid", label: "Paid", tagline: "Paid acquisition on", color: "pink" },
   { key: "scale", label: "Scale to ₹30L", tagline: "Marketplaces + grow", color: "emerald" },
 ];
 
 const SPRINT_TO_PHASE: Record<string, string> = {
   "0": "foundation",
   "1": "launch",
-  "2": "paid",
+  "2": "prepaid",
   "3": "scale",
 };
 
