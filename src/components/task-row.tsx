@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check } from "lucide-react";
-import { updateTaskStatus } from "@/actions/tasks";
+import { Check, Trash2 } from "lucide-react";
+import { updateTaskStatus, removeTask } from "@/actions/tasks";
 import { TaskPhasePicker } from "@/components/task-phase-picker";
 import { toast } from "sonner";
 
@@ -38,6 +38,7 @@ export function TaskRow({
   const router = useRouter();
   const [, start] = useTransition();
   const [done, setDone] = useState(status === "COMPLETED");
+  const [deleted, setDeleted] = useState(false);
   void priority;
 
   const toggle = () => {
@@ -54,6 +55,21 @@ export function TaskRow({
       }
     });
   };
+
+  const remove = () => {
+    setDeleted(true); // optimistic — row disappears instantly
+    start(async () => {
+      try {
+        await removeTask(id);
+        router.refresh();
+      } catch {
+        setDeleted(false);
+        toast.error("Couldn't delete");
+      }
+    });
+  };
+
+  if (deleted) return null;
 
   return (
     <div className="flex items-center gap-1 rounded-2xl border border-slate-200 bg-white pr-2">
@@ -117,6 +133,16 @@ export function TaskRow({
       </Link>
 
       {showPhase && <TaskPhasePicker taskId={id} phase={phaseKey ?? null} />}
+
+      {/* tap to delete — no confirmation */}
+      <button
+        type="button"
+        onClick={remove}
+        aria-label="Delete task"
+        className="flex h-12 w-9 shrink-0 items-center justify-center text-slate-300 active:text-red-600"
+      >
+        <Trash2 className="h-4 w-4" />
+      </button>
     </div>
   );
 }

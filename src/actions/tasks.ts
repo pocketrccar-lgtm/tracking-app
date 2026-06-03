@@ -107,3 +107,9 @@ export async function deleteTask(id: string) {
   revalidatePath("/tasks");
   redirect("/tasks");
 }
+
+// Inline delete from the list — no redirect, just drop the row.
+export async function removeTask(id: string) {
+  await db.task.delete({ where: { id } });
+  revalidatePath("/tasks");
+}
