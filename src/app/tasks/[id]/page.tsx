@@ -30,7 +30,8 @@ import {
 } from "@/lib/enums";
 import { format } from "date-fns";
 
-export const dynamic = "force-dynamic";
+// Cached render, busted on demand by revalidatePath/revalidateTag in mutations.
+export const revalidate = 30;
 
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 

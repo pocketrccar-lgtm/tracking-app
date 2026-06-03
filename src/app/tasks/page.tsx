@@ -7,10 +7,9 @@ import { TaskRow } from "@/components/task-row";
 import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
 import { phaseForTask, PHASE_LABEL } from "@/lib/roadmap";
+import { getCachedTaskRows, getCachedUsers } from "@/lib/task-cache";
 import { Plus } from "lucide-react";
 import { format } from "date-fns";
-
-export const dynamic = "force-dynamic";
 
 const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
@@ -71,7 +70,7 @@ export default async function TasksPage({
   const phaseFilter = params.phase ?? "";
   const horizon = params.h ?? ""; // "" | today | tomorrow | d3 | week | month
 
-  const users = await db.user.findMany({ orderBy: { name: "asc" } });
+  const users = await getCachedUsers();
   const syed =
     users.find((u) => u.email?.toLowerCase().startsWith("syed@")) ??
     users.find((u) => /^syed\b/i.test(u.name));
@@ -84,20 +83,12 @@ export default async function TasksPage({
 
   // Both = the two partners' combined work (incl. shared), excluding the CA.
   const partnerIds = [syed?.id, shoaib?.id, shared?.id].filter(Boolean) as string[];
-  const where: Record<string, unknown> = {};
-  if (who === "mine" && syed) where.assignedToId = syed.id;
-  else if (who === "shoaib" && shoaib) where.assignedToId = shoaib.id;
-  else if (partnerIds.length) where.assignedToId = { in: partnerIds };
+  let assignedToIds: string[] | null = null;
+  if (who === "mine" && syed) assignedToIds = [syed.id];
+  else if (who === "shoaib" && shoaib) assignedToIds = [shoaib.id];
+  else if (partnerIds.length) assignedToIds = partnerIds;
 
-  const allWho = await db.task.findMany({
-    where,
-    orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
-    take: 400,
-    include: {
-      vendor: { select: { id: true, name: true } },
-      assignedTo: { select: { name: true } },
-    },
-  });
+  const allWho = await getCachedTaskRows(assignedToIds);
 
   const todayMs = Date.parse(isoDate(new Date()));
 
@@ -110,8 +101,8 @@ export default async function TasksPage({
     month: 31,
   };
   const hMax = horizon in H_MAX ? H_MAX[horizon] : Infinity;
-  const diffOf = (t: { dueDate: Date | null }) =>
-    t.dueDate ? Math.round((Date.parse(isoDate(t.dueDate)) - todayMs) / 86400000) : null;
+  const diffOf = (t: { dueMs: number | null }) =>
+    t.dueMs !== null ? Math.round((t.dueMs - todayMs) / 86400000) : null;
 
   const tasks = allWho.filter((t) => {
     if (phaseFilter && phaseForTask(t) !== phaseFilter) return false;
@@ -137,8 +128,8 @@ export default async function TasksPage({
       title: t.title,
       status: t.status,
       priority: t.priority,
-      vendorName: t.vendor?.name ?? null,
-      assigneeName: t.assignedTo?.name?.split(" ")[0] ?? null,
+      vendorName: t.vendorName,
+      assigneeName: t.assigneeName?.split(" ")[0] ?? null,
       catLabel: TASK_TYPE_LABELS[t.type as TaskType] ?? null,
       dueLabel: null,
       overdue: false,
@@ -148,12 +139,12 @@ export default async function TasksPage({
       groups.done.push(base);
       continue;
     }
-    if (!t.dueDate) {
+    if (t.dueMs === null) {
       groups.nodate.push(base);
       continue;
     }
-    const d = new Date(t.dueDate);
-    const diff = Math.round((Date.parse(isoDate(d)) - todayMs) / 86400000);
+    const d = new Date(t.dueMs);
+    const diff = Math.round((t.dueMs - todayMs) / 86400000);
     if (diff < 0) groups.overdue.push({ ...base, dueLabel: `${-diff}d overdue`, overdue: true });
     else if (diff === 0) groups.today.push({ ...base, dueLabel: "Today" });
     else if (diff === 1) groups.tomorrow.push({ ...base, dueLabel: "Tomorrow" });
@@ -256,9 +247,12 @@ export default async function TasksPage({
               title: t.title,
               status: t.status,
               priority: t.priority,
-              vendor: t.vendor,
-              assignedTo: t.assignedTo,
-              dueDate: t.dueDate,
+              vendor:
+                t.vendorId && t.vendorName
+                  ? { id: t.vendorId, name: t.vendorName }
+                  : null,
+              assignedTo: t.assigneeName ? { name: t.assigneeName } : null,
+              dueDate: t.dueMs !== null ? new Date(t.dueMs) : null,
             }))}
           />
         ) : tasks.length === 0 ? (

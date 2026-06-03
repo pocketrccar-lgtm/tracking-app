@@ -1,8 +1,17 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
+import { TASKS_TAG } from "@/lib/task-cache";
+
+// Bust every cached task read (cached list rows + detail ISR) after a write.
+// Next 16: revalidateTag needs a cache-life profile; "max" == the old one-arg behaviour.
+function bustTasks(id?: string) {
+  revalidateTag(TASKS_TAG, "max");
+  revalidatePath("/tasks");
+  if (id) revalidatePath(`/tasks/${id}`);
+}
 
 function s(v: FormDataEntryValue | null): string | null {
   if (!v) return null;
@@ -44,7 +53,7 @@ export async function createTask(fd: FormData) {
       notes: d.notes,
     },
   });
-  revalidatePath("/tasks");
+  bustTasks();
   if (d.vendorId) revalidatePath(`/vendors/${d.vendorId}`);
   redirect("/tasks");
 }
@@ -67,16 +76,14 @@ export async function updateTask(id: string, fd: FormData) {
       completedAt: d.status === "COMPLETED" ? new Date() : null,
     },
   });
-  revalidatePath("/tasks");
-  revalidatePath(`/tasks/${id}`);
+  bustTasks(id);
   revalidatePath(`/vendors/${d.vendorId}`);
   redirect(`/tasks/${id}`);
 }
 
 export async function setTaskPhase(id: string, phase: string) {
   await db.task.update({ where: { id }, data: { phase: phase || null } });
-  revalidatePath("/tasks");
-  revalidatePath(`/tasks/${id}`);
+  bustTasks(id);
 }
 
 export async function updateTaskStatus(id: string, status: string) {
@@ -87,8 +94,7 @@ export async function updateTaskStatus(id: string, status: string) {
       completedAt: status === "COMPLETED" ? new Date() : null,
     },
   });
-  revalidatePath("/tasks");
-  revalidatePath(`/tasks/${id}`);
+  bustTasks(id);
 }
 
 // Push the due date out by N days (from the current due date, or today).
@@ -98,20 +104,19 @@ export async function snoozeTask(id: string, days: number) {
   base.setHours(0, 0, 0, 0);
   base.setDate(base.getDate() + days);
   await db.task.update({ where: { id }, data: { dueDate: base } });
-  revalidatePath("/tasks");
-  revalidatePath(`/tasks/${id}`);
+  bustTasks(id);
 }
 
 export async function deleteTask(id: string) {
   await db.task.delete({ where: { id } });
-  revalidatePath("/tasks");
+  bustTasks();
   redirect("/tasks");
 }
 
 // Inline delete from the list — no redirect, just drop the row.
 export async function removeTask(id: string) {
   await db.task.delete({ where: { id } });
-  revalidatePath("/tasks");
+  bustTasks();
 }
 
 // ─── Inline field edits (tap-to-edit on the task detail page) ────────────────
@@ -119,20 +124,17 @@ export async function setTaskTitle(id: string, title: string) {
   const t = title.trim();
   if (!t) return;
   await db.task.update({ where: { id }, data: { title: t } });
-  revalidatePath(`/tasks/${id}`);
-  revalidatePath("/tasks");
+  bustTasks(id);
 }
 
 export async function setTaskNotes(id: string, notes: string) {
   await db.task.update({ where: { id }, data: { notes: notes.trim() || null } });
-  revalidatePath(`/tasks/${id}`);
-  revalidatePath("/tasks");
+  bustTasks(id);
 }
 
 export async function setTaskAssignee(id: string, assignedToId: string | null) {
   await db.task.update({ where: { id }, data: { assignedToId: assignedToId || null } });
-  revalidatePath(`/tasks/${id}`);
-  revalidatePath("/tasks");
+  bustTasks(id);
 }
 
 // "Done when" lives inside description as a "DONE-WHEN: …" marker.
@@ -146,6 +148,5 @@ export async function setTaskDoneWhen(id: string, text: string) {
       : `DONE-WHEN: ${clean}`
     : body || null;
   await db.task.update({ where: { id }, data: { description } });
-  revalidatePath(`/tasks/${id}`);
-  revalidatePath("/tasks");
+  bustTasks(id);
 }
