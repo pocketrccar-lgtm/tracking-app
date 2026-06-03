@@ -95,7 +95,7 @@ export function TaskRow({
       <Link href={`/tasks/${id}`} className="min-w-0 flex-1 py-2.5 active:opacity-70">
         <div className="flex items-center gap-1.5">
           <span
-            className={`min-w-0 flex-1 truncate text-sm font-semibold ${
+            className={`min-w-0 flex-1 line-clamp-2 text-sm font-semibold ${
               done ? "text-slate-400 line-through" : "text-slate-900"
             }`}
           >
