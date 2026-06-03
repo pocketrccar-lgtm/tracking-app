@@ -2,13 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { updateTaskStatus, snoozeTask, deleteTask } from "@/actions/tasks";
 import { TASK_STATUSES, TASK_STATUS_LABELS } from "@/lib/enums";
-import { Check, Pencil, MoreHorizontal, Clock, Trash2 } from "lucide-react";
+import { Check, MoreHorizontal, Clock, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 export function TaskViewActions({
@@ -67,12 +66,6 @@ export function TaskViewActions({
           >
             <Check className="h-4 w-4" /> {done ? "Reopen" : "Mark complete"}
           </Button>
-          <Link
-            href={`/tasks/${taskId}/edit`}
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            <Pencil className="h-4 w-4" /> Edit
-          </Link>
           <Button
             variant="outline"
             size="lg"

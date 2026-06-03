@@ -113,3 +113,39 @@ export async function removeTask(id: string) {
   await db.task.delete({ where: { id } });
   revalidatePath("/tasks");
 }
+
+// ─── Inline field edits (tap-to-edit on the task detail page) ────────────────
+export async function setTaskTitle(id: string, title: string) {
+  const t = title.trim();
+  if (!t) return;
+  await db.task.update({ where: { id }, data: { title: t } });
+  revalidatePath(`/tasks/${id}`);
+  revalidatePath("/tasks");
+}
+
+export async function setTaskNotes(id: string, notes: string) {
+  await db.task.update({ where: { id }, data: { notes: notes.trim() || null } });
+  revalidatePath(`/tasks/${id}`);
+  revalidatePath("/tasks");
+}
+
+export async function setTaskAssignee(id: string, assignedToId: string | null) {
+  await db.task.update({ where: { id }, data: { assignedToId: assignedToId || null } });
+  revalidatePath(`/tasks/${id}`);
+  revalidatePath("/tasks");
+}
+
+// "Done when" lives inside description as a "DONE-WHEN: …" marker.
+export async function setTaskDoneWhen(id: string, text: string) {
+  const t = await db.task.findUnique({ where: { id }, select: { description: true } });
+  const body = (t?.description ?? "").replace(/\s*DONE-WHEN:\s*[^]*$/i, "").trimEnd();
+  const clean = text.trim();
+  const description = clean
+    ? body
+      ? `${body}\n\nDONE-WHEN: ${clean}`
+      : `DONE-WHEN: ${clean}`
+    : body || null;
+  await db.task.update({ where: { id }, data: { description } });
+  revalidatePath(`/tasks/${id}`);
+  revalidatePath("/tasks");
+}

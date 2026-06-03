@@ -1,11 +1,19 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, User, Phone, ShoppingBag, Key, Target, CircleDot } from "lucide-react";
+import { ArrowLeft, Calendar, Phone, ShoppingBag, Key, Target, CircleDot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TaskViewActions } from "@/components/task-view-actions";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { InlineEditText } from "@/components/inline-edit-text";
+import { InlineAssignee } from "@/components/inline-assignee";
+import {
+  setTaskTitle,
+  setTaskNotes,
+  setTaskAssignee,
+  setTaskDoneWhen,
+} from "@/actions/tasks";
 import {
   buildGraph,
   doneWhen as parseDoneWhen,
@@ -32,7 +40,7 @@ export default async function TaskViewPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [task, allTasks] = await Promise.all([
+  const [task, allTasks, users] = await Promise.all([
     db.task.findUnique({
       where: { id },
       include: {
@@ -55,6 +63,7 @@ export default async function TaskViewPage({
         description: true,
       },
     }),
+    db.user.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
   ]);
   if (!task) notFound();
 
@@ -113,9 +122,15 @@ export default async function TaskViewPage({
             {TASK_TYPE_LABELS[task.type as TaskType] ?? task.type}
           </Badge>
         </div>
-        <h1 className="mt-2.5 text-2xl font-bold leading-snug text-slate-900">
-          {task.title}
-        </h1>
+        <div className="mt-2.5">
+          <InlineEditText
+            initial={task.title}
+            placeholder="Task title"
+            singleLine
+            save={setTaskTitle.bind(null, task.id)}
+            displayClassName="text-2xl font-bold leading-snug text-slate-900"
+          />
+        </div>
         <div
           className={`mt-2 inline-flex items-center gap-1.5 text-sm font-semibold ${
             overdue ? "text-red-600" : "text-slate-500"
@@ -126,8 +141,7 @@ export default async function TaskViewPage({
       </div>
 
       {/* why this matters — goal impact */}
-      {(unlocksCount > 0 || dw || openBlockers.length > 0) && (
-        <Card>
+      <Card>
           <CardContent className="space-y-3 p-4">
             <div className="flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-slate-400">
               <Target className="h-3.5 w-3.5" /> Why this matters
@@ -147,14 +161,18 @@ export default async function TaskViewPage({
               </p>
             )}
 
-            {dw && (
-              <div>
-                <div className="mb-0.5 text-xs font-semibold text-slate-400">
-                  Done when
-                </div>
-                <p className="text-sm text-slate-700">{dw}</p>
+            <div>
+              <div className="mb-0.5 text-xs font-semibold text-slate-400">
+                Done when
               </div>
-            )}
+              <InlineEditText
+                initial={dw ?? ""}
+                placeholder="Define what 'done' looks like…"
+                emptyLabel="Tap to add a 'done when' definition"
+                save={setTaskDoneWhen.bind(null, task.id)}
+                displayClassName="text-sm text-slate-700"
+              />
+            </div>
 
             {openBlockers.length > 0 && (
               <div className="rounded-xl bg-amber-50 p-3">
@@ -178,7 +196,6 @@ export default async function TaskViewPage({
             )}
           </CardContent>
         </Card>
-      )}
 
       {/* meta */}
       <Card>
@@ -210,34 +227,26 @@ export default async function TaskViewPage({
             )}
           </div>
 
-          {/* assignee */}
-          <div className="flex items-center gap-3 p-4">
-            <User className="h-4 w-4 shrink-0 text-slate-400" />
-            <span className="text-sm text-slate-700">
-              {task.assignedTo ? (
-                <>
-                  Assigned to{" "}
-                  <span className="font-semibold text-slate-900">
-                    {task.assignedTo.name}
-                  </span>
-                </>
-              ) : (
-                "Unassigned"
-              )}
-            </span>
-          </div>
+          {/* assignee — tap to reassign */}
+          <InlineAssignee
+            current={task.assignedTo ? { id: task.assignedTo.id, name: task.assignedTo.name } : null}
+            users={users}
+            save={setTaskAssignee.bind(null, task.id)}
+          />
 
-          {/* notes */}
-          {task.notes && (
-            <div className="p-4">
-              <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
-                Notes
-              </div>
-              <p className="whitespace-pre-line text-sm text-slate-700">
-                {task.notes}
-              </p>
+          {/* notes — tap to edit */}
+          <div className="p-4">
+            <div className="mb-1 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Notes
             </div>
-          )}
+            <InlineEditText
+              initial={task.notes ?? ""}
+              placeholder="Add notes…"
+              emptyLabel="Tap to add notes"
+              save={setTaskNotes.bind(null, task.id)}
+              displayClassName="text-sm text-slate-700"
+            />
+          </div>
         </CardContent>
       </Card>
 
