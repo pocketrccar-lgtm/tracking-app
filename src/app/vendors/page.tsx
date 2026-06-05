@@ -30,6 +30,23 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 50;
 
+// compact drift indicator — only for the meaningful states
+function DriftTag({ s }: { s: string }) {
+  if (s === "YES_CONFIRMED")
+    return (
+      <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+        🏁 Drift
+      </span>
+    );
+  if (s === "LIKELY")
+    return (
+      <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
+        Drift?
+      </span>
+    );
+  return null;
+}
+
 export default async function VendorsListPage({
   searchParams,
 }: {
@@ -178,12 +195,15 @@ export default async function VendorsListPage({
                       )}
                     </TableCell>
                     <TableCell className="font-medium">
-                      <Link
-                        href={`/vendors/${v.id}`}
-                        className="hover:text-red-600"
-                      >
-                        {v.name}
-                      </Link>
+                      <div className="flex items-center gap-1.5">
+                        <Link
+                          href={`/vendors/${v.id}`}
+                          className="hover:text-red-600"
+                        >
+                          {v.name}
+                        </Link>
+                        <DriftTag s={v.driftStatus} />
+                      </div>
                     </TableCell>
                     <TableCell className="text-xs text-slate-600 dark:text-neutral-300">
                       {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
@@ -283,6 +303,7 @@ export default async function VendorsListPage({
                     {v.phones[0]?.phone ?? "no phone"}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <DriftTag s={v.driftStatus} />
                     <Badge variant="outline" className="bg-slate-50 text-slate-600">
                       {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
                     </Badge>

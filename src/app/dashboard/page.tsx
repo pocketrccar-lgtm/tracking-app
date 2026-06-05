@@ -24,6 +24,8 @@ export default async function DashboardPage() {
   const [
     vendorCount,
     driftConfirmedCount,
+    driftLikelyCount,
+    rankedCount,
     tasksPending,
     tasksDoneToday,
     activeCount,
@@ -35,6 +37,8 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     db.vendor.count(),
     db.vendor.count({ where: { driftStatus: "YES_CONFIRMED" } }),
+    db.vendor.count({ where: { driftStatus: "LIKELY" } }),
+    db.vendor.count({ where: { rank: { not: null } } }),
     db.task.count({ where: { status: "PENDING" } }),
     db.task.count({
       where: {
@@ -68,14 +72,14 @@ export default async function DashboardPage() {
     {
       label: "Vendors",
       value: vendorCount,
-      sub: `${activeCount} active`,
+      sub: `${rankedCount} ranked · ${activeCount} active`,
       href: "/vendors",
       tone: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-300",
     },
     {
       label: "Drift confirmed",
       value: driftConfirmedCount,
-      sub: "tier-1 leads",
+      sub: `+${driftLikelyCount} likely`,
       href: "/vendors?drift=YES_CONFIRMED",
       tone: "bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-900/40 text-emerald-700 dark:text-emerald-300",
     },
