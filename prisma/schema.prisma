@@ -30,9 +30,9 @@ model User {
 model Vendor {
   id              String   @id @default(cuid())
   name            String
-  type            String   // MANUFACTURER | DISTRIBUTOR | WHOLESALER | TRADER | IMPORTER | OEM | MOULDER | MIXED
-  tier            String   // T1_DRIFT_CONFIRMED | T2_STRONG_SIGNAL | T3_VERIFY_DRIFT | T4_INDIAMART_GATED | CHINESE_FACTORY | MOULDER | AVOID
-  status          String   @default("COLD") // COLD | CONTACTED | ENGAGED | QUOTED | SAMPLE_ORDERED | ONBOARDED | PAUSED | DEAD
+  type            String   // MANUFACTURER | DISTRIBUTOR | WHOLESALER | TRADER
+  tier            String   // T1_DRIFT_CONFIRMED | T2_STRONG_SIGNAL | T3_VERIFY_DRIFT | T4_INDIAMART_GATED
+  status          String   @default("NEW") // NEW | CONTACTED | ORDER_PLACED | ACTIVE | WASTE_LEAD
 
   state           String?
   city            String?

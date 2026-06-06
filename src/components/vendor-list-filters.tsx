@@ -131,6 +131,26 @@ export function VendorListFilters({ states }: { states: string[] }) {
         </button>
       </div>
 
+      {/* Type quick-filter chips */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        {[{ value: "ALL", label: "All types" }, ...VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] }))].map(
+          (t) => {
+            const active = (sp.get("type") ?? "ALL") === t.value;
+            return (
+              <button
+                key={t.value}
+                onClick={() => updateParam("type", t.value)}
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          },
+        )}
+      </div>
+
       {/* active filter chips */}
       {activeCount > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">

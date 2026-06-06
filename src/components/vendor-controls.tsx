@@ -44,7 +44,7 @@ export function VendorControls({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const dropped = current === "DROPPED";
+  const dropped = current === "WASTE_LEAD";
   const currentIndex = (VENDOR_STATUS_FUNNEL as readonly string[]).indexOf(
     current,
   );
@@ -114,18 +114,18 @@ export function VendorControls({
           ) : (
             <button
               type="button"
-              onClick={() => setStatus("DROPPED")}
+              onClick={() => setStatus("WASTE_LEAD")}
               disabled={pending}
               className="text-xs font-semibold text-slate-400 disabled:opacity-50"
             >
-              Mark dropped
+              Mark waste lead
             </button>
           )}
         </div>
 
         {dropped ? (
-          <div className="rounded-lg bg-zinc-100 px-3 py-4 text-center text-sm font-semibold text-zinc-500">
-            Dropped — not in the funnel.
+          <div className="rounded-lg bg-rose-50 px-3 py-4 text-center text-sm font-semibold text-rose-500">
+            Waste lead — parked, not in the funnel.
             <br />
             <span className="text-xs font-normal">
               Tap Reactivate to put them back.

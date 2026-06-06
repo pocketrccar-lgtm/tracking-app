@@ -1,16 +1,12 @@
 // Centralized enum-like constants so the whole app uses the same labels + colors.
 // Stored as strings in DB (SQLite-compatible). Use these helpers everywhere.
 
+// Four clean supply-side types. (Importer/Mixed/Retail fold into Trader; OEM/Moulder into Manufacturer.)
 export const VENDOR_TYPES = [
   "MANUFACTURER",
   "DISTRIBUTOR",
   "WHOLESALER",
   "TRADER",
-  "IMPORTER",
-  "OEM",
-  "MOULDER",
-  "RETAIL",
-  "MIXED",
 ] as const;
 
 export type VendorType = (typeof VENDOR_TYPES)[number];
@@ -20,27 +16,23 @@ export const VENDOR_TIERS = [
   "T2_STRONG_SIGNAL",
   "T3_VERIFY_DRIFT",
   "T4_INDIAMART_GATED",
-  "CHINESE_FACTORY",
-  "MOULDER",
-  "AVOID",
 ] as const;
 
 export type VendorTier = (typeof VENDOR_TIERS)[number];
 
+// Sourcing funnel: New → Just contacted → Order placed → Active supplier, plus the Waste-lead exit.
 export const VENDOR_STATUSES = [
   "NEW",
   "CONTACTED",
-  "CATALOG_RECEIVED",
   "ORDER_PLACED",
   "ACTIVE",
-  "DROPPED",
+  "WASTE_LEAD",
 ] as const;
 
-// The forward sourcing funnel (excludes the DROPPED exit state).
+// The forward sourcing funnel (excludes the WASTE_LEAD exit state).
 export const VENDOR_STATUS_FUNNEL = [
   "NEW",
   "CONTACTED",
-  "CATALOG_RECEIVED",
   "ORDER_PLACED",
   "ACTIVE",
 ] as const;
@@ -124,11 +116,6 @@ export const VENDOR_TYPE_LABELS: Record<VendorType, string> = {
   DISTRIBUTOR: "Distributor",
   WHOLESALER: "Wholesaler",
   TRADER: "Trader",
-  IMPORTER: "Importer",
-  OEM: "OEM",
-  MOULDER: "Moulder",
-  RETAIL: "Retail",
-  MIXED: "Mixed",
 };
 
 // ─── Market level — the supply gate ──────────────────────────────────────────
@@ -153,18 +140,14 @@ export const VENDOR_TIER_LABELS: Record<VendorTier, string> = {
   T2_STRONG_SIGNAL: "Tier 2 — Strong signal",
   T3_VERIFY_DRIFT: "Tier 3 — Verify drift",
   T4_INDIAMART_GATED: "Tier 4 — IndiaMART gated",
-  CHINESE_FACTORY: "Chinese factory",
-  MOULDER: "Moulder",
-  AVOID: "Avoid",
 };
 
 export const VENDOR_STATUS_LABELS: Record<VendorStatus, string> = {
   NEW: "New",
   CONTACTED: "Just contacted",
-  CATALOG_RECEIVED: "Catalog received",
   ORDER_PLACED: "Order placed",
   ACTIVE: "Active supplier",
-  DROPPED: "Dropped",
+  WASTE_LEAD: "Waste lead",
 };
 
 export const DRIFT_STATUS_LABELS: Record<DriftStatus, string> = {
@@ -211,18 +194,14 @@ export const TIER_COLORS: Record<VendorTier, string> = {
   T2_STRONG_SIGNAL: "bg-red-100 text-red-800 border-red-200",
   T3_VERIFY_DRIFT: "bg-blue-100 text-blue-800 border-blue-200",
   T4_INDIAMART_GATED: "bg-slate-100 text-slate-700 border-slate-200",
-  CHINESE_FACTORY: "bg-red-100 text-red-800 border-red-200",
-  MOULDER: "bg-purple-100 text-purple-800 border-purple-200",
-  AVOID: "bg-zinc-200 text-zinc-600 border-zinc-300 line-through",
 };
 
 export const STATUS_COLORS: Record<VendorStatus, string> = {
   NEW: "bg-slate-100 text-slate-700",
   CONTACTED: "bg-blue-100 text-blue-700",
-  CATALOG_RECEIVED: "bg-amber-100 text-amber-700",
   ORDER_PLACED: "bg-purple-100 text-purple-700",
   ACTIVE: "bg-emerald-100 text-emerald-700",
-  DROPPED: "bg-zinc-200 text-zinc-500 line-through",
+  WASTE_LEAD: "bg-rose-100 text-rose-700 line-through",
 };
 
 export const DRIFT_COLORS: Record<DriftStatus, string> = {

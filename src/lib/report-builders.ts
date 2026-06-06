@@ -67,7 +67,7 @@ export async function buildDailyReport(
       take: 5,
     }),
     db.vendor.findMany({
-      where: { status: "CATALOG_RECEIVED", updatedAt: { gte: dayStart, lte: dayEnd } },
+      where: { status: "ACTIVE", updatedAt: { gte: dayStart, lte: dayEnd } },
       take: 10,
     }),
     db.vendor.findMany({
@@ -112,7 +112,7 @@ export function formatDailyReportText(
   lines.push(`- Tasks completed: ${d.tasksCompletedToday}`);
   lines.push(`- Vendors contacted: ${d.vendorsContactedToday}`);
   lines.push(`- New vendors added: ${d.newVendorsToday}`);
-  lines.push(`- Catalogs received: ${d.newlyQuoted.length}`);
+  lines.push(`- New active suppliers: ${d.newlyQuoted.length}`);
   lines.push(`- Newly contacted: ${d.newlyEngaged.length}`);
   if (d.sampleOrderedToday) lines.push(`- Orders placed: ${d.sampleOrderedToday}`);
   lines.push("");

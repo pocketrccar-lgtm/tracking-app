@@ -217,13 +217,13 @@ export default async function DashboardPage() {
                     </Link>
                   );
                 })}
-                {(statusCounts["DROPPED"] ?? 0) > 0 && (
+                {(statusCounts["WASTE_LEAD"] ?? 0) > 0 && (
                   <Link
-                    href="/vendors?status=DROPPED"
+                    href="/vendors?status=WASTE_LEAD"
                     className="flex items-center justify-between pt-1 text-xs text-slate-400"
                   >
-                    <span>Dropped</span>
-                    <span className="tabular-nums">{statusCounts["DROPPED"]}</span>
+                    <span>Waste leads</span>
+                    <span className="tabular-nums">{statusCounts["WASTE_LEAD"]}</span>
                   </Link>
                 )}
               </CardContent>
