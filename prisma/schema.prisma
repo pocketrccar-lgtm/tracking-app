@@ -32,7 +32,8 @@ model Vendor {
   name            String
   type            String   // MANUFACTURER | DISTRIBUTOR | WHOLESALER | TRADER
   tier            String   // T1_DRIFT_CONFIRMED | T2_STRONG_SIGNAL | T3_VERIFY_DRIFT | T4_INDIAMART_GATED
-  status          String   @default("NEW") // NEW | CONTACTED | ORDER_PLACED | ACTIVE | WASTE_LEAD
+  status          String   @default("NEW") // NEW | CONTACTED | ORDER_PLACED | ACTIVE | WRONG_SUPPLIER
+  wrongReason     String?  // WHOLESALER | DIFFERENT_CATEGORY  (set only when status = WRONG_SUPPLIER)
 
   state           String?
   city            String?

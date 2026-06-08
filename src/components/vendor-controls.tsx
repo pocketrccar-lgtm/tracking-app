@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertDialog } from "@/components/ui/alert-dialog";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import {
   VENDOR_STATUS_FUNNEL,
   VENDOR_TIERS,
@@ -11,12 +12,16 @@ import {
   VENDOR_STATUS_LABELS,
   VENDOR_TIER_LABELS,
   VENDOR_TYPE_LABELS,
+  WRONG_REASONS,
+  WRONG_REASON_LABELS,
   type VendorStatus,
+  type WrongReason,
 } from "@/lib/enums";
 import {
   updateVendorStatus,
   updateVendorTier,
   updateVendorType,
+  markWrongSupplier,
   deleteVendor,
 } from "@/actions/vendors";
 import { toast } from "sonner";
@@ -31,23 +36,41 @@ export function VendorControls({
   status,
   tier,
   type,
+  wrongReason,
 }: {
   vendorId: string;
   vendorName: string;
   status: string;
   tier: string;
   type: string;
+  wrongReason?: string | null;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [current, setCurrent] = useState(status);
+  const [reason, setReason] = useState<string | null>(wrongReason ?? null);
+  const [reasonOpen, setReasonOpen] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const dropped = current === "WASTE_LEAD";
+  const dropped = current === "WRONG_SUPPLIER";
   const currentIndex = (VENDOR_STATUS_FUNNEL as readonly string[]).indexOf(
     current,
   );
+
+  const markWrong = (r: WrongReason) =>
+    startTransition(async () => {
+      setCurrent("WRONG_SUPPLIER"); // optimistic
+      setReason(r);
+      setReasonOpen(false);
+      try {
+        await markWrongSupplier(vendorId, r);
+        toast.success(`Marked wrong supplier — ${WRONG_REASON_LABELS[r]}`);
+        router.refresh();
+      } catch {
+        toast.error("Failed to update");
+      }
+    });
 
   const setStatus = (value: string) => {
     if (value === current) return;
@@ -114,21 +137,22 @@ export function VendorControls({
           ) : (
             <button
               type="button"
-              onClick={() => setStatus("WASTE_LEAD")}
+              onClick={() => setReasonOpen(true)}
               disabled={pending}
-              className="text-xs font-semibold text-slate-400 disabled:opacity-50"
+              className="text-xs font-semibold text-rose-500 disabled:opacity-50"
             >
-              Mark waste lead
+              Mark wrong supplier
             </button>
           )}
         </div>
 
         {dropped ? (
-          <div className="rounded-lg bg-rose-50 px-3 py-4 text-center text-sm font-semibold text-rose-500">
-            Waste lead — parked, not in the funnel.
+          <div className="rounded-lg bg-rose-50 px-3 py-4 text-center text-sm font-semibold text-rose-600">
+            Wrong supplier
+            {reason ? ` — ${WRONG_REASON_LABELS[reason as WrongReason] ?? reason}` : ""}
             <br />
-            <span className="text-xs font-normal">
-              Tap Reactivate to put them back.
+            <span className="text-xs font-normal text-rose-500">
+              Hidden from the type lists. Tap Reactivate to put them back.
             </span>
           </div>
         ) : (
@@ -237,6 +261,23 @@ export function VendorControls({
           <Trash2 className="h-4 w-4" /> Delete vendor
         </Button>
       </div>
+
+      <BottomSheet open={reasonOpen} onOpenChange={setReasonOpen} title="Why is this a wrong supplier?">
+        <div className="space-y-2 pt-1">
+          {WRONG_REASONS.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => markWrong(r)}
+              disabled={pending}
+              className="flex min-h-[52px] w-full items-center justify-between rounded-xl bg-slate-100 px-4 text-left text-sm font-semibold text-slate-800 active:scale-[0.99] disabled:opacity-60"
+            >
+              {WRONG_REASON_LABELS[r]}
+              <span className="text-rose-500">→</span>
+            </button>
+          ))}
+        </div>
+      </BottomSheet>
 
       <AlertDialog
         open={confirmOpen}

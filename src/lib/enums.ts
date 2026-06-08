@@ -20,22 +20,30 @@ export const VENDOR_TIERS = [
 
 export type VendorTier = (typeof VENDOR_TIERS)[number];
 
-// Sourcing funnel: New → Just contacted → Order placed → Active supplier, plus the Waste-lead exit.
+// Sourcing funnel: New → Just contacted → Order placed → Active supplier, plus the Wrong-supplier exit.
 export const VENDOR_STATUSES = [
   "NEW",
   "CONTACTED",
   "ORDER_PLACED",
   "ACTIVE",
-  "WASTE_LEAD",
+  "WRONG_SUPPLIER",
 ] as const;
 
-// The forward sourcing funnel (excludes the WASTE_LEAD exit state).
+// The forward sourcing funnel (excludes the WRONG_SUPPLIER exit state).
 export const VENDOR_STATUS_FUNNEL = [
   "NEW",
   "CONTACTED",
   "ORDER_PLACED",
   "ACTIVE",
 ] as const;
+
+// Why a vendor was marked a wrong supplier (asked at mark-time).
+export const WRONG_REASONS = ["WHOLESALER", "DIFFERENT_CATEGORY"] as const;
+export type WrongReason = (typeof WRONG_REASONS)[number];
+export const WRONG_REASON_LABELS: Record<WrongReason, string> = {
+  WHOLESALER: "Wholesaler",
+  DIFFERENT_CATEGORY: "Different category",
+};
 
 export type VendorStatus = (typeof VENDOR_STATUSES)[number];
 
@@ -147,7 +155,7 @@ export const VENDOR_STATUS_LABELS: Record<VendorStatus, string> = {
   CONTACTED: "Just contacted",
   ORDER_PLACED: "Order placed",
   ACTIVE: "Active supplier",
-  WASTE_LEAD: "Waste lead",
+  WRONG_SUPPLIER: "Wrong supplier",
 };
 
 export const DRIFT_STATUS_LABELS: Record<DriftStatus, string> = {
@@ -201,7 +209,7 @@ export const STATUS_COLORS: Record<VendorStatus, string> = {
   CONTACTED: "bg-blue-100 text-blue-700",
   ORDER_PLACED: "bg-purple-100 text-purple-700",
   ACTIVE: "bg-emerald-100 text-emerald-700",
-  WASTE_LEAD: "bg-rose-100 text-rose-700 line-through",
+  WRONG_SUPPLIER: "bg-rose-100 text-rose-700 line-through",
 };
 
 export const DRIFT_COLORS: Record<DriftStatus, string> = {

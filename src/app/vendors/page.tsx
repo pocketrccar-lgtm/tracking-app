@@ -71,7 +71,9 @@ export default async function VendorsListPage({
   if (params.state) where.state = params.state;
   if (params.tier) where.tier = params.tier;
   if (params.type) where.type = params.type;
+  // Wrong suppliers are pulled out of every type view — only shown when explicitly filtered.
   if (params.status) where.status = params.status;
+  else where.status = { not: "WRONG_SUPPLIER" };
   if (params.drift) where.driftStatus = params.drift;
   if (params.marketLevel) where.marketLevel = params.marketLevel;
   if (params.supply === "1") where.rank = { not: null };

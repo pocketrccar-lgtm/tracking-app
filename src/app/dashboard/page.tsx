@@ -217,13 +217,13 @@ export default async function DashboardPage() {
                     </Link>
                   );
                 })}
-                {(statusCounts["WASTE_LEAD"] ?? 0) > 0 && (
+                {(statusCounts["WRONG_SUPPLIER"] ?? 0) > 0 && (
                   <Link
-                    href="/vendors?status=WASTE_LEAD"
+                    href="/vendors?status=WRONG_SUPPLIER"
                     className="flex items-center justify-between pt-1 text-xs text-slate-400"
                   >
-                    <span>Waste leads</span>
-                    <span className="tabular-nums">{statusCounts["WASTE_LEAD"]}</span>
+                    <span>Wrong suppliers</span>
+                    <span className="tabular-nums">{statusCounts["WRONG_SUPPLIER"]}</span>
                   </Link>
                 )}
               </CardContent>

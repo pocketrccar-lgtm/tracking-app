@@ -63,6 +63,27 @@ export function VendorListFilters({ states }: { states: string[] }) {
   const setSort = (value: string) => updateParam("sort", value === "rank" ? null : value);
   const toggleSupply = () => updateParam("supply", supplyOnly ? null : "1");
 
+  // Wrong suppliers live in their own bucket — toggling type clears it and vice-versa.
+  const wrongActive = sp.get("status") === "WRONG_SUPPLIER";
+  const pushParams = (mut: (p: URLSearchParams) => void) => {
+    const params = new URLSearchParams(sp.toString());
+    mut(params);
+    params.delete("page");
+    router.push(`/vendors?${params.toString()}`);
+  };
+  const setType = (value: string) =>
+    pushParams((p) => {
+      if (value === "ALL") p.delete("type");
+      else p.set("type", value);
+      p.delete("status");
+    });
+  const toggleWrong = () =>
+    pushParams((p) => {
+      if (wrongActive) p.delete("status");
+      else p.set("status", "WRONG_SUPPLIER");
+      p.delete("type");
+    });
+
   const fields: { key: string; label: string; options: { value: string; label: string }[] }[] = [
     { key: "marketLevel", label: "Market level", options: MARKET_LEVELS.map((m) => ({ value: m, label: MARKET_LEVEL_LABELS[m] })) },
     { key: "state", label: "State", options: states.map((s) => ({ value: s, label: s })) },
@@ -131,15 +152,15 @@ export function VendorListFilters({ states }: { states: string[] }) {
         </button>
       </div>
 
-      {/* Type quick-filter chips */}
+      {/* Type quick-filter chips (+ separate Wrong-supplier bucket) */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         {[{ value: "ALL", label: "All types" }, ...VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] }))].map(
           (t) => {
-            const active = (sp.get("type") ?? "ALL") === t.value;
+            const active = !wrongActive && (sp.get("type") ?? "ALL") === t.value;
             return (
               <button
                 key={t.value}
-                onClick={() => updateParam("type", t.value)}
+                onClick={() => setType(t.value)}
                 className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
                   active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
                 }`}
@@ -149,6 +170,14 @@ export function VendorListFilters({ states }: { states: string[] }) {
             );
           },
         )}
+        <button
+          onClick={toggleWrong}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+            wrongActive ? "bg-rose-600 text-white" : "bg-rose-50 text-rose-600"
+          }`}
+        >
+          Wrong supplier
+        </button>
       </div>
 
       {/* active filter chips */}

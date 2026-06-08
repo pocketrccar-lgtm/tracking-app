@@ -140,6 +140,7 @@ export default async function VendorDetailPage({
         status={vendor.status}
         tier={vendor.tier}
         type={vendor.type}
+        wrongReason={vendor.wrongReason}
       />
 
       {(vendor.marketLevel || vendor.volumeScore != null) && (

@@ -104,7 +104,22 @@ export async function deleteVendor(id: string) {
 }
 
 export async function updateVendorStatus(id: string, status: string) {
-  await db.vendor.update({ where: { id }, data: { status } });
+  // leaving the wrong-supplier state clears its reason
+  await db.vendor.update({
+    where: { id },
+    data: { status, ...(status === "WRONG_SUPPLIER" ? {} : { wrongReason: null }) },
+  });
+  revalidatePath(`/vendors/${id}`);
+  revalidatePath("/vendors");
+  revalidatePath("/dashboard");
+}
+
+// Mark a vendor a wrong supplier with the reason (Wholesaler | Different category).
+export async function markWrongSupplier(id: string, reason: string) {
+  await db.vendor.update({
+    where: { id },
+    data: { status: "WRONG_SUPPLIER", wrongReason: reason || null },
+  });
   revalidatePath(`/vendors/${id}`);
   revalidatePath("/vendors");
   revalidatePath("/dashboard");
