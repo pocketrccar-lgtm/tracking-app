@@ -58,6 +58,38 @@ export async function createTask(fd: FormData) {
   redirect("/tasks");
 }
 
+// Bulk-create from one AI-parsed note that contained several tasks.
+export type NewTaskInput = {
+  title: string;
+  type?: string;
+  priority?: string;
+  assignedToId?: string | null;
+  dueDate?: string | null;
+  vendorId?: string | null;
+  notes?: string | null;
+  phase?: string | null;
+};
+
+export async function createTasks(tasks: NewTaskInput[]) {
+  const clean = (tasks ?? []).filter((t) => t?.title?.trim());
+  if (!clean.length) throw new Error("No tasks to create");
+  await db.task.createMany({
+    data: clean.map((t) => ({
+      title: t.title.trim(),
+      type: t.type || "SOURCING",
+      priority: t.priority || "MEDIUM",
+      status: "PENDING",
+      assignedToId: t.assignedToId || null,
+      dueDate: t.dueDate ? new Date(t.dueDate) : null,
+      vendorId: t.vendorId || null,
+      phase: t.phase || null,
+      notes: t.notes || null,
+    })),
+  });
+  bustTasks();
+  redirect("/tasks");
+}
+
 export async function updateTask(id: string, fd: FormData) {
   const d = fromForm(fd);
   await db.task.update({

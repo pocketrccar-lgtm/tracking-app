@@ -44,23 +44,26 @@ export async function POST(req: NextRequest) {
 
   const anthropic = new Anthropic({ apiKey });
 
-  const system = `You convert a spoken note into a structured sourcing task for an RC-car vendor CRM used by two partners.
-Return ONLY a JSON object (no markdown, no prose) with these keys:
-{
-  "title": string (short imperative, e.g. "Call about drift RC catalogue"),
-  "vendorId": string|null (pick the BEST matching id from the vendor list, else null),
-  "assignedToId": string|null (pick the partner id if a person is named — "ask Shoaib to...", "Syed will..." — else null),
-  "type": one of ${JSON.stringify(TASK_TYPES)} (the business CATEGORY of the task — infer from intent: a call/visit/whatsapp/email/sample/follow-up/research, or a function like LEGAL, FINANCE, OPS, INVENTORY, MARKETING, CONTENT, PRODUCT, SOURCING, STRATEGY; default SOURCING),
+  const system = `You convert a spoken note into one or MORE structured sourcing tasks for an RC-car vendor CRM used by two partners (Syed, Shoaib).
+
+CRITICAL — SPLIT INTO MULTIPLE TASKS: a single note usually contains SEVERAL distinct tasks — a numbered or bulleted list (1. … 2. … 3. …), several sentences each describing a different action, or items joined by "and", "also", "then", "next". Return EACH distinct action item as its OWN separate task. Do NOT merge different actions into one task. Only return a single task if the note genuinely describes just one action.
+
+Return ONLY a JSON object (no markdown, no prose):
+{ "tasks": [ {
+  "title": string (short self-contained imperative, e.g. "Call about drift RC catalogue"),
+  "vendorId": string|null (BEST matching id from the vendor list, else null),
+  "assignedToId": string|null (partner id if a person is named — "ask Shoaib to…", "Syed will…" — else null),
+  "type": one of ${JSON.stringify(TASK_TYPES)} (business CATEGORY — a call/visit/whatsapp/email/sample/follow-up/research, or a function like LEGAL, FINANCE, OPS, INVENTORY, MARKETING, CONTENT, PRODUCT, SOURCING, STRATEGY; default SOURCING),
   "priority": one of ${JSON.stringify(TASK_PRIORITIES)},
-  "dueDate": "YYYY-MM-DD" (resolve relative dates against today=${today}; if no date is mentioned, default to today=${today}),
-  "notes": string (any extra detail from the note, else "")
-}
-Rules: Default priority MEDIUM. dueDate is ALWAYS a real date (never null) — use today if unspecified. If no vendor is clearly named, vendorId=null. If no person is named, assignedToId=null.`;
+  "dueDate": "YYYY-MM-DD" (resolve relative dates against today=${today}; default today if unspecified),
+  "notes": string (extra detail for THIS task, else "")
+} ] }
+Rules: Always return at least one task in the "tasks" array. Each task's title must be self-contained and actionable on its own. dueDate is ALWAYS a real date (never null) — use today if unspecified. Default priority MEDIUM. If no vendor is clearly named, vendorId=null. If no person is named, assignedToId=null.`;
 
   try {
     const msg = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
-      max_tokens: 512,
+      max_tokens: 1500,
       system,
       messages: [
         {
@@ -82,18 +85,27 @@ Rules: Default priority MEDIUM. dueDate is ALWAYS a real date (never null) — u
       );
     }
     const parsed = JSON.parse(match[0]);
-    // validate ids actually exist
-    if (parsed.vendorId && !vendors.some((v) => v.id === parsed.vendorId)) {
-      parsed.vendorId = null;
+    // Accept {tasks:[...]} (new) or a bare single-task object (fallback).
+    const rawTasks: Record<string, unknown>[] = Array.isArray(parsed.tasks)
+      ? parsed.tasks
+      : parsed.title
+        ? [parsed]
+        : [];
+    const tasks = rawTasks
+      .filter((t) => t && typeof t.title === "string" && (t.title as string).trim())
+      .map((t) => {
+        if (t.vendorId && !vendors.some((v) => v.id === t.vendorId)) t.vendorId = null;
+        if (t.assignedToId && !users.some((u) => u.id === t.assignedToId)) t.assignedToId = null;
+        if (!t.type || !(TASK_TYPES as readonly string[]).includes(t.type as string)) t.type = "SOURCING";
+        if (!t.priority || !(TASK_PRIORITIES as readonly string[]).includes(t.priority as string)) t.priority = "MEDIUM";
+        if (!t.dueDate) t.dueDate = today;
+        return t;
+      });
+    if (!tasks.length) {
+      return NextResponse.json({ error: "No tasks found in note" }, { status: 502 });
     }
-    if (parsed.assignedToId && !users.some((u) => u.id === parsed.assignedToId)) {
-      parsed.assignedToId = null;
-    }
-    if (!parsed.type || !(TASK_TYPES as readonly string[]).includes(parsed.type)) {
-      parsed.type = "SOURCING";
-    }
-    if (!parsed.dueDate) parsed.dueDate = today;
-    return NextResponse.json({ task: parsed });
+    // Keep `task` for any old client; `tasks` is the array.
+    return NextResponse.json({ tasks, task: tasks[0] });
   } catch (e) {
     return NextResponse.json(
       { error: (e as Error).message || "AI request failed" },

@@ -19,7 +19,7 @@ export type ExtractedTask = {
 export function VoiceTaskInput({
   onExtract,
 }: {
-  onExtract: (task: ExtractedTask) => void;
+  onExtract: (tasks: ExtractedTask[]) => void;
 }) {
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
@@ -94,8 +94,13 @@ export function VoiceTaskInput({
         toast.error(data.error || "AI extraction failed");
         return;
       }
-      onExtract(data.task as ExtractedTask);
-      toast.success("Form filled — review & save");
+      const tasks = (Array.isArray(data.tasks) ? data.tasks : data.task ? [data.task] : []) as ExtractedTask[];
+      if (!tasks.length) {
+        toast.error("No tasks found in that note");
+        return;
+      }
+      onExtract(tasks);
+      toast.success(tasks.length > 1 ? `AI found ${tasks.length} tasks — review & create` : "Form filled — review & save");
     } catch {
       toast.error("AI request failed");
     } finally {
