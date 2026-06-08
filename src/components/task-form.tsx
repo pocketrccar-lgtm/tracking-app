@@ -42,6 +42,7 @@ type Props = {
   action: (fd: FormData) => void;
   submitLabel: string;
   cancelHref?: string;
+  compact?: boolean; // new-task fast path — hide "More details", keep values as hidden fields
 };
 
 const selectClass =
@@ -98,6 +99,7 @@ export function TaskForm({
   action,
   submitLabel,
   cancelHref,
+  compact = false,
 }: Props) {
   const [due, setDue] = useState(task?.dueDate ? ymd(new Date(task.dueDate)) : "");
   const [assignee, setAssignee] = useState(
@@ -208,6 +210,17 @@ export function TaskForm({
         </div>
       </div>
 
+      {compact ? (
+        <>
+          {/* fast path: preserve AI-filled / default values without showing the fields */}
+          <input type="hidden" name="type" defaultValue={task?.type ?? "SOURCING"} />
+          <input type="hidden" name="vendorId" defaultValue={task?.vendorId ?? defaultVendorId ?? ""} />
+          <input type="hidden" name="status" defaultValue={task?.status ?? "PENDING"} />
+          <input type="hidden" name="effortDays" defaultValue={task?.effortDays ?? 1} />
+          <input type="hidden" name="notes" defaultValue={task?.notes ?? task?.description ?? ""} />
+        </>
+      ) : (
+        <>
       {/* More: vendor, status, notes */}
       <button
         type="button"
@@ -298,6 +311,8 @@ export function TaskForm({
             />
           </div>
         </div>
+      )}
+        </>
       )}
 
       {/* Sticky thumb-zone action bar (sits above the bottom nav) */}

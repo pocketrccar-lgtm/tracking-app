@@ -5,7 +5,7 @@ import { TaskForm } from "@/components/task-form";
 import { VoiceTaskInput, type ExtractedTask } from "@/components/voice-task-input";
 import { createTask, createTasks } from "@/actions/tasks";
 import { toast } from "sonner";
-import { X } from "lucide-react";
+import { X, Sparkles } from "lucide-react";
 
 type Vendor = { id: string; name: string };
 type User = { id: string; name: string; role: string };
@@ -33,6 +33,7 @@ export function NewTaskClient({
   }>({ dueDate: new Date(), assignedToId: defaultAssigneeId ?? null });
   const [version, setVersion] = useState(0);
   const [multi, setMulti] = useState<ExtractedTask[] | null>(null);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const [pending, start] = useTransition();
 
   const onExtract = (tasks: ExtractedTask[]) => {
@@ -52,6 +53,7 @@ export function NewTaskClient({
       notes: t.notes ?? null,
     });
     setVersion((v) => v + 1); // remount TaskForm with new defaults
+    setVoiceOpen(false); // collapse voice — focus on the filled form
   };
 
   const todayIso = new Date().toISOString().slice(0, 10);
@@ -93,7 +95,17 @@ export function NewTaskClient({
 
   return (
     <div className="space-y-4">
-      <VoiceTaskInput onExtract={onExtract} />
+      {voiceOpen ? (
+        <VoiceTaskInput onExtract={onExtract} />
+      ) : (
+        <button
+          type="button"
+          onClick={() => setVoiceOpen(true)}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50/70 py-2.5 text-sm font-semibold text-red-700 active:scale-[0.99]"
+        >
+          <Sparkles className="h-4 w-4" /> Speak it / paste a list of tasks
+        </button>
+      )}
 
       {multi ? (
         <div className="space-y-3">
@@ -158,6 +170,7 @@ export function NewTaskClient({
           defaultAssigneeId={defaultAssigneeId}
           action={createTask}
           submitLabel="Create task"
+          compact
         />
       )}
     </div>
