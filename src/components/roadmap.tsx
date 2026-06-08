@@ -45,12 +45,23 @@ const DOT: Record<string, string> = {
   teal: "bg-teal-500",
 };
 
-function Stat({ big, small }: { big: string; small: string }) {
+function Stat({ big, small, tone }: { big: string; small: string; tone?: string }) {
   return (
     <div className="px-1">
-      <div className="text-lg font-bold tabular-nums text-slate-900">{big}</div>
+      <div className={`text-lg font-bold tabular-nums ${tone ?? "text-slate-900"}`}>{big}</div>
       <div className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
         {small}
+      </div>
+    </div>
+  );
+}
+
+function PersonStat({ name, open, done }: { name: string; open: number; done: number }) {
+  return (
+    <div className="rounded-xl bg-white/70 px-2 py-1.5 text-center">
+      <div className="text-xs font-bold text-slate-700">{name}</div>
+      <div className="text-[11px] text-slate-500">
+        <span className="font-bold text-slate-900">{open}</span> open · {done} done
       </div>
     </div>
   );
@@ -69,6 +80,19 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
     phases[0];
 
   const eta = format(s.projectedGoalDate, "d MMM yyyy");
+
+  // per-person load: open + done (excludes the legacy "shared" user)
+  const personStats = ["Syed", "Shoaib", "Pandey"].map((name) => {
+    const theirs = tasks.filter((t) => {
+      const a = (t.assignedTo?.name ?? "").toLowerCase();
+      return !a.includes("shared") && a.includes(name.toLowerCase());
+    });
+    return {
+      name,
+      open: theirs.filter((t) => t.status !== "COMPLETED").length,
+      done: theirs.filter((t) => t.status === "COMPLETED").length,
+    };
+  });
   const ringColor = BAR[current?.color ?? "teal"] ?? "text-teal-500";
   const ringPct = current?.total
     ? Math.round((current.done / current.total) * 100)
@@ -104,12 +128,20 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
         </div>
 
         <div className="grid grid-cols-3 divide-x divide-slate-200 rounded-2xl bg-white/70 py-2 text-center">
-          <Stat big={`${s.daysToGoal}`} small="days to goal" />
-          <Stat big={`${s.doneThisWeek}`} small="done / week" />
           <Stat
-            big={current ? `${current.done}/${current.total}` : "—"}
-            small={current?.label ?? "phase"}
+            big={`${s.overdueCount}`}
+            small="overdue"
+            tone={s.overdueCount > 0 ? "text-red-600" : "text-slate-900"}
           />
+          <Stat big={`${s.doneThisWeek}`} small="done this week" />
+          <Stat big={`${s.daysToGoal}`} small="days left" />
+        </div>
+
+        {/* who's carrying what — open + done per person */}
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          {personStats.map((p) => (
+            <PersonStat key={p.name} name={p.name} open={p.open} done={p.done} />
+          ))}
         </div>
       </div>
 

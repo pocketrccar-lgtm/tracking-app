@@ -111,12 +111,10 @@ export function NewTaskClient({
       toast.error("Add at least one task title");
       return;
     }
+    // createTasks redirects to /tasks?created=… — let the redirect propagate
+    // (do NOT try/catch it, or the navigation gets swallowed and looks failed).
     start(async () => {
-      try {
-        await createTasks(payload); // redirects to /tasks
-      } catch {
-        toast.error("Couldn't create tasks");
-      }
+      await createTasks(payload);
     });
   };
 

@@ -38,7 +38,7 @@ function fromForm(fd: FormData) {
 export async function createTask(fd: FormData) {
   const d = fromForm(fd);
   if (!d.title) throw new Error("Title required");
-  await db.task.create({
+  const task = await db.task.create({
     data: {
       vendorId: d.vendorId || null,
       title: d.title,
@@ -55,7 +55,7 @@ export async function createTask(fd: FormData) {
   });
   bustTasks();
   if (d.vendorId) revalidatePath(`/vendors/${d.vendorId}`);
-  redirect("/tasks");
+  redirect(`/tasks?created=${task.id}`);
 }
 
 // Bulk-create from one AI-parsed note that contained several tasks.
@@ -73,21 +73,26 @@ export type NewTaskInput = {
 export async function createTasks(tasks: NewTaskInput[]) {
   const clean = (tasks ?? []).filter((t) => t?.title?.trim());
   if (!clean.length) throw new Error("No tasks to create");
-  await db.task.createMany({
-    data: clean.map((t) => ({
-      title: t.title.trim(),
-      type: t.type || "SOURCING",
-      priority: t.priority || "MEDIUM",
-      status: "PENDING",
-      assignedToId: t.assignedToId || null,
-      dueDate: t.dueDate ? new Date(t.dueDate) : null,
-      vendorId: t.vendorId || null,
-      phase: t.phase || null,
-      notes: t.notes || null,
-    })),
-  });
+  // create one-by-one so we get each new id (for the confirmation popup)
+  const ids: string[] = [];
+  for (const t of clean) {
+    const created = await db.task.create({
+      data: {
+        title: t.title.trim(),
+        type: t.type || "SOURCING",
+        priority: t.priority || "MEDIUM",
+        status: "PENDING",
+        assignedToId: t.assignedToId || null,
+        dueDate: t.dueDate ? new Date(t.dueDate) : null,
+        vendorId: t.vendorId || null,
+        phase: t.phase || null,
+        notes: t.notes || null,
+      },
+    });
+    ids.push(created.id);
+  }
   bustTasks();
-  redirect("/tasks");
+  redirect(`/tasks?created=${ids.join(",")}`);
 }
 
 export async function updateTask(id: string, fd: FormData) {

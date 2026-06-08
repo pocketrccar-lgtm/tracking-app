@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { TaskKanban } from "@/components/task-kanban";
 import { TaskRow } from "@/components/task-row";
 import { TaskSearch } from "@/components/task-search";
+import { TaskCreatedConfirm } from "@/components/task-created-confirm";
 import { CollapsibleSection } from "@/components/collapsible-section";
 import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
@@ -38,6 +39,7 @@ export default async function TasksPage({
     phase?: string;
     h?: string;
     q?: string;
+    created?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -45,6 +47,25 @@ export default async function TasksPage({
     params.view === "list" || params.view === "kanban"
       ? params.view
       : "roadmap";
+
+  // Confirmation popup for just-created task(s) — driven by ?created=<ids>
+  const createdIds = (params.created ?? "").split(",").filter(Boolean);
+  const createdTasks = createdIds.length
+    ? (
+        await db.task.findMany({
+          where: { id: { in: createdIds } },
+          select: { seq: true, title: true, assignedTo: { select: { name: true } } },
+          orderBy: { seq: "asc" },
+        })
+      ).map((t) => ({
+        seq: t.seq,
+        title: t.title,
+        assigneeName: t.assignedTo?.name?.split(" ")[0] ?? null,
+      }))
+    : [];
+  const createdConfirm = createdTasks.length ? (
+    <TaskCreatedConfirm tasks={createdTasks} />
+  ) : null;
 
   // ─── ROADMAP (default) ─────────────────────────────────────────────────────
   if (view === "roadmap") {
@@ -64,6 +85,7 @@ export default async function TasksPage({
           <NewTaskButton />
           <Roadmap tasks={tasks} />
         </div>
+        {createdConfirm}
       </div>
     );
   }
@@ -176,14 +198,19 @@ export default async function TasksPage({
     { key: "done", label: "Done" },
   ];
 
-  const overdueCount = groups.overdue.length;
-  const todayCount = groups.today.length;
-  const subtitle =
-    overdueCount > 0
-      ? `${overdueCount} overdue · ${todayCount} today`
-      : todayCount > 0
-        ? `${todayCount} due today`
-        : `${tasks.length} task${tasks.length === 1 ? "" : "s"}`;
+  // Full-set breakdown for the header (not horizon-filtered) — open/overdue/today/done.
+  const stats = { total: allWho.length, done: 0, open: 0, overdue: 0, today: 0 };
+  for (const t of allWho) {
+    if (t.status === "COMPLETED") {
+      stats.done++;
+      continue;
+    }
+    stats.open++;
+    const d = diffOf(t);
+    if (d !== null && d < 0) stats.overdue++;
+    else if (d === 0) stats.today++;
+  }
+  const subtitle = `${stats.open} open · ${stats.overdue} overdue · ${stats.today} today · ${stats.done} done`;
 
   const HORIZONS = [
     { value: "", label: "All" },
@@ -307,6 +334,7 @@ export default async function TasksPage({
           </div>
         )}
       </div>
+      {createdConfirm}
     </div>
   );
 }
