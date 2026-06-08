@@ -1,9 +1,10 @@
 import { db } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Calendar, Phone, ShoppingBag, Key, Target, CircleDot } from "lucide-react";
+import { Calendar, Phone, ShoppingBag, Key, Target, CircleDot } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BackLink } from "@/components/back-link";
 import { TaskViewActions } from "@/components/task-view-actions";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { InlineEditText } from "@/components/inline-edit-text";
@@ -100,12 +101,7 @@ export default async function TaskViewPage({
 
   return (
     <div className="px-4 pt-5 pb-36 space-y-5">
-      <Link
-        href="/tasks"
-        className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
-      >
-        <ArrowLeft className="h-3.5 w-3.5" /> Back to tasks
-      </Link>
+      <BackLink label="Back to tasks" />
 
       {/* hero */}
       <div>

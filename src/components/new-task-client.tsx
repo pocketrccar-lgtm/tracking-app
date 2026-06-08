@@ -4,11 +4,29 @@ import { useState, useTransition } from "react";
 import { TaskForm } from "@/components/task-form";
 import { VoiceTaskInput, type ExtractedTask } from "@/components/voice-task-input";
 import { createTask, createTasks } from "@/actions/tasks";
+import { TASK_TYPES, TASK_TYPE_LABELS } from "@/lib/enums";
 import { toast } from "sonner";
 import { X, Sparkles } from "lucide-react";
 
 type Vendor = { id: string; name: string };
 type User = { id: string; name: string; role: string };
+
+const chipSelect =
+  "rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600 focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/20";
+
+function isoPlus(n: number) {
+  const d = new Date();
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+const DUE_OPTS = [
+  { label: "Today", value: isoPlus(0) },
+  { label: "Tomorrow", value: isoPlus(1) },
+  { label: "3 days", value: isoPlus(3) },
+  { label: "This week", value: isoPlus(7) },
+  { label: "This month", value: isoPlus(30) },
+  { label: "No date", value: "" },
+];
 
 export function NewTaskClient({
   vendors,
@@ -57,13 +75,16 @@ export function NewTaskClient({
   };
 
   const todayIso = new Date().toISOString().slice(0, 10);
-  const whenLabel = (d?: string | null) =>
-    !d ? "Today" : d === todayIso ? "Today" : d;
-  const whoLabel = (id?: string | null) =>
-    users.find((u) => u.id === id)?.name.split(" ")[0] ?? "Unassigned";
 
-  const editTitle = (i: number, title: string) =>
-    setMulti((m) => (m ? m.map((t, j) => (j === i ? { ...t, title } : t)) : m));
+  // partners only, for the per-task assignee dropdown
+  const assigneeOpts = [
+    ...users.filter((u) => u.role !== "advisor" && /syed/i.test(u.name)),
+    ...users.filter((u) => u.role !== "advisor" && /^shoaib/i.test(u.name)),
+    ...users.filter((u) => u.role !== "advisor" && /shared/i.test(u.name)),
+  ].map((u) => ({ id: u.id, label: /shared/i.test(u.name) ? "Both" : u.name.split(" ")[0] }));
+
+  const editField = (i: number, patch: Partial<ExtractedTask>) =>
+    setMulti((m) => (m ? m.map((t, j) => (j === i ? { ...t, ...patch } : t)) : m));
   const removeTask = (i: number) =>
     setMulti((m) => (m ? m.filter((_, j) => j !== i) : m));
 
@@ -75,7 +96,7 @@ export function NewTaskClient({
         title: t.title!.trim(),
         type: t.type,
         priority: t.priority,
-        assignedToId: t.assignedToId ?? defaultAssigneeId ?? null,
+        assignedToId: t.assignedToId ?? null, // respect explicit "Unassigned"
         dueDate: t.dueDate ?? todayIso,
         vendorId: t.vendorId ?? defaultVendorId ?? null,
         notes: t.notes ?? null,
@@ -131,7 +152,7 @@ export function NewTaskClient({
                   </span>
                   <input
                     value={t.title ?? ""}
-                    onChange={(e) => editTitle(i, e.target.value)}
+                    onChange={(e) => editField(i, { title: e.target.value })}
                     placeholder="Task title"
                     className="min-h-[40px] flex-1 rounded-lg border border-slate-200 px-2.5 text-sm font-medium focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-500/15"
                   />
@@ -144,8 +165,42 @@ export function NewTaskClient({
                     <X className="h-4 w-4" />
                   </button>
                 </div>
-                <div className="mt-1 pl-6 text-[11px] font-medium text-slate-400">
-                  {whenLabel(t.dueDate)} · {whoLabel(t.assignedToId)} · {(t.type ?? "SOURCING").toLowerCase()}
+                {/* editable: due date · assignee · category */}
+                <div className="mt-2 flex flex-wrap items-center gap-1.5 pl-6">
+                  <select
+                    value={t.dueDate ?? todayIso}
+                    onChange={(e) => editField(i, { dueDate: e.target.value })}
+                    className={chipSelect}
+                    aria-label="Due date"
+                  >
+                    {!DUE_OPTS.some((o) => o.value === (t.dueDate ?? todayIso)) && (
+                      <option value={t.dueDate ?? ""}>{t.dueDate || "No date"}</option>
+                    )}
+                    {DUE_OPTS.map((o) => (
+                      <option key={o.label} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={t.assignedToId ?? ""}
+                    onChange={(e) => editField(i, { assignedToId: e.target.value || null })}
+                    className={chipSelect}
+                    aria-label="Assignee"
+                  >
+                    <option value="">Unassigned</option>
+                    {assigneeOpts.map((o) => (
+                      <option key={o.id} value={o.id}>{o.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={t.type ?? "SOURCING"}
+                    onChange={(e) => editField(i, { type: e.target.value })}
+                    className={chipSelect}
+                    aria-label="Category"
+                  >
+                    {TASK_TYPES.map((ty) => (
+                      <option key={ty} value={ty}>{TASK_TYPE_LABELS[ty]}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
             ))}
