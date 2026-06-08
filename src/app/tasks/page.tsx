@@ -57,9 +57,9 @@ export default async function TasksPage({
         <PageHeader title="Roadmap" subtitle="Your climb to ₹30L / month" />
         <div className="px-4 pt-5 pb-32 space-y-4">
           <ViewToggle view={view} />
+          <NewTaskButton />
           <Roadmap tasks={tasks} />
         </div>
-        <NewTaskFab />
       </div>
     );
   }
@@ -207,6 +207,7 @@ export default async function TasksPage({
       <PageHeader title="Tasks" subtitle={subtitle} />
       <div className="px-4 pt-5 pb-32 space-y-3">
         <ViewToggle view={view} />
+        <NewTaskButton />
 
         {/* who: the two partners */}
         <div className="flex rounded-xl bg-slate-100 p-1">
@@ -258,7 +259,7 @@ export default async function TasksPage({
         ) : tasks.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center text-sm text-slate-500">
-              No tasks here yet. Tap the red + to add one.
+              No tasks here yet. Tap “＋ New task” above to add one.
             </CardContent>
           </Card>
         ) : (
@@ -287,8 +288,6 @@ export default async function TasksPage({
           </div>
         )}
       </div>
-
-      <NewTaskFab />
     </div>
   );
 }
@@ -313,14 +312,13 @@ function ViewToggle({ view }: { view: string }) {
   );
 }
 
-function NewTaskFab() {
+function NewTaskButton() {
   return (
     <Link
       href="/tasks/new"
-      aria-label="New task"
-      className="fixed right-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-30 flex h-14 w-14 items-center justify-center rounded-full bg-red-600 text-white shadow-lg active:scale-95 transition-transform"
+      className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-red-600 py-3 text-sm font-bold text-white shadow-sm active:scale-[0.99] transition-transform"
     >
-      <Plus className="h-6 w-6" strokeWidth={2.5} />
+      <Plus className="h-5 w-5" strokeWidth={2.5} /> New task
     </Link>
   );
 }
