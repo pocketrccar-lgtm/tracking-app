@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
 import { TaskKanban } from "@/components/task-kanban";
 import { TaskRow } from "@/components/task-row";
+import { TaskSearch } from "@/components/task-search";
+import { CollapsibleSection } from "@/components/collapsible-section";
 import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
 import { phaseForTask, PHASE_LABEL } from "@/lib/roadmap";
@@ -15,6 +17,7 @@ const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
 type Row = {
   id: string;
+  seq: number;
   title: string;
   status: string;
   priority: string;
@@ -34,6 +37,7 @@ export default async function TasksPage({
     view?: string;
     phase?: string;
     h?: string;
+    q?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -66,27 +70,26 @@ export default async function TasksPage({
 
   // ─── LIST / BOARD ──────────────────────────────────────────────────────────
   const who =
-    params.who === "mine" || params.who === "shoaib" ? params.who : "both";
+    params.who === "syed" || params.who === "shoaib" || params.who === "pandey"
+      ? params.who
+      : "all";
   const phaseFilter = params.phase ?? "";
   const horizon = params.h ?? ""; // "" | today | tomorrow | d3 | week | month
+  const q = (params.q ?? "").trim();
 
   const users = await getCachedUsers();
-  const syed =
-    users.find((u) => u.email?.toLowerCase().startsWith("syed@")) ??
-    users.find((u) => /^syed\b/i.test(u.name));
-  const shoaib =
-    users.find((u) => u.email?.toLowerCase().startsWith("shoaib@")) ??
-    users.find((u) => u.name.trim().toLowerCase() === "shoaib");
-  const shared = users.find((u) =>
-    u.email?.toLowerCase().startsWith("shared@"),
-  );
+  const byEmailOrName = (emailPrefix: string, nameRe: RegExp) =>
+    users.find((u) => u.email?.toLowerCase().startsWith(emailPrefix)) ??
+    users.find((u) => nameRe.test(u.name));
+  const syed = byEmailOrName("syed@", /^syed\b/i);
+  const shoaib = byEmailOrName("shoaib@", /^shoaib\b/i);
+  const pandey = byEmailOrName("pandey@", /pandey/i);
 
-  // Both = the two partners' combined work (incl. shared), excluding the CA.
-  const partnerIds = [syed?.id, shoaib?.id, shared?.id].filter(Boolean) as string[];
+  // All = everyone's tasks (no filter); else one person.
   let assignedToIds: string[] | null = null;
-  if (who === "mine" && syed) assignedToIds = [syed.id];
+  if (who === "syed" && syed) assignedToIds = [syed.id];
   else if (who === "shoaib" && shoaib) assignedToIds = [shoaib.id];
-  else if (partnerIds.length) assignedToIds = partnerIds;
+  else if (who === "pandey" && pandey) assignedToIds = [pandey.id];
 
   const allWho = await getCachedTaskRows(assignedToIds);
 
@@ -104,7 +107,17 @@ export default async function TasksPage({
   const diffOf = (t: { dueMs: number | null }) =>
     t.dueMs !== null ? Math.round((t.dueMs - todayMs) / 86400000) : null;
 
+  // Search by keyword (title) or task ID (#12 / 12) — overrides date/phase filters.
+  const qLower = q.toLowerCase();
+  const qNum = q.replace(/^#/, "");
   const tasks = allWho.filter((t) => {
+    if (q) {
+      return (
+        t.title.toLowerCase().includes(qLower) ||
+        String(t.seq) === qNum ||
+        `#${t.seq}` === q
+      );
+    }
     if (phaseFilter && phaseForTask(t) !== phaseFilter) return false;
     if (hMax === Infinity) return true; // "All" shows everything
     if (t.status === "COMPLETED") return false; // hide done in a horizon view
@@ -125,6 +138,7 @@ export default async function TasksPage({
   for (const t of tasks) {
     const base: Row = {
       id: t.id,
+      seq: t.seq,
       title: t.title,
       status: t.status,
       priority: t.priority,
@@ -185,12 +199,13 @@ export default async function TasksPage({
     const w = next.who ?? who;
     const ph = next.phase ?? phaseFilter;
     const h = next.h ?? horizon;
-    const q = new URLSearchParams();
-    q.set("view", view);
-    if (w !== "both") q.set("who", w);
-    if (ph) q.set("phase", ph);
-    if (h) q.set("h", h);
-    return `/tasks?${q.toString()}`;
+    const sp = new URLSearchParams();
+    sp.set("view", view);
+    if (w !== "all") sp.set("who", w);
+    if (ph) sp.set("phase", ph);
+    if (h) sp.set("h", h);
+    if (q) sp.set("q", q);
+    return `/tasks?${sp.toString()}`;
   };
 
   const seg = (active: boolean) =>
@@ -209,18 +224,24 @@ export default async function TasksPage({
         <ViewToggle view={view} />
         <NewTaskButton />
 
-        {/* who: the two partners */}
+        {/* who: All + the three people */}
         <div className="flex rounded-xl bg-slate-100 p-1">
-          <Link href={hrefFor({ who: "both" })} className={seg(who === "both")}>
-            Both
+          <Link href={hrefFor({ who: "all" })} className={seg(who === "all")}>
+            All
           </Link>
-          <Link href={hrefFor({ who: "mine" })} className={seg(who === "mine")}>
-            {syed ? syed.name.split(" ")[0] : "Mine"}
+          <Link href={hrefFor({ who: "syed" })} className={seg(who === "syed")}>
+            Syed
           </Link>
           <Link href={hrefFor({ who: "shoaib" })} className={seg(who === "shoaib")}>
-            {shoaib ? shoaib.name.split(" ")[0] : "Shoaib"}
+            Shoaib
+          </Link>
+          <Link href={hrefFor({ who: "pandey" })} className={seg(who === "pandey")}>
+            Pandey
           </Link>
         </div>
+
+        {/* search by keyword or task #ID */}
+        <TaskSearch />
 
         {/* time-horizon filter */}
         <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-4 px-4">
@@ -263,26 +284,24 @@ export default async function TasksPage({
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-5 pt-1">
+          <div className="space-y-2.5 pt-1">
             {SECTIONS.map(({ key, label, tone }) => {
               const rows = groups[key];
               if (rows.length === 0) return null;
+              // collapsed by default; auto-open when searching or in a focused horizon
+              const open = Boolean(q) || horizon !== "";
               return (
-                <section key={key}>
-                  <h2
-                    className={`mb-2 flex items-center gap-2 px-1 text-xs font-extrabold uppercase tracking-wider ${tone ?? "text-slate-400"}`}
-                  >
-                    {label}
-                    <span className="rounded-full bg-slate-100 px-1.5 text-[11px] text-slate-500">
-                      {rows.length}
-                    </span>
-                  </h2>
-                  <div className="space-y-2">
-                    {rows.map((r) => (
-                      <TaskRow key={r.id} {...r} showPhase />
-                    ))}
-                  </div>
-                </section>
+                <CollapsibleSection
+                  key={`${key}-${open ? "open" : "shut"}`}
+                  label={label}
+                  count={rows.length}
+                  tone={tone}
+                  defaultOpen={open}
+                >
+                  {rows.map((r) => (
+                    <TaskRow key={r.id} {...r} showPhase />
+                  ))}
+                </CollapsibleSection>
               );
             })}
           </div>

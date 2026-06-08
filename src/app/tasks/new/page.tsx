@@ -18,7 +18,8 @@ export default async function NewTaskPage({
   ]);
   // Auto-assign new tasks to the account owner (Syed) by default; AI/voice can override.
   const defaultAssigneeId =
-    users.find((u) => /syed/i.test(u.name))?.id ?? users[0]?.id;
+    users.find((u) => /syed/i.test(u.name) && !/shared/i.test(u.name))?.id ??
+    users.find((u) => u.role !== "advisor")?.id;
 
   return (
     <div>

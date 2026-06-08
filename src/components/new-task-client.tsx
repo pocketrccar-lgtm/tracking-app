@@ -76,12 +76,18 @@ export function NewTaskClient({
 
   const todayIso = new Date().toISOString().slice(0, 10);
 
-  // partners only, for the per-task assignee dropdown
-  const assigneeOpts = [
-    ...users.filter((u) => u.role !== "advisor" && /syed/i.test(u.name)),
-    ...users.filter((u) => u.role !== "advisor" && /^shoaib/i.test(u.name)),
-    ...users.filter((u) => u.role !== "advisor" && /shared/i.test(u.name)),
-  ].map((u) => ({ id: u.id, label: /shared/i.test(u.name) ? "Both" : u.name.split(" ")[0] }));
+  // assignee dropdown — the three people: Syed, Shoaib, Pandey
+  const pick = (re: RegExp) =>
+    users.find((u) => u.role !== "advisor" && re.test(u.name) && !/shared/i.test(u.name));
+  const assigneeOpts = (
+    [
+      { u: pick(/syed/i), label: "Syed" },
+      { u: pick(/shoaib/i), label: "Shoaib" },
+      { u: pick(/pandey/i), label: "Pandey" },
+    ] as const
+  )
+    .filter((x) => x.u)
+    .map((x) => ({ id: x.u!.id, label: x.label }));
 
   const editField = (i: number, patch: Partial<ExtractedTask>) =>
     setMulti((m) => (m ? m.map((t, j) => (j === i ? { ...t, ...patch } : t)) : m));
@@ -117,7 +123,7 @@ export function NewTaskClient({
   return (
     <div className="space-y-4">
       {voiceOpen ? (
-        <VoiceTaskInput onExtract={onExtract} />
+        <VoiceTaskInput onExtract={onExtract} autoStart />
       ) : (
         <button
           type="button"

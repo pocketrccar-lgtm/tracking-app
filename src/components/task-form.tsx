@@ -117,16 +117,18 @@ export function TaskForm({
 
   const activeChip = DUE_CHIPS.find((c) => c.value === due)?.value ?? null;
 
-  // Partners only (drop the CA advisor + "Anyone"); the shared user shows as "Both".
-  const partners = users.filter((u) => u.role !== "advisor");
-  const assigneeOptions = [
-    ...partners.filter((u) => /syed/i.test(u.name)),
-    ...partners.filter((u) => /^shoaib/i.test(u.name)),
-    ...partners.filter((u) => /shared/i.test(u.name)),
-  ].map((u) => ({
-    id: u.id,
-    label: /shared/i.test(u.name) ? "Both" : u.name.split(" ")[0],
-  }));
+  // The three people who own tasks: Syed, Shoaib, Pandey (no CA, no "shared/Both").
+  const pick = (re: RegExp) =>
+    users.find((u) => u.role !== "advisor" && re.test(u.name) && !/shared/i.test(u.name));
+  const assigneeOptions = (
+    [
+      { u: pick(/syed/i), label: "Syed" },
+      { u: pick(/shoaib/i), label: "Shoaib" },
+      { u: pick(/pandey/i), label: "Pandey" },
+    ] as const
+  )
+    .filter((x) => x.u)
+    .map((x) => ({ id: x.u!.id, label: x.label }));
 
   return (
     <form action={action} className="space-y-5 pb-40">

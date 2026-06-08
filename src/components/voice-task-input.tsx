@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Mic, Square, Sparkles } from "lucide-react";
@@ -18,8 +18,10 @@ export type ExtractedTask = {
 
 export function VoiceTaskInput({
   onExtract,
+  autoStart = false,
 }: {
   onExtract: (tasks: ExtractedTask[]) => void;
+  autoStart?: boolean;
 }) {
   const [transcript, setTranscript] = useState("");
   const [listening, setListening] = useState(false);
@@ -76,6 +78,12 @@ export function VoiceTaskInput({
     (recRef.current as { stop?: () => void } | null)?.stop?.();
     setListening(false);
   };
+
+  // When the box is opened via "Speak it", start the mic immediately.
+  useEffect(() => {
+    if (autoStart && supported) startListening();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fillWithAI = async () => {
     if (!transcript.trim()) {

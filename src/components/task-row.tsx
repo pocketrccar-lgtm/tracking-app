@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 export function TaskRow({
   id,
+  seq,
   title,
   status,
   priority,
@@ -23,6 +24,7 @@ export function TaskRow({
   phaseKey,
 }: {
   id: string;
+  seq?: number;
   title: string;
   status: string;
   priority: string;
@@ -108,6 +110,9 @@ export function TaskRow({
           )}
         </div>
         <div className="mt-0.5 flex items-center gap-1.5 text-xs">
+          {seq != null && (
+            <span className="shrink-0 font-mono text-slate-400">#{seq}</span>
+          )}
           {note && !done && (
             <span className="shrink-0 rounded-full bg-teal-50 px-1.5 font-bold text-teal-700">
               {note}

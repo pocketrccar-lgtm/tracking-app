@@ -204,6 +204,7 @@ model PriceHistory {
 
 model Task {
   id           String    @id @default(cuid())
+  seq          Int       @unique @default(autoincrement()) // short human task ID (#seq), searchable
   vendorId     String?
   type         String    // CALL | VISIT | WHATSAPP | EMAIL | LINKEDIN_DM | SAMPLE_ORDER | FOLLOW_UP | RESEARCH | OTHER
   title        String

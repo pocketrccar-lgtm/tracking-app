@@ -9,6 +9,7 @@ const dayMs = (d: Date) => Date.parse(d.toISOString().slice(0, 10));
 
 export type CachedTaskRow = {
   id: string;
+  seq: number;
   title: string;
   status: string;
   priority: string;
@@ -39,6 +40,7 @@ export const getCachedTaskRows = unstable_cache(
     });
     return tasks.map((t) => ({
       id: t.id,
+      seq: t.seq,
       title: t.title,
       status: t.status,
       priority: t.priority,

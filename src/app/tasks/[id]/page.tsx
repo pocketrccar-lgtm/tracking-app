@@ -118,6 +118,7 @@ export default async function TaskViewPage({
           <Badge variant="outline" className="bg-slate-50 text-slate-600">
             {TASK_TYPE_LABELS[task.type as TaskType] ?? task.type}
           </Badge>
+          <span className="font-mono text-xs text-slate-400">#{task.seq}</span>
         </div>
         <div className="mt-2.5">
           <InlineEditText
