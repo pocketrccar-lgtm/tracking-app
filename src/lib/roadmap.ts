@@ -10,6 +10,9 @@
 export const GOAL_LABEL = "₹30L / month";
 export const GOAL_SUBLABEL = "₹30 lakh monthly revenue";
 
+// Fixed sprint length: ₹30L target is 90 days from the day we started.
+export const TARGET_DAYS = 90;
+
 const DAY = 86_400_000;
 const isoMs = (d: Date) => Date.parse(d.toISOString().slice(0, 10));
 
@@ -47,6 +50,7 @@ const isPhaseKey = (k: string | null | undefined): k is string =>
 export type RoadmapTask = {
   id: string;
   title: string;
+  createdAt?: Date | null;
   status: string;
   priority: string;
   dueDate: Date | null;
@@ -151,8 +155,13 @@ export type RoadmapSummary = {
   done: number;
   progressPct: number;
   remainingEffort: number;
-  plannedGoalDate: Date;
-  projectedGoalDate: Date;
+  startDate: Date;
+  targetDays: number;
+  dayNumber: number; // which day of the 90 we're on
+  daysLeftPlanned: number; // days left to the fixed 90-day target
+  behindDays: number; // how many days overdue work has pushed the goal out
+  plannedGoalDate: Date; // the fixed 90-day deadline
+  projectedGoalDate: Date; // deadline + slip from overdue work
   daysToGoal: number;
   slipDays: number;
   overdueCount: number;
@@ -170,8 +179,14 @@ export function computeRoadmap(tasks: RoadmapTask[], now = new Date()): RoadmapS
   const incomplete = tasks.filter((t) => !isDone(t));
   const remainingEffort = incomplete.reduce((s, t) => s + eff(t), 0);
 
-  const dueMs = tasks.filter((t) => t.dueDate).map((t) => isoMs(t.dueDate as Date));
-  const plannedGoalMs = dueMs.length ? Math.max(...dueMs) : todayMs + remainingEffort * DAY;
+  // Fixed 90-day window from the day we started (earliest task created).
+  const createdMs = tasks
+    .map((t) => (t.createdAt ? isoMs(t.createdAt) : null))
+    .filter((x): x is number => x !== null);
+  const startMs = createdMs.length ? Math.min(...createdMs) : todayMs;
+  const plannedGoalMs = startMs + TARGET_DAYS * DAY;
+  const dayNumber = Math.max(1, Math.round((todayMs - startMs) / DAY) + 1);
+  const daysLeftPlanned = Math.round((plannedGoalMs - todayMs) / DAY);
 
   // Overdue backlog = incomplete work already past due. It must be cleared,
   // pushing the whole tail out by its effort → "each delay adds X days".
@@ -193,6 +208,11 @@ export function computeRoadmap(tasks: RoadmapTask[], now = new Date()): RoadmapS
     done,
     progressPct,
     remainingEffort,
+    startDate: new Date(startMs),
+    targetDays: TARGET_DAYS,
+    dayNumber,
+    daysLeftPlanned,
+    behindDays: slipDays,
     plannedGoalDate: new Date(plannedGoalMs),
     projectedGoalDate: new Date(projectedGoalMs),
     daysToGoal: Math.max(0, Math.round((projectedGoalMs - todayMs) / DAY)),

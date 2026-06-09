@@ -80,6 +80,7 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
     phases[0];
 
   const eta = format(s.projectedGoalDate, "d MMM yyyy");
+  const target90 = format(s.plannedGoalDate, "d MMM yyyy");
 
   // per-person load: open + done (excludes the legacy "shared" user)
   const personStats = ["Syed", "Shoaib", "Pandey"].map((name) => {
@@ -105,14 +106,15 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
         <div className="flex items-center justify-center gap-1.5 text-sm font-extrabold tracking-wide text-slate-900">
           <Flag className="h-4 w-4 text-amber-500" /> {GOAL_LABEL.toUpperCase()}
         </div>
-        <p
-          className={`mt-0.5 text-center text-xs font-semibold ${
-            s.onTrack ? "text-emerald-600" : "text-amber-600"
-          }`}
-        >
-          {s.onTrack
-            ? `On track for ~${eta}`
-            : `~${eta} · ${s.slipDays} day${s.slipDays === 1 ? "" : "s"} behind`}
+        {/* 90-day reverse countdown */}
+        <p className="mt-1 text-center text-sm font-bold text-slate-700">
+          Day {s.dayNumber} of {s.targetDays} ·{" "}
+          <span className={s.behindDays > 0 ? "text-amber-600" : "text-emerald-600"}>
+            {Math.max(0, s.daysLeftPlanned)} day{s.daysLeftPlanned === 1 ? "" : "s"} left
+          </span>
+        </p>
+        <p className="text-center text-[11px] font-medium text-slate-400">
+          target {target90}
         </p>
 
         <div className="my-3 flex justify-center">
@@ -134,7 +136,7 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
             tone={s.overdueCount > 0 ? "text-red-600" : "text-slate-900"}
           />
           <Stat big={`${s.doneThisWeek}`} small="done this week" />
-          <Stat big={`${s.daysToGoal}`} small="days left" />
+          <Stat big={`${Math.max(0, s.daysLeftPlanned)}`} small={`of ${s.targetDays} left`} />
         </div>
 
         {/* who's carrying what — open + done per person */}
@@ -146,23 +148,24 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
       </div>
 
       {/* SLIP / ON-TRACK */}
-      {s.slipDays > 0 ? (
+      {s.behindDays > 0 ? (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <div className="flex items-start gap-2">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             <div className="text-sm text-amber-900">
               <span className="font-bold">
-                ₹30L slipped +{s.slipDays} day{s.slipDays === 1 ? "" : "s"}
+                You&apos;re {s.behindDays} day{s.behindDays === 1 ? "" : "s"} behind.
               </span>{" "}
-              → now ~{eta}. {s.overdueCount} overdue task
-              {s.overdueCount === 1 ? "" : "s"} pushed it out — clear them to win
-              the days back.
+              ₹30L was due <span className="font-semibold">{target90}</span> → at this pace it
+              slips to <span className="font-semibold">~{eta}</span>, because{" "}
+              {s.overdueCount} task{s.overdueCount === 1 ? " is" : "s are"} overdue. Finish them
+              on time to pull the date back.
             </div>
           </div>
         </div>
       ) : (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-          🎯 On pace — every task you close keeps ₹30L on {eta}.
+          🎯 On pace — ₹30L lands {target90} as long as you keep closing tasks on time.
         </div>
       )}
 
