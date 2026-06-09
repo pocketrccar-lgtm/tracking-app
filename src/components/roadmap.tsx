@@ -149,17 +149,20 @@ export function Roadmap({ tasks }: { tasks: RoadmapTask[] }) {
 
       {/* SLIP / ON-TRACK */}
       {s.behindDays > 0 ? (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-          <div className="flex items-start gap-2">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-            <div className="text-sm text-amber-900">
-              <span className="font-bold">
-                You&apos;re {s.behindDays} day{s.behindDays === 1 ? "" : "s"} behind.
+        <div className="warn-beacon rounded-2xl border-2 border-red-300 bg-red-600 p-4">
+          <div className="flex items-start gap-2.5">
+            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-white" />
+            <div className="text-sm font-bold leading-snug text-white">
+              <span className="text-base font-extrabold uppercase tracking-wide">
+                ⚠ You&apos;re {s.behindDays} day{s.behindDays === 1 ? "" : "s"} behind
+              </span>
+              <br />
+              ₹30L was due {target90} → now slips to{" "}
+              <span className="underline decoration-white/70 decoration-2 underline-offset-2">
+                ~{eta}
               </span>{" "}
-              ₹30L was due <span className="font-semibold">{target90}</span> → at this pace it
-              slips to <span className="font-semibold">~{eta}</span>, because{" "}
-              {s.overdueCount} task{s.overdueCount === 1 ? " is" : "s are"} overdue. Finish them
-              on time to pull the date back.
+              because {s.overdueCount} task{s.overdueCount === 1 ? " is" : "s are"} overdue.{" "}
+              <span className="font-extrabold">Clear them to win the days back.</span>
             </div>
           </div>
         </div>
