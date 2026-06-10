@@ -8,11 +8,13 @@ import {
   VENDOR_TYPES,
   VENDOR_TIERS,
   VENDOR_STATUSES,
+  VENDOR_STATUS_FUNNEL,
   DRIFT_STATUSES,
   MARKET_LEVELS,
   VENDOR_TYPE_LABELS,
   VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
+  STATUS_COLORS,
   DRIFT_STATUS_LABELS,
   MARKET_LEVEL_LABELS,
 } from "@/lib/enums";
@@ -22,7 +24,19 @@ import { SlidersHorizontal, X } from "lucide-react";
 const selectClass =
   "h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20";
 
-export function VendorListFilters({ states }: { states: string[] }) {
+export function VendorListFilters({
+  states,
+  pendingCount,
+  typeCounts,
+  wrongCount,
+  statusCounts,
+}: {
+  states: string[];
+  pendingCount: number;
+  typeCounts: Record<string, number>;
+  wrongCount: number;
+  statusCounts: Record<string, number>;
+}) {
   const router = useRouter();
   const sp = useSearchParams();
   const [q, setQ] = useState(sp.get("q") ?? "");
@@ -57,14 +71,9 @@ export function VendorListFilters({ states }: { states: string[] }) {
   );
   const activeCount = activeKeys.length;
 
-  const sort = sp.get("sort") ?? "rank";
-  const supplyOnly = sp.get("supply") === "1";
-
-  const setSort = (value: string) => updateParam("sort", value === "rank" ? null : value);
-  const toggleSupply = () => updateParam("supply", supplyOnly ? null : "1");
-
   // Wrong suppliers live in their own bucket — toggling type clears it and vice-versa.
-  const wrongActive = sp.get("status") === "WRONG_SUPPLIER";
+  const statusParam = sp.get("status");
+  const wrongActive = statusParam === "WRONG_SUPPLIER";
   const pushParams = (mut: (p: URLSearchParams) => void) => {
     const params = new URLSearchParams(sp.toString());
     mut(params);
@@ -77,6 +86,16 @@ export function VendorListFilters({ states }: { states: string[] }) {
       else p.set("type", value);
       p.delete("status");
     });
+  // Funnel-status filter — selecting a stage clears any type filter (and vice-versa).
+  const setStatus = (value: string) =>
+    pushParams((p) => {
+      if (statusParam === value) p.delete("status");
+      else p.set("status", value);
+      p.delete("type");
+    });
+  // "Pending to connect" = vendors still at status NEW (not yet contacted).
+  const pendingActive = statusParam === "NEW";
+  const togglePending = () => setStatus("NEW");
   const toggleWrong = () =>
     pushParams((p) => {
       if (wrongActive) p.delete("status");
@@ -91,12 +110,6 @@ export function VendorListFilters({ states }: { states: string[] }) {
     { key: "type", label: "Type", options: VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] })) },
     { key: "status", label: "Status", options: VENDOR_STATUSES.map((s) => ({ value: s, label: VENDOR_STATUS_LABELS[s] })) },
     { key: "drift", label: "Drift", options: DRIFT_STATUSES.map((d) => ({ value: d, label: DRIFT_STATUS_LABELS[d] })) },
-  ];
-
-  const SORTS = [
-    { value: "rank", label: "Rank" },
-    { value: "volume", label: "Volume" },
-    { value: "recent", label: "Recent" },
   ];
 
   return (
@@ -123,60 +136,79 @@ export function VendorListFilters({ states }: { states: string[] }) {
         </Button>
       </div>
 
-      {/* Sort + supply-ready quick controls */}
-      <div className="mt-2 flex items-center gap-2">
-        <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50 p-0.5">
-          {SORTS.map((s) => (
+      {/* Funnel-status quick filters — each stage with its live vendor count */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        {VENDOR_STATUS_FUNNEL.map((s) => {
+          const active = statusParam === s;
+          return (
             <button
-              key={s.value}
-              onClick={() => setSort(s.value)}
-              className={`rounded-md px-2.5 py-1 text-xs font-semibold transition-colors ${
-                sort === s.value
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500"
+              key={s}
+              onClick={() => setStatus(s)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${STATUS_COLORS[s]} ${
+                active ? "ring-2 ring-slate-900 ring-offset-1" : ""
               }`}
             >
-              {s.label}
+              {VENDOR_STATUS_LABELS[s]}
+              <span className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-white/70 px-1 text-[10px] font-bold tabular-nums">
+                {statusCounts[s] ?? 0}
+              </span>
             </button>
-          ))}
-        </div>
-        <button
-          onClick={toggleSupply}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-            supplyOnly
-              ? "bg-emerald-600 text-white"
-              : "bg-slate-100 text-slate-500"
-          }`}
-        >
-          Supply-ready only
-        </button>
+          );
+        })}
       </div>
 
-      {/* Type quick-filter chips (+ separate Wrong-supplier bucket) */}
+      {/* Pending-to-connect + type quick-filter chips (+ separate Wrong-supplier bucket) */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        {[{ value: "ALL", label: "All types" }, ...VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] }))].map(
-          (t) => {
-            const active = !wrongActive && (sp.get("type") ?? "ALL") === t.value;
-            return (
-              <button
-                key={t.value}
-                onClick={() => setType(t.value)}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
+        <button
+          onClick={togglePending}
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+            pendingActive ? "bg-amber-600 text-white" : "bg-amber-50 text-amber-700"
+          }`}
+        >
+          Pending to connect
+          <span
+            className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
+              pendingActive ? "bg-white/25 text-white" : "bg-amber-200 text-amber-800"
+            }`}
+          >
+            {pendingCount}
+          </span>
+        </button>
+        {VENDOR_TYPES.map((t) => {
+          const active = !wrongActive && !pendingActive && sp.get("type") === t;
+          return (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                active ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {VENDOR_TYPE_LABELS[t]}
+              <span
+                className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
+                  active ? "bg-white/25 text-white" : "bg-slate-200 text-slate-500"
                 }`}
               >
-                {t.label}
-              </button>
-            );
-          },
-        )}
+                {typeCounts[t] ?? 0}
+              </span>
+            </button>
+          );
+        })}
         <button
           onClick={toggleWrong}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
             wrongActive ? "bg-rose-600 text-white" : "bg-rose-50 text-rose-600"
           }`}
         >
           Wrong supplier
+          <span
+            className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
+              wrongActive ? "bg-white/25 text-white" : "bg-rose-200 text-rose-700"
+            }`}
+          >
+            {wrongCount}
+          </span>
         </button>
       </div>
 

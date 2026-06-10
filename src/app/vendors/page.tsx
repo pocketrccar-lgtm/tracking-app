@@ -99,7 +99,7 @@ export default async function VendorsListPage({
             { bchRelevance: "desc" as const },
           ];
 
-  const [vendors, total, distinctStates] = await Promise.all([
+  const [vendors, total, distinctStates, typeGroups, statusGroups] = await Promise.all([
     db.vendor.findMany({
       where,
       orderBy,
@@ -114,11 +114,31 @@ export default async function VendorsListPage({
       distinct: ["state"],
       orderBy: { state: "asc" },
     }),
+    // Per-type totals for the quick-filter chips (wrong suppliers are excluded everywhere).
+    db.vendor.groupBy({
+      by: ["type"],
+      where: { status: { not: "WRONG_SUPPLIER" } },
+      _count: { _all: true },
+    }),
+    // Per-status totals for the funnel chips (New → Contacted → Order placed → Active),
+    // plus the Wrong-supplier bucket.
+    db.vendor.groupBy({
+      by: ["status"],
+      _count: { _all: true },
+    }),
   ]);
 
   const states = distinctStates
     .map((s) => s.state)
     .filter((s): s is string => Boolean(s));
+
+  const typeCounts: Record<string, number> = {};
+  for (const g of typeGroups) typeCounts[g.type] = g._count._all;
+  const statusCounts: Record<string, number> = {};
+  for (const g of statusGroups) statusCounts[g.status] = g._count._all;
+  // "Pending to connect" = vendors still at the top of the funnel (status NEW).
+  const pendingCount = statusCounts["NEW"] ?? 0;
+  const wrongCount = statusCounts["WRONG_SUPPLIER"] ?? 0;
 
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -144,7 +164,13 @@ export default async function VendorsListPage({
 
       <Card>
         <CardContent className="p-4">
-          <VendorListFilters states={states} />
+          <VendorListFilters
+            states={states}
+            pendingCount={pendingCount}
+            typeCounts={typeCounts}
+            wrongCount={wrongCount}
+            statusCounts={statusCounts}
+          />
         </CardContent>
       </Card>
 
