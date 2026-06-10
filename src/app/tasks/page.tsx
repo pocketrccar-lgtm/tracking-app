@@ -7,6 +7,7 @@ import { TaskRow } from "@/components/task-row";
 import { TaskSearch } from "@/components/task-search";
 import { TaskCreatedConfirm } from "@/components/task-created-confirm";
 import { CollapsibleSection } from "@/components/collapsible-section";
+import { WhatsAppShare } from "@/components/whatsapp-share";
 import { Roadmap } from "@/components/roadmap";
 import { TASK_TYPE_LABELS, type TaskType } from "@/lib/enums";
 import { phaseForTask, PHASE_LABEL } from "@/lib/roadmap";
@@ -212,6 +213,51 @@ export default async function TasksPage({
   }
   const subtitle = `${stats.open} open · ${stats.overdue} overdue · ${stats.today} today · ${stats.done} done`;
 
+  // WhatsApp delegation message — all of the selected person's OPEN tasks,
+  // grouped by urgency, line by line. Only shown when one person is picked.
+  const whoName = who === "all" ? null : who[0].toUpperCase() + who.slice(1);
+  const openForWho = allWho.filter((t) => t.status !== "COMPLETED");
+  let waMessage = "";
+  if (whoName && openForWho.length) {
+    const sec: Record<string, string[]> = {
+      overdue: [],
+      today: [],
+      tomorrow: [],
+      week: [],
+      later: [],
+      nodate: [],
+    };
+    for (const t of openForWho) {
+      const tail = t.vendorName ? ` — ${t.vendorName}` : "";
+      const line = `#${t.seq} ${t.title}${tail}`;
+      if (t.dueMs === null) {
+        sec.nodate.push(line);
+        continue;
+      }
+      const diff = Math.round((t.dueMs - todayMs) / 86400000);
+      if (diff < 0) sec.overdue.push(`${line} (${-diff}d overdue)`);
+      else if (diff === 0) sec.today.push(line);
+      else if (diff === 1) sec.tomorrow.push(line);
+      else if (diff <= 7) sec.week.push(`${line} (${format(new Date(t.dueMs), "EEE")})`);
+      else sec.later.push(`${line} (${format(new Date(t.dueMs), "d MMM")})`);
+    }
+    const blocks: [string, string[]][] = [
+      ["🔴 OVERDUE", sec.overdue],
+      ["📌 TODAY", sec.today],
+      ["➡️ TOMORROW", sec.tomorrow],
+      ["📅 THIS WEEK", sec.week],
+      ["🗓️ LATER", sec.later],
+      ["⚪ NO DUE DATE", sec.nodate],
+    ];
+    const lines = [`*Tasks for ${whoName}* — ${openForWho.length} open`, "_via Pocket RC Cars_"];
+    for (const [head, arr] of blocks) {
+      if (!arr.length) continue;
+      lines.push("", `*${head}*`, ...arr);
+    }
+    lines.push("", "Reply here as you close each one ✅");
+    waMessage = lines.join("\n");
+  }
+
   const HORIZONS = [
     { value: "", label: "All" },
     { value: "today", label: "Today" },
@@ -331,6 +377,17 @@ export default async function TasksPage({
                 </CollapsibleSection>
               );
             })}
+          </div>
+        )}
+
+        {/* delegate the whole list to this person over WhatsApp */}
+        {view !== "kanban" && whoName && waMessage && (
+          <div className="pt-1">
+            <WhatsAppShare
+              text={waMessage}
+              name={whoName}
+              count={openForWho.length}
+            />
           </div>
         )}
       </div>
