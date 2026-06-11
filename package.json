@@ -13,6 +13,7 @@
     "db:studio": "prisma studio",
     "db:seed": "tsx prisma/seed.ts",
     "db:import-vendors": "tsx scripts/import-vendors.ts",
+    "db:import-validation": "tsx scripts/import-validation-ranks.ts",
     "db:seed-tasks": "tsx scripts/seed-rc-tasks.ts"
   },
   "prisma": {

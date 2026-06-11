@@ -10,6 +10,15 @@ function s(v: FormDataEntryValue | null): string | null {
   return str === "" ? null : str;
 }
 
+// Touching a "pending to connect" (NEW) vendor in any meaningful way means we've
+// started engaging it — so it auto-advances to CONTACTED and leaves the pending
+// list. Returns { status: "CONTACTED" } to merge into an update only when the
+// vendor is currently NEW; otherwise returns {} (leave its status alone).
+async function contactBumpIfNew(id: string): Promise<{ status?: string }> {
+  const v = await db.vendor.findUnique({ where: { id }, select: { status: true } });
+  return v?.status === "NEW" ? { status: "CONTACTED" } : {};
+}
+
 function parsePhones(fd: FormData) {
   const phones = fd.getAll("phone").map(String);
   const labels = fd.getAll("phoneLabel").map(String);
@@ -75,6 +84,8 @@ export async function createVendor(fd: FormData) {
 export async function updateVendor(id: string, fd: FormData) {
   const data = fromFormData(fd);
   if (!data.name) throw new Error("Name required");
+  // Editing a still-NEW vendor counts as engaging it → advance to CONTACTED.
+  if (data.status === "NEW") data.status = "CONTACTED";
   const phones = parsePhones(fd);
   const emails = parseEmails(fd);
 
@@ -126,14 +137,17 @@ export async function markWrongSupplier(id: string, reason: string) {
 }
 
 export async function updateVendorTier(id: string, tier: string) {
-  await db.vendor.update({ where: { id }, data: { tier } });
+  const bump = await contactBumpIfNew(id);
+  await db.vendor.update({ where: { id }, data: { tier, ...bump } });
   revalidatePath(`/vendors/${id}`);
   revalidatePath("/vendors");
   revalidatePath("/dashboard");
 }
 
 export async function updateVendorType(id: string, type: string) {
-  await db.vendor.update({ where: { id }, data: { type } });
+  const bump = await contactBumpIfNew(id);
+  await db.vendor.update({ where: { id }, data: { type, ...bump } });
   revalidatePath(`/vendors/${id}`);
   revalidatePath("/vendors");
+  revalidatePath("/dashboard");
 }

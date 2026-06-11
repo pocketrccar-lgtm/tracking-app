@@ -42,3 +42,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# validation import temp files
+scripts/_validation_ranked.json
+scripts/_validation_unmatched.txt
