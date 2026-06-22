@@ -25,6 +25,7 @@ import {
 } from "@/lib/enums";
 import { formatDistanceToNow } from "date-fns";
 import { WhatsAppButton } from "@/components/whatsapp-button";
+import { CallButton } from "@/components/call-button";
 
 export const dynamic = "force-dynamic";
 
@@ -348,6 +349,7 @@ export default async function VendorsListPage({
                     ) : null}
                   </div>
                 </Link>
+                <CallButton phone={v.phones[0]?.phone} vendorName={v.name} />
                 <WhatsAppButton phone={v.phones[0]?.phone} vendorName={v.name} />
               </div>
             ))}

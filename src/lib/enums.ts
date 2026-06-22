@@ -38,10 +38,12 @@ export const VENDOR_STATUS_FUNNEL = [
 ] as const;
 
 // Why a vendor was marked a wrong supplier (asked at mark-time).
-export const WRONG_REASONS = ["WHOLESALER", "DIFFERENT_CATEGORY"] as const;
+export const WRONG_REASONS = ["RETAILER", "DIFFERENT_CATEGORY"] as const;
 export type WrongReason = (typeof WRONG_REASONS)[number];
-export const WRONG_REASON_LABELS: Record<WrongReason, string> = {
-  WHOLESALER: "Wholesaler",
+export const WRONG_REASON_LABELS: Record<WrongReason | "WHOLESALER", string> = {
+  RETAILER: "Retailer",
+  // Legacy records stored "WHOLESALER" as the reason; keep the label so they render.
+  WHOLESALER: "Retailer",
   DIFFERENT_CATEGORY: "Different category",
 };
 
