@@ -25,12 +25,44 @@ export function buildTelLink(phone: string): string | null {
   return `tel:+${full}`;
 }
 
-// Build a wa.me link from an Indian phone string like "+91-79428-43226".
-export function buildWaLink(phone: string, vendorName: string): string | null {
+// Normalize an Indian phone string like "+91-79428-43226" to digits with
+// country code. Returns null if it doesn't look like a real number.
+function normalizePhone(phone: string): string | null {
   const digits = phone.replace(/\D/g, "");
   if (digits.length < 10) return null;
   // ensure country code; assume India if 10 digits
-  const full = digits.length === 10 ? `91${digits}` : digits;
-  const msg = getTemplate().replaceAll("{vendor}", vendorName || "there");
+  return digits.length === 10 ? `91${digits}` : digits;
+}
+
+function buildWaText(vendorName: string): string {
+  return getTemplate().replaceAll("{vendor}", vendorName || "there");
+}
+
+// Build a wa.me link from an Indian phone string like "+91-79428-43226".
+// Universal link — opens whichever WhatsApp app is the device default.
+export function buildWaLink(phone: string, vendorName: string): string | null {
+  const full = normalizePhone(phone);
+  if (!full) return null;
+  const msg = buildWaText(vendorName);
   return `https://wa.me/${full}?text=${encodeURIComponent(msg)}`;
+}
+
+// Build an Android intent URL that targets the WhatsApp Business app
+// (package com.whatsapp.w4b) specifically, rather than regular WhatsApp.
+// Falls back to the wa.me link if the Business app isn't installed.
+export function buildWaBusinessLink(
+  phone: string,
+  vendorName: string,
+): string | null {
+  const full = normalizePhone(phone);
+  if (!full) return null;
+  const msg = encodeURIComponent(buildWaText(vendorName));
+  const fallback = encodeURIComponent(
+    `https://wa.me/${full}?text=${msg}`,
+  );
+  return (
+    `intent://send?phone=${full}&text=${msg}` +
+    `#Intent;scheme=whatsapp;package=com.whatsapp.w4b;` +
+    `S.browser_fallback_url=${fallback};end`
+  );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
-import { buildWaLink } from "@/lib/whatsapp";
+import { buildWaLink, buildWaBusinessLink } from "@/lib/whatsapp";
 import { toast } from "sonner";
 
 export function WhatsAppButton({
@@ -18,12 +18,24 @@ export function WhatsAppButton({
   const open = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const url = buildWaLink(phone, vendorName);
+    // On Android, route to the WhatsApp Business app (com.whatsapp.w4b) via an
+    // intent URL; it falls back to wa.me if Business isn't installed. Elsewhere
+    // use the universal wa.me link.
+    const isAndroid =
+      typeof navigator !== "undefined" && /Android/i.test(navigator.userAgent);
+    const url = isAndroid
+      ? buildWaBusinessLink(phone, vendorName)
+      : buildWaLink(phone, vendorName);
     if (!url) {
       toast.error("No valid WhatsApp number");
       return;
     }
-    window.open(url, "_blank");
+    if (isAndroid) {
+      // intent:// URLs must navigate the current tab, not open a new window.
+      window.location.href = url;
+    } else {
+      window.open(url, "_blank");
+    }
   };
 
   if (variant === "full") {
