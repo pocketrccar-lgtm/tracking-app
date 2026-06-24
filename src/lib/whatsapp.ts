@@ -4,7 +4,7 @@
 export const WA_TEMPLATE_KEY = "prc_wa_template";
 
 export const DEFAULT_WA_TEMPLATE =
-  "Hi,\n\nthis is Varsa from PRC (pokketrccar.com) — the RC division of bharath cycle hub, 25-year-old business in the sports & cycling trade (bicycles, e-cycles, sports goods & accessories).\n\nFor the last 1.5 years we've been active in RC cars category and already sell a range of RC cars, drift cars, hobby grade RC cars, ride-ons and kids' toys across India.\n\nCould you please share your latest stock sheet with quantities and pricing? Happy to share our visiting card and GST details for your reference. Thank you!\n\nthese are our socials link.\nInstagram: https://www.instagram.com/164prccars\nYouTube: https://youtube.com/@164prccars";
+  "Hi,\n\nthis is Varsa from PRC (pocketrccars.com) — the RC division of bharath cycle hub, 25-year-old business in the sports & cycling trade (bicycles, e-cycles, sports goods & accessories).\n\nFor the last 1.5 years we've been active in RC cars category and already sell a range of RC cars, drift cars, hobby grade RC cars, ride-ons and kids' toys across India.\n\nCould you please share your latest stock sheet with quantities and pricing? Happy to share our visiting card and GST details for your reference. Thank you!\n\nthese are our socials link.\nInstagram: https://www.instagram.com/164prccars\nYouTube: https://youtube.com/@164prccars";
 
 export function getTemplate(): string {
   if (typeof window === "undefined") return DEFAULT_WA_TEMPLATE;
