@@ -43,6 +43,7 @@ export const WRONG_REASONS = [
   "DIFFERENT_CATEGORY",
   "INDIAMART_NUMBER",
   "WRONG_CONTACT",
+  "DIDNT_CONNECT",
 ] as const;
 export type WrongReason = (typeof WRONG_REASONS)[number];
 export const WRONG_REASON_LABELS: Record<WrongReason | "WHOLESALER", string> = {
@@ -52,6 +53,7 @@ export const WRONG_REASON_LABELS: Record<WrongReason | "WHOLESALER", string> = {
   DIFFERENT_CATEGORY: "Different category",
   INDIAMART_NUMBER: "IndiaMart number",
   WRONG_CONTACT: "Wrong contact details",
+  DIDNT_CONNECT: "Didn't connect",
 };
 
 export type VendorStatus = (typeof VENDOR_STATUSES)[number];
@@ -164,7 +166,7 @@ export const VENDOR_STATUS_LABELS: Record<VendorStatus, string> = {
   CONTACTED: "Just contacted",
   ORDER_PLACED: "Order placed",
   ACTIVE: "Active supplier",
-  WRONG_SUPPLIER: "Wrong supplier",
+  WRONG_SUPPLIER: "Lost lead",
 };
 
 export const DRIFT_STATUS_LABELS: Record<DriftStatus, string> = {

@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -65,6 +66,10 @@ export default async function VendorsListPage({
   }>;
 }) {
   const params = await searchParams;
+  // Default landing view = "Pending to connect" (status NEW). A bare /vendors
+  // visit (e.g. from the bottom nav) redirects so the pending filter is on by
+  // default; any explicit filter/param skips this.
+  if (Object.keys(params).length === 0) redirect("/vendors?status=NEW");
   const page = Math.max(1, parseInt(params.page ?? "1", 10) || 1);
   const skip = (page - 1) * PAGE_SIZE;
 

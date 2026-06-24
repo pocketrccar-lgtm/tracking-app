@@ -65,7 +65,7 @@ export function VendorControls({
       setReasonOpen(false);
       try {
         await markWrongSupplier(vendorId, r);
-        toast.success(`Marked wrong supplier — ${WRONG_REASON_LABELS[r]}`);
+        toast.success(`Marked lost lead — ${WRONG_REASON_LABELS[r]}`);
         router.refresh();
       } catch {
         toast.error("Failed to update");
@@ -141,14 +141,14 @@ export function VendorControls({
               disabled={pending}
               className="text-xs font-semibold text-rose-500 disabled:opacity-50"
             >
-              Mark wrong supplier
+              Mark lost lead
             </button>
           )}
         </div>
 
         {dropped ? (
           <div className="rounded-lg bg-rose-50 px-3 py-4 text-center text-sm font-semibold text-rose-600">
-            Wrong supplier
+            Lost lead
             {reason ? ` — ${WRONG_REASON_LABELS[reason as WrongReason] ?? reason}` : ""}
             <br />
             <span className="text-xs font-normal text-rose-500">
@@ -262,7 +262,7 @@ export function VendorControls({
         </Button>
       </div>
 
-      <BottomSheet open={reasonOpen} onOpenChange={setReasonOpen} title="Why is this a wrong supplier?">
+      <BottomSheet open={reasonOpen} onOpenChange={setReasonOpen} title="Why is this a lost lead?">
         <div className="space-y-2 pt-1">
           {WRONG_REASONS.map((r) => (
             <button

@@ -155,7 +155,7 @@ export default async function DashboardPage() {
                     href="/vendors?status=WRONG_SUPPLIER"
                     className="flex items-center justify-between pt-1 text-xs text-slate-400"
                   >
-                    <span>Wrong suppliers</span>
+                    <span>Lost leads</span>
                     <span className="tabular-nums">{statusCounts["WRONG_SUPPLIER"]}</span>
                   </Link>
                 )}

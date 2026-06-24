@@ -201,7 +201,7 @@ export function VendorListFilters({
             wrongActive ? "bg-rose-600 text-white" : "bg-rose-50 text-rose-600"
           }`}
         >
-          Wrong supplier
+          Lost lead
           <span
             className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tabular-nums ${
               wrongActive ? "bg-white/25 text-white" : "bg-rose-200 text-rose-700"
