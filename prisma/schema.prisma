@@ -118,8 +118,8 @@ model VendorPhone {
   id        String  @id @default(cuid())
   vendorId  String
   phone     String
-  label     String? // "main" | "whatsapp" | "founder" | "wholesale" | "retail"
-  verified  Boolean @default(false)
+  label     String? // "sales" | "corporate" (manufacturer's own lines) | "main" | "whatsapp" | "founder" | "dealer" | "spares" | "wholesale" | "retail"
+  verified  Boolean @default(false) // true = read off the official website / Google Business profile — shown first, dialled first
   vendor    Vendor  @relation(fields: [vendorId], references: [id], onDelete: Cascade)
 
   @@index([vendorId])

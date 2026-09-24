@@ -36,7 +36,7 @@ export async function buildDailyReport(
         ...userFilter,
         occurredAt: { gte: dayStart, lte: dayEnd },
       },
-      include: { vendor: { include: { phones: { take: 1 } } } },
+      include: { vendor: { include: { phones: { take: 1, orderBy: [{ verified: "desc" }, { id: "asc" }] } } } },
       distinct: ["vendorId"],
     }),
     db.vendor.findMany({
@@ -62,7 +62,7 @@ export async function buildDailyReport(
         ...userFilter,
         occurredAt: { gte: dayStart, lte: dayEnd },
       },
-      include: { vendor: { include: { phones: { take: 1 } } } },
+      include: { vendor: { include: { phones: { take: 1, orderBy: [{ verified: "desc" }, { id: "asc" }] } } } },
       orderBy: { occurredAt: "desc" },
       take: 5,
     }),

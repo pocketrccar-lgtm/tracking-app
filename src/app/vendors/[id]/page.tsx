@@ -58,7 +58,7 @@ export default async function VendorDetailPage({
   const vendor = await db.vendor.findUnique({
     where: { id },
     include: {
-      phones: true,
+      phones: { orderBy: [{ verified: "desc" }, { id: "asc" }] },
       emails: true,
       products: { take: 8, orderBy: { updatedAt: "desc" } },
       tasks: {

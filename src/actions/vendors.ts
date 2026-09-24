@@ -24,7 +24,7 @@ function parsePhones(fd: FormData) {
   const phones = fd.getAll("phone").map(String);
   const labels = fd.getAll("phoneLabel").map(String);
   return phones
-    .map((p, i) => ({ phone: p.trim(), label: labels[i]?.trim() || "main" }))
+    .map((p, i) => ({ phone: p.trim(), label: labels[i]?.trim() || "main", verified: false }))
     .filter((p) => p.phone.length >= 4);
 }
 
@@ -91,7 +91,12 @@ export async function updateVendor(id: string, fd: FormData) {
   // Editing a still-NEW vendor counts as engaging it → advance to CONTACTED.
   if (data.status === "NEW") data.status = "CONTACTED";
   await assertInVertical(db, { categoryId: data.categoryId });
-  const phones = parsePhones(fd);
+  // The edit form rebuilds the phone list; carry over the verified flag of any
+  // number that was verified before, so the verified sales line stays first.
+  const before = await db.vendor.findUnique({ where: { id }, select: { phones: { select: { phone: true, verified: true } } } });
+  const digits = (p: string) => p.replace(/\D/g, "").slice(-10);
+  const wasVerified = new Set((before?.phones ?? []).filter((p) => p.verified).map((p) => digits(p.phone)));
+  const phones = parsePhones(fd).map((p) => ({ ...p, verified: wasVerified.has(digits(p.phone)) }));
   const emails = parseEmails(fd);
 
   await db.$transaction([

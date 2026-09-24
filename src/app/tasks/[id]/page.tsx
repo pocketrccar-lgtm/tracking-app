@@ -49,7 +49,7 @@ export default async function TaskViewPage({
     db.task.findUnique({
       where: { id },
       include: {
-        vendor: { include: { phones: { take: 1 } } },
+        vendor: { include: { phones: { take: 1, orderBy: [{ verified: "desc" }, { id: "asc" }] } } },
         assignedTo: true,
       },
     }),

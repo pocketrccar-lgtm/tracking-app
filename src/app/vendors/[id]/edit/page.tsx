@@ -16,7 +16,7 @@ export default async function EditVendorPage({
   const { id } = await params;
   const vendor = await db.vendor.findUnique({
     where: { id },
-    include: { phones: true, emails: true },
+    include: { phones: { orderBy: [{ verified: "desc" }, { id: "asc" }] }, emails: true },
   });
   if (!vendor) notFound();
 

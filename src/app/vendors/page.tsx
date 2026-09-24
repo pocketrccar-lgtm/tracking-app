@@ -144,7 +144,7 @@ export default async function VendorsListPage({
       skip,
       take: PAGE_SIZE,
       include: {
-        phones: { take: 1 },
+        phones: { take: 1, orderBy: [{ verified: "desc" }, { id: "asc" }] },
         interactions: { select: { outcome: true }, orderBy: { occurredAt: "desc" }, take: 20 },
       },
     }),

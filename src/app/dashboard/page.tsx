@@ -53,7 +53,7 @@ export default async function DashboardPage() {
     db.vendor.findMany({
       orderBy: { updatedAt: "desc" },
       take: 8,
-      include: { phones: { take: 1 } },
+      include: { phones: { take: 1, orderBy: [{ verified: "desc" }, { id: "asc" }] } },
     }),
   ]);
 
