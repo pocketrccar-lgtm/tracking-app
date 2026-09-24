@@ -11,6 +11,9 @@ import {
   VENDOR_STATUS_FUNNEL,
   DRIFT_STATUSES,
   MARKET_LEVELS,
+  CALL_OUTCOMES,
+  CALL_OUTCOME_LABELS,
+  CALL_OUTCOME_ICONS,
   VENDOR_TYPE_LABELS,
   VENDOR_STATUS_LABELS,
   STATUS_COLORS,
@@ -111,6 +114,7 @@ export function VendorListFilters({
     { key: "type", label: "Type", options: VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] })) },
     { key: "status", label: "Status", options: VENDOR_STATUSES.map((s) => ({ value: s, label: VENDOR_STATUS_LABELS[s] })) },
     { key: "drift", label: labels.fitName, options: DRIFT_STATUSES.map((d) => ({ value: d, label: labels.fit[d] })) },
+    { key: "call", label: "Call outcome", options: CALL_OUTCOMES.map((c) => ({ value: c, label: `${CALL_OUTCOME_ICONS[c]} ${CALL_OUTCOME_LABELS[c]}` })) },
   ];
 
   return (

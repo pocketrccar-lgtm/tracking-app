@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { VendorControls } from "@/components/vendor-controls";
+import { CallOutcomeButtons } from "@/components/call-outcome-buttons";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +76,7 @@ export default async function VendorDetailPage({
   });
 
   if (!vendor) notFound();
+  const noAnswerCount = await db.interaction.count({ where: { vendorId: vendor.id, outcome: "NO_ANSWER" } });
 
   return (
     <div className="px-4 pt-5 pb-28 space-y-6">
@@ -133,6 +135,18 @@ export default async function VendorDetailPage({
           </Link>
         </div>
       </div>
+
+      <Card>
+        <CardContent className="space-y-2 p-4">
+          <div className="flex items-baseline justify-between gap-2">
+            <div className="text-sm font-bold text-slate-900">Log this call</div>
+            {noAnswerCount > 0 && (
+              <div className="text-xs font-semibold text-slate-500">📵 No answer ×{noAnswerCount}</div>
+            )}
+          </div>
+          <CallOutcomeButtons vendorId={vendor.id} />
+        </CardContent>
+      </Card>
 
       <VendorControls
         vendorId={vendor.id}
@@ -488,7 +502,7 @@ export default async function VendorDetailPage({
                     </div>
                     {i.outcome && (
                       <Badge variant="outline" className="mt-1">
-                        {i.outcome}
+                        {i.outcome.replaceAll("_", " ").toLowerCase().replace(/^./, (c) => c.toUpperCase())}
                       </Badge>
                     )}
                     {i.notes && (

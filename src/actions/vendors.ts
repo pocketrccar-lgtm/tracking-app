@@ -161,3 +161,41 @@ export async function updateVendorType(id: string, type: string) {
   revalidatePath("/vendors");
   revalidatePath("/dashboard");
 }
+
+// One-tap call outcome from the vendor screen. Logs the call in the vendor's
+// history and moves its status:
+//   NO_ANSWER → status unchanged (stays pending; the attempt is counted)
+//   QUALITY   → NEW becomes CONTACTED (a real conversation happened)
+//   WASTE     → Lost lead, reason "Waste lead"
+export async function logCallOutcome(vendorId: string, outcome: string) {
+  if (!["NO_ANSWER", "QUALITY", "WASTE"].includes(outcome)) throw new Error("Unknown outcome");
+  const db = await vdb();
+  // Scoped lookup — a vendor from another category is "not found".
+  const vendor = await db.vendor.findUnique({ where: { id: vendorId }, select: { status: true } });
+  if (!vendor) throw new Error("Vendor not found in this category");
+  // The app has no login yet; calls are attributed to the shared partner account.
+  const author =
+    (await db.user.findFirst({ where: { name: { startsWith: "Shared" } } })) ??
+    (await db.user.findFirst({ orderBy: { createdAt: "asc" } }));
+  if (!author) throw new Error("No user to attribute the call to");
+
+  const label = { NO_ANSWER: "No answer", QUALITY: "Quality lead", WASTE: "Waste lead" }[outcome];
+  const statusChange =
+    outcome === "QUALITY"
+      ? vendor.status === "NEW" ? { status: "CONTACTED" } : {}
+      : outcome === "WASTE"
+        ? { status: "WRONG_SUPPLIER", wrongReason: "WASTE_LEAD" }
+        : {};
+
+  await db.$transaction([
+    db.interaction.create({
+      data: { vendorId, userId: author.id, type: "CALL", outcome, notes: label },
+    }),
+    // Always touch the vendor so "Updated" reflects the call; merge any status change.
+    db.vendor.update({ where: { id: vendorId }, data: { ...statusChange, updatedAt: new Date() } }),
+  ]);
+
+  revalidatePath(`/vendors/${vendorId}`);
+  revalidatePath("/vendors");
+  revalidatePath("/dashboard");
+}

@@ -44,6 +44,7 @@ export const WRONG_REASONS = [
   "INDIAMART_NUMBER",
   "WRONG_CONTACT",
   "DIDNT_CONNECT",
+  "WASTE_LEAD",
 ] as const;
 export type WrongReason = (typeof WRONG_REASONS)[number];
 export const WRONG_REASON_LABELS: Record<WrongReason | "WHOLESALER", string> = {
@@ -54,6 +55,7 @@ export const WRONG_REASON_LABELS: Record<WrongReason | "WHOLESALER", string> = {
   INDIAMART_NUMBER: "IndiaMart number",
   WRONG_CONTACT: "Wrong contact details",
   DIDNT_CONNECT: "Didn't connect",
+  WASTE_LEAD: "Waste lead",
 };
 
 export type VendorStatus = (typeof VENDOR_STATUSES)[number];
@@ -124,6 +126,9 @@ export const INTERACTION_OUTCOMES = [
   "REJECTED",
   "ENGAGED",
   "FOLLOW_UP_SCHEDULED",
+  // One-tap call outcomes logged from the vendor screen.
+  "QUALITY",
+  "WASTE",
 ] as const;
 
 export type InteractionOutcome = (typeof INTERACTION_OUTCOMES)[number];
@@ -255,3 +260,19 @@ export const DEFAULT_CATEGORIES = [
   { name: "Chinese Factories", slug: "china-factories", color: "red" },
   { name: "General Toy", slug: "general-toy", color: "slate" },
 ];
+
+// ─── One-tap call outcomes ──────────────────────────────────────────────────
+// NO_ANSWER keeps the vendor pending (attempt counted); QUALITY advances a new
+// lead to "Just contacted"; WASTE drops it to Lost lead with reason "Waste lead".
+export const CALL_OUTCOMES = ["NO_ANSWER", "QUALITY", "WASTE"] as const;
+export type CallOutcome = (typeof CALL_OUTCOMES)[number];
+export const CALL_OUTCOME_LABELS: Record<CallOutcome, string> = {
+  NO_ANSWER: "No answer",
+  QUALITY: "Quality lead",
+  WASTE: "Waste lead",
+};
+export const CALL_OUTCOME_ICONS: Record<CallOutcome, string> = {
+  NO_ANSWER: "📵",
+  QUALITY: "⭐",
+  WASTE: "🗑",
+};

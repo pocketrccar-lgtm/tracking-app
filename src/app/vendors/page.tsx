@@ -27,6 +27,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { WhatsAppButton } from "@/components/whatsapp-button";
 import { CallButton } from "@/components/call-button";
+import { CallOutcomeButtons } from "@/components/call-outcome-buttons";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,31 @@ function DriftTag({ s, labels }: { s: string; labels: VerticalLabels }) {
   return null;
 }
 
+// Call-outcome chip: how many unanswered calls, and the latest quality verdict.
+function CallTag({ outcomes }: { outcomes: (string | null)[] }) {
+  const noAnswer = outcomes.filter((o) => o === "NO_ANSWER").length;
+  const verdict = outcomes.find((o) => o === "QUALITY" || o === "WASTE");
+  return (
+    <>
+      {noAnswer > 0 && (
+        <span className="shrink-0 rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-bold text-slate-600">
+          📵 ×{noAnswer}
+        </span>
+      )}
+      {verdict === "QUALITY" && (
+        <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
+          ⭐ Quality
+        </span>
+      )}
+      {verdict === "WASTE" && (
+        <span className="shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[10px] font-bold text-rose-700">
+          🗑 Waste
+        </span>
+      )}
+    </>
+  );
+}
+
 export default async function VendorsListPage({
   searchParams,
 }: {
@@ -61,6 +87,7 @@ export default async function VendorsListPage({
     drift?: string;
     marketLevel?: string;
     supply?: string;
+    call?: string;
     sort?: string;
     page?: string;
   }>;
@@ -85,6 +112,9 @@ export default async function VendorsListPage({
   if (params.drift) where.driftStatus = params.drift;
   if (params.marketLevel) where.marketLevel = params.marketLevel;
   if (params.supply === "1") where.rank = { not: null };
+  // Call-outcome filter: vendors with at least one logged call of that outcome.
+  if (params.call && ["NO_ANSWER", "QUALITY", "WASTE"].includes(params.call))
+    where.interactions = { some: { outcome: params.call } };
   if (params.q) {
     const q = params.q;
     where.OR = [
@@ -113,7 +143,10 @@ export default async function VendorsListPage({
       orderBy,
       skip,
       take: PAGE_SIZE,
-      include: { phones: { take: 1 } },
+      include: {
+        phones: { take: 1 },
+        interactions: { select: { outcome: true }, orderBy: { occurredAt: "desc" }, take: 20 },
+      },
     }),
     db.vendor.count({ where }),
     db.vendor.findMany({
@@ -240,6 +273,7 @@ export default async function VendorsListPage({
                           {v.name}
                         </Link>
                         <DriftTag s={v.driftStatus} labels={labels} />
+                        <CallTag outcomes={v.interactions.map((i) => i.outcome)} />
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-slate-600 dark:text-neutral-300">
@@ -337,6 +371,7 @@ export default async function VendorsListPage({
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     <DriftTag s={v.driftStatus} labels={labels} />
+                        <CallTag outcomes={v.interactions.map((i) => i.outcome)} />
                     <Badge variant="outline" className="bg-slate-50 text-slate-600">
                       {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
                     </Badge>
@@ -355,6 +390,7 @@ export default async function VendorsListPage({
                 </Link>
                 <CallButton phone={v.phones[0]?.phone} vendorName={v.name} />
                 <WhatsAppButton phone={v.phones[0]?.phone} vendorName={v.name} />
+                <CallOutcomeButtons vendorId={v.id} compact />
               </div>
             ))}
           </div>
