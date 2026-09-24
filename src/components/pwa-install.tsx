@@ -107,7 +107,7 @@ export function PwaInstall() {
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold leading-tight">Install BCH Source</p>
+        <p className="text-sm font-semibold leading-tight">Install Sourcing OS</p>
         {showIOSHint ? (
           <p className="mt-0.5 text-xs leading-snug text-white/90">
             Tap Share, then &ldquo;Add to Home Screen&rdquo;.

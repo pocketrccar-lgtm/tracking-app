@@ -213,7 +213,7 @@ export default async function VendorDetailPage({
         </Card>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 [&>*]:min-w-0">
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Contact</CardTitle>
@@ -260,7 +260,7 @@ export default async function VendorDetailPage({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="text-red-600 hover:underline truncate"
+                  className="min-w-0 text-red-600 hover:underline truncate"
                 >
                   {vendor.websiteUrl}
                 </a>
@@ -276,7 +276,7 @@ export default async function VendorDetailPage({
                   }
                   target="_blank"
                   rel="noreferrer"
-                  className="text-red-600 hover:underline truncate"
+                  className="min-w-0 text-red-600 hover:underline truncate"
                 >
                   Instagram
                 </a>
@@ -289,7 +289,7 @@ export default async function VendorDetailPage({
                   href={vendor.youtubeUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-red-600 hover:underline truncate"
+                  className="min-w-0 text-red-600 hover:underline truncate"
                 >
                   YouTube
                 </a>
@@ -302,7 +302,7 @@ export default async function VendorDetailPage({
                   href={vendor.indiamartUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-red-600 hover:underline truncate"
+                  className="min-w-0 text-red-600 hover:underline truncate"
                 >
                   IndiaMART
                 </a>
@@ -379,7 +379,7 @@ export default async function VendorDetailPage({
                     }
                     target="_blank"
                     rel="noreferrer"
-                    className="text-red-600 hover:underline truncate"
+                    className="min-w-0 text-red-600 hover:underline truncate"
                   >
                     {vendor.founderLinkedin}
                   </a>
@@ -395,7 +395,7 @@ export default async function VendorDetailPage({
               <CardTitle className="text-sm">Notes</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-slate-700 dark:text-neutral-300 whitespace-pre-line">
+              <p className="text-sm text-slate-700 dark:text-neutral-300 whitespace-pre-line [overflow-wrap:anywhere]">
                 {vendor.notes}
               </p>
             </CardContent>
@@ -405,7 +405,7 @@ export default async function VendorDetailPage({
 
       <Separator />
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 [&>*]:min-w-0">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Tasks</CardTitle>

@@ -206,7 +206,7 @@ export default async function VendorsListPage({
       ) : (
         <>
           {/* Desktop table */}
-          <Card className="hidden md:block overflow-hidden">
+          <Card className="hidden md:block overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
