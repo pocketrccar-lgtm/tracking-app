@@ -1,7 +1,7 @@
 {
-  "name": "Pocket RC Cars",
-  "short_name": "PRC Cars",
-  "description": "Pocket RC Cars sourcing OS — vendors, quotes, tasks and supply-side research on the go. pokketrccar.com",
+  "name": "Sourcing OS",
+  "short_name": "Sourcing OS",
+  "description": "Sourcing OS — vendors, quotes, tasks and supply-side research across categories (Pocket RC, EV Scooters).",
   "display": "standalone",
   "orientation": "portrait",
   "start_url": "/dashboard",

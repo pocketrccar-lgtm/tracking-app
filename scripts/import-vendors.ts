@@ -6,10 +6,12 @@
  *
  * Run:  npm run db:import-vendors   (after npm run db:migrate + npm run db:seed)
  */
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 import { readFileSync } from "fs";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 
 const DEFAULT_MD = "/Users/syedibrahim/Desktop/SOURCING_HQ/RC_RESEARCH/SHOAIB_MASTER_CALL_LIST.md";
 const MD_PATH = process.env.MD_PATH || DEFAULT_MD;

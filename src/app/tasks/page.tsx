@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { scope, getVerticals } from "@/lib/vertical";
+import { labelsFor } from "@/lib/vertical-labels";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader } from "@/components/page-header";
@@ -43,11 +44,17 @@ export default async function TasksPage({
     created?: string;
   }>;
 }) {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
+  const verticalName = (await getVerticals()).find((v) => v.id === verticalId)?.name ?? "Sourcing OS";
   const params = await searchParams;
+  // The ₹30L roadmap is Pocket RC's plan; other verticals open on the list.
   const view =
     params.view === "list" || params.view === "kanban"
       ? params.view
-      : "roadmap";
+      : labels.hasRoadmap
+        ? "roadmap"
+        : "list";
 
   // Confirmation popup for just-created task(s) — driven by ?created=<ids>
   const createdIds = (params.created ?? "").split(",").filter(Boolean);
@@ -82,7 +89,7 @@ export default async function TasksPage({
       <div>
         <PageHeader title="Roadmap" subtitle="Your climb to ₹30L / month" />
         <div className="px-4 pt-5 pb-32 space-y-4">
-          <ViewToggle view={view} />
+          <ViewToggle view={view} hasRoadmap={labels.hasRoadmap} />
           <NewTaskButton />
           <Roadmap tasks={tasks} />
         </div>
@@ -114,7 +121,7 @@ export default async function TasksPage({
   else if (who === "shoaib" && shoaib) assignedToIds = [shoaib.id];
   else if (who === "pandey" && pandey) assignedToIds = [pandey.id];
 
-  const allWho = await getCachedTaskRows(assignedToIds);
+  const allWho = await getCachedTaskRows(verticalId, assignedToIds);
 
   const todayMs = Date.parse(isoDate(new Date()));
 
@@ -249,7 +256,7 @@ export default async function TasksPage({
       ["🗓️ LATER", sec.later],
       ["⚪ NO DUE DATE", sec.nodate],
     ];
-    const lines = [`*Tasks for ${whoName}* — ${openForWho.length} open`, "_via Pocket RC Cars_"];
+    const lines = [`*Tasks for ${whoName}* — ${openForWho.length} open`, `_via Sourcing OS · ${verticalName}_`];
     for (const [head, arr] of blocks) {
       if (!arr.length) continue;
       lines.push("", `*${head}*`, ...arr);
@@ -294,7 +301,7 @@ export default async function TasksPage({
     <div>
       <PageHeader title="Tasks" subtitle={subtitle} />
       <div className="px-4 pt-5 pb-32 space-y-3">
-        <ViewToggle view={view} />
+        <ViewToggle view={view} hasRoadmap={labels.hasRoadmap} />
         <NewTaskButton />
 
         {/* who: All + the three people */}
@@ -396,16 +403,18 @@ export default async function TasksPage({
   );
 }
 
-function ViewToggle({ view }: { view: string }) {
+function ViewToggle({ view, hasRoadmap }: { view: string; hasRoadmap: boolean }) {
   const seg = (active: boolean) =>
     `flex-1 rounded-lg py-2 min-h-[40px] flex items-center justify-center text-xs font-bold transition-all ${
       active ? "bg-white shadow-sm text-slate-900" : "text-slate-400"
     }`;
   return (
     <div className="flex rounded-xl bg-slate-100 p-1">
-      <Link href="/tasks" className={seg(view === "roadmap")}>
-        Roadmap
-      </Link>
+      {hasRoadmap && (
+        <Link href="/tasks" className={seg(view === "roadmap")}>
+          Roadmap
+        </Link>
+      )}
       <Link href="/tasks?view=list" className={seg(view === "list")}>
         List
       </Link>

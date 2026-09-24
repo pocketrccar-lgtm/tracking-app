@@ -1,7 +1,9 @@
 // Clean up: drop generic "market location" entries + exact-normalized duplicates
 // (keeps the richest copy: ranked > has-phone > longer-notes > oldest).
-import { PrismaClient } from "../src/generated/prisma";
-const db = new PrismaClient();
+import { scopedDb } from "../src/lib/vertical";
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 const norm = (s: string) => (s || "").toLowerCase().replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9]+/g, "");
 
 // names that are markets/areas, not a specific business

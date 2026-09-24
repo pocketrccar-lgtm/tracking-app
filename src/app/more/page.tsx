@@ -67,8 +67,8 @@ const SECTIONS: { title: string; items: Item[] }[] = [
     items: [
       {
         href: "/categories",
-        label: "Categories",
-        desc: "Verticals — RC cars, helmets, fitness…",
+        label: "Sub-categories",
+        desc: "Sub-types inside the current category",
         icon: Tag,
       },
       {
@@ -145,7 +145,7 @@ export default function MorePage() {
         </div>
 
         <p className="px-1 text-center text-xs text-slate-400">
-          Pocket RC Cars · pokketrccar.com
+          Sourcing OS · switch category at the top
         </p>
       </div>
     </div>

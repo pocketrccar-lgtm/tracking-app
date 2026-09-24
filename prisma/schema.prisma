@@ -1,5 +1,5 @@
-// BCH Sourcing OS — Vendor CRM for the BCH RC car launch
-// SQLite for dev; swap provider to "postgresql" + DATABASE_URL for Supabase production
+// Sourcing OS — multi-vertical vendor CRM (Pocket RC, EV Scooters, …)
+// Every vertical shares these tables; rows are partitioned by `verticalId`.
 
 generator client {
   provider = "prisma-client-js"
@@ -10,6 +10,22 @@ datasource db {
   provider  = "postgresql"
   url       = env("POSTGRES_PRISMA_URL")
   directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// ─── Verticals ──────────────────────────────────────────────────────────────
+// A business line being sourced for (Pocket RC, EV Scooters). The id IS the slug
+// ("pocket-rc") so it can be used as a column default during the rollout.
+
+model Vertical {
+  id         String     @id
+  name       String     @unique
+  color      String?
+  order      Int        @default(0)
+  createdAt  DateTime   @default(now())
+  vendors    Vendor[]
+  tasks      Task[]
+  categories Category[]
+  playbooks  Playbook[]
 }
 
 // ─── Users ──────────────────────────────────────────────────────────────────
@@ -82,6 +98,11 @@ model Vendor {
   categories      VendorCategory[]
   purchaseOrders  PurchaseOrder[]
 
+  // Rollout: nullable + default until every row is stamped, then NOT NULL.
+  verticalId      String?  @default("pocket-rc")
+  vertical        Vertical? @relation(fields: [verticalId], references: [id], onDelete: Restrict)
+
+  @@unique([verticalId, name])
   @@index([state])
   @@index([type])
   @@index([tier])
@@ -89,6 +110,8 @@ model Vendor {
   @@index([driftStatus])
   @@index([rank])
   @@index([marketLevel])
+  @@index([verticalId, status])
+  @@index([verticalId, rank])
 }
 
 model VendorPhone {
@@ -125,6 +148,11 @@ model Category {
   primaryVendors Vendor[]         @relation("PrimaryCategory")
   products       Product[]
   playbooks      Playbook[]
+  // Sub-categories live inside one vertical (e.g. Drift RC inside Pocket RC).
+  verticalId     String?          @default("pocket-rc")
+  vertical       Vertical?        @relation(fields: [verticalId], references: [id], onDelete: Restrict)
+
+  @@index([verticalId])
 }
 
 // A research funnel / workflow stored in-app (Apify scan, YouTube scan,
@@ -139,8 +167,11 @@ model Playbook {
   order      Int       @default(0)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
+  verticalId String?   @default("pocket-rc")
+  vertical   Vertical? @relation(fields: [verticalId], references: [id], onDelete: Restrict)
 
   @@index([categoryId])
+  @@index([verticalId])
 }
 
 model VendorCategory {
@@ -222,11 +253,15 @@ model Task {
 
   vendor       Vendor?   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
   assignedTo   User?     @relation(fields: [assignedToId], references: [id])
+  // Tasks may have no vendor (roadmap tasks), so the vertical is stamped directly.
+  verticalId   String?   @default("pocket-rc")
+  vertical     Vertical? @relation(fields: [verticalId], references: [id], onDelete: Restrict)
 
   @@index([vendorId])
   @@index([assignedToId])
   @@index([status])
   @@index([dueDate])
+  @@index([verticalId, status])
 }
 
 // ─── Interactions (call/visit/dm log) ───────────────────────────────────────

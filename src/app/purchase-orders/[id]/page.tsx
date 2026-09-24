@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { notFound } from "next/navigation";
 import { updatePurchaseOrder } from "@/actions/purchase-orders";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +18,7 @@ export default async function POEditPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const db = await vdb();
   const { id } = await params;
   const po = await db.purchaseOrder.findUnique({
     where: { id },

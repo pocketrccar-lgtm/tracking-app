@@ -1,8 +1,8 @@
-import { PrismaClient } from "@/generated/prisma";
+import type { ScopedDb } from "@/lib/vertical";
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, format } from "date-fns";
 
 export async function buildDailyReport(
-  db: PrismaClient,
+  db: ScopedDb,
   { userId, date }: { userId: string | null; date: Date },
 ) {
   const dayStart = startOfDay(date);
@@ -137,7 +137,7 @@ export function formatDailyReportText(
 }
 
 export async function buildWeeklyReport(
-  db: PrismaClient,
+  db: ScopedDb,
   { weekOf }: { weekOf: Date },
 ) {
   const weekStart = startOfWeek(weekOf, { weekStartsOn: 1 });

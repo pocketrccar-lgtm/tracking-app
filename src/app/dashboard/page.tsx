@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { scope, getVerticals } from "@/lib/vertical";
+import { labelsFor } from "@/lib/vertical-labels";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -7,7 +8,6 @@ import { PageTransition } from "@/components/page-transition";
 import {
   TIER_COLORS,
   STATUS_COLORS,
-  VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
   VENDOR_STATUS_FUNNEL,
   type VendorTier,
@@ -19,6 +19,9 @@ import { ChevronRight } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
+  const verticalName = (await getVerticals()).find((v) => v.id === verticalId)?.name ?? "Sourcing OS";
   const [
     vendorCount,
     driftConfirmedCount,
@@ -68,7 +71,7 @@ export default async function DashboardPage() {
       tone: "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900/40 text-red-700 dark:text-red-300",
     },
     {
-      label: "Drift confirmed",
+      label: labels.fitConfirmedCard,
       value: driftConfirmedCount,
       sub: `+${driftLikelyCount} likely`,
       href: "/vendors?drift=YES_CONFIRMED",
@@ -92,7 +95,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Pocket RC Cars" subtitle="Sourcing OS — Syed + Shoaib" />
+      <PageHeader title={verticalName} subtitle="Sourcing OS — Syed + Shoaib" />
       <PageTransition>
         <div className="px-4 pt-5 pb-28 space-y-6">
           {/* Funnel cards */}
@@ -191,7 +194,7 @@ export default async function DashboardPage() {
                           className="flex items-center justify-between active:scale-[0.99] transition-transform"
                         >
                           <Badge variant="outline" className={TIER_COLORS[tier] ?? ""}>
-                            {VENDOR_TIER_LABELS[tier] ?? t.tier}
+                            {labels.tier[tier] ?? t.tier}
                           </Badge>
                           <span className="text-sm font-semibold text-slate-700 dark:text-neutral-300 tabular-nums">
                             {t._count._all}

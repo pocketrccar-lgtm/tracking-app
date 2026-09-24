@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { scope } from "@/lib/vertical";
 import { notFound } from "next/navigation";
 import { updateVendor } from "@/actions/vendors";
 import { VendorForm } from "@/components/vendor-form";
@@ -12,6 +12,7 @@ export default async function EditVendorPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { db, verticalId } = await scope();
   const { id } = await params;
   const vendor = await db.vendor.findUnique({
     where: { id },
@@ -34,6 +35,7 @@ export default async function EditVendorPage({
         vendor={vendor}
         action={updateAction}
         submitLabel="Save changes"
+        verticalId={verticalId}
       />
     </div>
   );

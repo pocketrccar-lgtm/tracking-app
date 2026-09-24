@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import Link from "next/link";
 import { PageHeader } from "@/components/page-header";
 import { PlaybookEditor } from "@/components/playbook-editor";
@@ -14,6 +14,7 @@ const selectClass =
   "h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20";
 
 export default async function PlaybooksPage() {
+  const db = await vdb();
   const [playbooks, categories] = await Promise.all([
     db.playbook.findMany({
       orderBy: [{ order: "asc" }, { createdAt: "asc" }],

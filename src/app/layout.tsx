@@ -4,17 +4,19 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { BottomNav } from "@/components/bottom-nav";
 import PWAInstall from "@/components/pwa-install";
+import { VerticalSwitcher } from "@/components/vertical-switcher";
+import { getVerticals, getVerticalId } from "@/lib/vertical";
 
 export const metadata: Metadata = {
-  title: "Pocket RC Cars",
+  title: "Sourcing OS",
   description:
-    "Pocket RC Cars sourcing OS — vendors, quotes, tasks & supply-side research. pokketrccar.com",
+    "Sourcing OS — vendors, quotes, tasks & supply-side research, one category at a time (Pocket RC, EV Scooters).",
   manifest: "/manifest.json",
-  applicationName: "Pocket RC Cars",
+  applicationName: "Sourcing OS",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "PRC Cars",
+    title: "Sourcing OS",
   },
   icons: {
     icon: [
@@ -34,11 +36,12 @@ export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [verticals, current] = await Promise.all([getVerticals(), getVerticalId()]);
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className="min-h-full bg-[#f5f5f7] text-slate-900 antialiased text-[15px]">
@@ -46,6 +49,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" forcedTheme="light">
           <Toaster richColors position="top-center" />
           <main className="mx-auto max-w-lg min-h-full bg-white shadow-sm">
+            <VerticalSwitcher verticals={verticals} current={current} />
             {children}
           </main>
           <BottomNav />

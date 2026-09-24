@@ -1,5 +1,7 @@
 "use client";
 
+import { labelsFor, currentVerticalIdClient } from "@/lib/vertical-labels";
+
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -50,7 +52,11 @@ export function TaskRow({
       try {
         await updateTaskStatus(id, next ? "COMPLETED" : "PENDING");
         router.refresh();
-        if (next) toast.success("✅ Done — one step closer to ₹30L");
+        if (next) toast.success(
+            labelsFor(currentVerticalIdClient()).hasRoadmap
+              ? "✅ Done — one step closer to ₹30L"
+              : "✅ Done",
+          );
       } catch {
         setDone(!next);
         toast.error("Couldn't update");

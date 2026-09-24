@@ -1,8 +1,10 @@
 // Import a city sweep's deduped suppliers. Reads data/city_vendors.json.
 import { readFileSync } from "node:fs";
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 const VALID = new Set(["MANUFACTURER", "DISTRIBUTOR", "WHOLESALER", "TRADER"]);
 // fold legacy/extra types into the clean 4
 const TYPE_MAP: Record<string, string> = { OEM: "MANUFACTURER", MOULDER: "MANUFACTURER", IMPORTER: "TRADER", RETAIL: "TRADER", MIXED: "TRADER" };

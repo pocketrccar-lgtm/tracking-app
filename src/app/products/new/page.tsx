@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { createProduct } from "@/actions/products";
 import { ProductForm } from "@/components/product-form";
 import Link from "next/link";
@@ -11,6 +11,7 @@ export default async function NewProductPage({
 }: {
   searchParams: Promise<{ vendorId?: string }>;
 }) {
+  const db = await vdb();
   const { vendorId } = await searchParams;
   const [vendors, categories] = await Promise.all([
     db.vendor.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),

@@ -1,5 +1,7 @@
 "use client";
 
+import { labelsFor } from "@/lib/vertical-labels";
+
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,7 +12,6 @@ import {
   VENDOR_TIERS,
   VENDOR_TYPES,
   VENDOR_STATUS_LABELS,
-  VENDOR_TIER_LABELS,
   VENDOR_TYPE_LABELS,
   WRONG_REASONS,
   WRONG_REASON_LABELS,
@@ -37,6 +38,7 @@ export function VendorControls({
   tier,
   type,
   wrongReason,
+  verticalId,
 }: {
   vendorId: string;
   vendorName: string;
@@ -44,7 +46,9 @@ export function VendorControls({
   tier: string;
   type: string;
   wrongReason?: string | null;
+  verticalId: string;
 }) {
+  const labels = labelsFor(verticalId);
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [current, setCurrent] = useState(status);
@@ -230,7 +234,7 @@ export function VendorControls({
             >
               {VENDOR_TIERS.map((t) => (
                 <option key={t} value={t}>
-                  {VENDOR_TIER_LABELS[t]}
+                  {labels.tier[t]}
                 </option>
               ))}
             </select>

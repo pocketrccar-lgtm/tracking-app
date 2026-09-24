@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { scope } from "@/lib/vertical";
+import { labelsFor, type VerticalLabels } from "@/lib/vertical-labels";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { buttonVariants } from "@/components/ui/button";
@@ -17,7 +18,6 @@ import { RankBadge } from "@/components/rank-badge";
 import {
   STATUS_COLORS,
   MARKET_LEVEL_COLORS,
-  MARKET_LEVEL_LABELS,
   VENDOR_STATUS_LABELS,
   VENDOR_TYPE_LABELS,
   type VendorStatus,
@@ -33,17 +33,17 @@ export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 
 // compact drift indicator — only for the meaningful states
-function DriftTag({ s }: { s: string }) {
+function DriftTag({ s, labels }: { s: string; labels: VerticalLabels }) {
   if (s === "YES_CONFIRMED")
     return (
       <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700">
-        🏁 Drift
+        {labels.fitChipConfirmed}
       </span>
     );
   if (s === "LIKELY")
     return (
       <span className="shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
-        Drift?
+        {labels.fitChipLikely}
       </span>
     );
   return null;
@@ -65,6 +65,8 @@ export default async function VendorsListPage({
     page?: string;
   }>;
 }) {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
   const params = await searchParams;
   // Default landing view = "Pending to connect" (status NEW). A bare /vendors
   // visit (e.g. from the bottom nav) redirects so the pending filter is on by
@@ -176,6 +178,7 @@ export default async function VendorsListPage({
             typeCounts={typeCounts}
             wrongCount={wrongCount}
             statusCounts={statusCounts}
+            verticalId={verticalId}
           />
         </CardContent>
       </Card>
@@ -236,7 +239,7 @@ export default async function VendorsListPage({
                         >
                           {v.name}
                         </Link>
-                        <DriftTag s={v.driftStatus} />
+                        <DriftTag s={v.driftStatus} labels={labels} />
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-slate-600 dark:text-neutral-300">
@@ -248,7 +251,7 @@ export default async function VendorsListPage({
                           variant="outline"
                           className={MARKET_LEVEL_COLORS[v.marketLevel as MarketLevel] ?? ""}
                         >
-                          {MARKET_LEVEL_LABELS[v.marketLevel as MarketLevel] ?? v.marketLevel}
+                          {labels.market[v.marketLevel as MarketLevel] ?? v.marketLevel}
                         </Badge>
                       ) : (
                         <span className="text-xs text-slate-300">—</span>
@@ -325,11 +328,7 @@ export default async function VendorsListPage({
                         variant="outline"
                         className={`shrink-0 ${MARKET_LEVEL_COLORS[v.marketLevel as MarketLevel] ?? ""}`}
                       >
-                        {(v.marketLevel as string) === "ABOVE_GREY"
-                          ? "Above grey"
-                          : (v.marketLevel as string) === "GREY"
-                            ? "Grey"
-                            : "Retail"}
+                        {labels.marketShort[v.marketLevel as MarketLevel] ?? v.marketLevel}
                       </Badge>
                     ) : null}
                   </div>
@@ -337,7 +336,7 @@ export default async function VendorsListPage({
                     {v.phones[0]?.phone ?? "no phone"}
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    <DriftTag s={v.driftStatus} />
+                    <DriftTag s={v.driftStatus} labels={labels} />
                     <Badge variant="outline" className="bg-slate-50 text-slate-600">
                       {VENDOR_TYPE_LABELS[v.type as VendorType] ?? v.type}
                     </Badge>

@@ -1,9 +1,11 @@
 // Apify Google Maps scraper → biggest B2B toy/RC suppliers per city, with phones.
 // Usage: tsx --env-file=.env scripts/apify-maps.ts mumbai
 import { readFileSync, writeFileSync } from "node:fs";
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 const ACTOR = "compass~crawler-google-places";
 
 const TERMS: Record<string, string[]> = {

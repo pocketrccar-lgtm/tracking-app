@@ -1,5 +1,7 @@
 "use client";
 
+import { labelsFor } from "@/lib/vertical-labels";
+
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +14,7 @@ import {
   VENDOR_STATUSES,
   DRIFT_STATUSES,
   VENDOR_TYPE_LABELS,
-  VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
-  DRIFT_STATUS_LABELS,
 } from "@/lib/enums";
 import { X, Plus } from "lucide-react";
 
@@ -50,9 +50,11 @@ type Props = {
   vendor?: Vendor;
   action: (fd: FormData) => void;
   submitLabel: string;
+  verticalId: string;
 };
 
-export function VendorForm({ vendor, action, submitLabel }: Props) {
+export function VendorForm({ vendor, action, submitLabel, verticalId }: Props) {
+  const labels = labelsFor(verticalId);
   const [phones, setPhones] = useState<{ phone: string; label?: string | null }[]>(
     vendor?.phones?.length
       ? vendor.phones.map((p) => ({ phone: p.phone, label: p.label }))
@@ -108,7 +110,7 @@ export function VendorForm({ vendor, action, submitLabel }: Props) {
             >
               {VENDOR_TIERS.map((t) => (
                 <option key={t} value={t}>
-                  {VENDOR_TIER_LABELS[t]}
+                  {labels.tier[t]}
                 </option>
               ))}
             </select>
@@ -131,7 +133,7 @@ export function VendorForm({ vendor, action, submitLabel }: Props) {
           </div>
 
           <div>
-            <Label htmlFor="driftStatus">Drift status</Label>
+            <Label htmlFor="driftStatus">{labels.fitName} status</Label>
             <select
               id="driftStatus"
               name="driftStatus"
@@ -140,7 +142,7 @@ export function VendorForm({ vendor, action, submitLabel }: Props) {
             >
               {DRIFT_STATUSES.map((d) => (
                 <option key={d} value={d}>
-                  {DRIFT_STATUS_LABELS[d]}
+                  {labels.fit[d]}
                 </option>
               ))}
             </select>

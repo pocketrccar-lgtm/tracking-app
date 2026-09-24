@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildWeeklyReport, formatWeeklyReportText } from "@/lib/report-builders";
 import { CopyToClipboard } from "@/components/copy-to-clipboard";
@@ -12,6 +12,7 @@ export default async function WeeklyReportPage({
 }: {
   searchParams: Promise<{ weekOf?: string }>;
 }) {
+  const db = await vdb();
   const sp = await searchParams;
   const weekOf = sp.weekOf ? new Date(sp.weekOf) : new Date();
   const data = await buildWeeklyReport(db, { weekOf });

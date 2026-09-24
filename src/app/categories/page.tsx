@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { Trash2 } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 export default async function CategoriesPage() {
+  const db = await vdb();
   const categories = await db.category.findMany({
     include: { _count: { select: { vendors: true, products: true } } },
     orderBy: { name: "asc" },
@@ -17,7 +18,7 @@ export default async function CategoriesPage() {
   return (
     <div className="px-4 pt-5 pb-28 space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Categories</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Sub-categories</h1>
         <p className="text-sm text-slate-500 dark:text-neutral-400">Group vendors + products by category.</p>
       </div>
 
@@ -29,7 +30,7 @@ export default async function CategoriesPage() {
           <form action={createCategory} className="grid gap-3 sm:grid-cols-3">
             <div>
               <Label htmlFor="name">Name *</Label>
-              <Input id="name" name="name" required placeholder="e.g. Drift RC" />
+              <Input id="name" name="name" required placeholder="e.g. Parts & Spares" />
             </div>
             <div>
               <Label htmlFor="description">Description</Label>

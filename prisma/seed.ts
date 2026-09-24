@@ -2,10 +2,12 @@
  * Idempotent seed: equal partners + categories + playbooks + known socials.
  * Run with: npx prisma db seed   (or  npm run db:seed)
  */
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 import { DEFAULT_CATEGORIES } from "../src/lib/enums";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 
 // Brand socials we are confident about from the research.
 const SOCIALS: {

@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +22,7 @@ export default async function ProductDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const db = await vdb();
   const { id } = await params;
   const product = await db.product.findUnique({
     where: { id },

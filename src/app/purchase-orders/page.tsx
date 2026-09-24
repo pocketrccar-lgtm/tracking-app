@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +15,7 @@ export default async function PurchaseOrdersPage({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
+  const db = await vdb();
   const params = await searchParams;
   const where: Record<string, unknown> = {};
   if (params.status) where.status = params.status;

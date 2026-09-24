@@ -11,10 +11,12 @@ import { config } from "dotenv";
 // load env (POSTGRES_PRISMA_URL) by absolute path so cwd doesn't matter
 config({ path: "/Users/syedibrahim/Desktop/bch-sourcing-os/.env" });
 
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 import { readFileSync, writeFileSync } from "fs";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 
 const TASKS_PATH =
   process.env.TASKS_JSON ||

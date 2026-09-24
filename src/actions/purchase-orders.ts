@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { vdb, assertInVertical } from "@/lib/vertical";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,6 +15,7 @@ function n(v: FormDataEntryValue | null): number {
 }
 
 export async function createPurchaseOrder(fd: FormData) {
+  const db = await vdb();
   const vendorId = String(fd.get("vendorId") ?? "");
   const productId = s(fd.get("productId"));
   const quantity = Math.max(1, Math.round(n(fd.get("quantity"))));
@@ -23,6 +24,7 @@ export async function createPurchaseOrder(fd: FormData) {
   const notes = s(fd.get("notes"));
 
   if (!vendorId) throw new Error("Vendor required");
+  await assertInVertical(db, { vendorId, productId });
 
   const po = await db.purchaseOrder.create({
     data: {
@@ -42,6 +44,7 @@ export async function createPurchaseOrder(fd: FormData) {
 }
 
 export async function updatePurchaseOrderStatus(id: string, status: string) {
+  const db = await vdb();
   const po = await db.purchaseOrder.findUnique({ where: { id } });
   if (!po) throw new Error("Not found");
   await db.purchaseOrder.update({
@@ -57,6 +60,7 @@ export async function updatePurchaseOrderStatus(id: string, status: string) {
 }
 
 export async function updatePurchaseOrder(id: string, fd: FormData) {
+  const db = await vdb();
   const quantity = Math.max(1, Math.round(n(fd.get("quantity"))));
   const unitCost = n(fd.get("unitCost"));
   const status = String(fd.get("status") ?? "SAMPLE");

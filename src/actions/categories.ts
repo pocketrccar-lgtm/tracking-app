@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -12,6 +12,7 @@ function slugify(s: string): string {
 }
 
 export async function createCategory(fd: FormData) {
+  const db = await vdb();
   const name = String(fd.get("name") ?? "").trim();
   const description = String(fd.get("description") ?? "").trim() || null;
   const color = String(fd.get("color") ?? "slate").trim();
@@ -24,6 +25,7 @@ export async function createCategory(fd: FormData) {
 }
 
 export async function deleteCategory(id: string) {
+  const db = await vdb();
   await db.category.delete({ where: { id } });
   revalidatePath("/categories");
 }

@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buildDailyReport, formatDailyReportText } from "@/lib/report-builders";
 import { CopyToClipboard } from "@/components/copy-to-clipboard";
@@ -12,6 +12,7 @@ export default async function DailyReportPage({
 }: {
   searchParams: Promise<{ date?: string; userId?: string }>;
 }) {
+  const db = await vdb();
   const sp = await searchParams;
   const date = sp.date ? new Date(sp.date) : new Date();
   const dateStr = date.toISOString().slice(0, 10);

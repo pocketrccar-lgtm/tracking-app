@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { notFound } from "next/navigation";
 import { updateProduct } from "@/actions/products";
 import { ProductForm } from "@/components/product-form";
@@ -12,6 +12,7 @@ export default async function EditProductPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const db = await vdb();
   const { id } = await params;
   const [product, vendors, categories] = await Promise.all([
     db.product.findUnique({ where: { id } }),

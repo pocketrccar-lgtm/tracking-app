@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  DEFAULT_WA_TEMPLATE,
+  defaultTemplateFor,
   getTemplate,
   setTemplate,
 } from "@/lib/whatsapp";
@@ -28,8 +28,8 @@ export default function TemplatesPage() {
   };
 
   const reset = () => {
-    setValue(DEFAULT_WA_TEMPLATE);
-    setTemplate(DEFAULT_WA_TEMPLATE);
+    setValue(defaultTemplateFor());
+    setTemplate(defaultTemplateFor());
     toast.success("Reset to default");
   };
 
@@ -37,7 +37,7 @@ export default function TemplatesPage() {
     <div>
       <PageHeader
         title="WhatsApp template"
-        subtitle="Sent when you tap the WhatsApp button on a vendor"
+        subtitle="Sent when you tap WhatsApp on a vendor — one template per category"
       />
       <div className="px-4 pt-5 pb-28 space-y-4">
         <Link
@@ -73,7 +73,7 @@ export default function TemplatesPage() {
             Preview
           </div>
           <p className="text-sm text-slate-700 whitespace-pre-line">
-            {(mounted ? value : DEFAULT_WA_TEMPLATE).replaceAll(
+            {(mounted ? value : defaultTemplateFor()).replaceAll(
               "{vendor}",
               "Ratnaakar Impex",
             )}

@@ -2,9 +2,11 @@
 // RC/toy wholesale-market vlogs + factory tours and extract vendor names +
 // contacts from titles/descriptions/comments. No retailers.
 import { writeFileSync, readFileSync } from "node:fs";
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 
 (async () => {
   const keys = JSON.parse(readFileSync("/Users/syedibrahim/Desktop/SOURCING_HQ/scripts/keys.json", "utf8"));

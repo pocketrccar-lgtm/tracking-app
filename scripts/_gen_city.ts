@@ -2,9 +2,11 @@
 // vendor names embedded (dedupe) + the city's market/area sub-queries.
 // Usage: tsx scripts/_gen_city.ts mumbai
 import { writeFileSync } from "node:fs";
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 
 const CITY_QUERIES: Record<string, { city: string; cityMatch: string; queries: { k: string; q: string }[] }> = {
   mumbai: {

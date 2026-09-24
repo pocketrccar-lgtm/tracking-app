@@ -2,8 +2,10 @@ import { createVendor } from "@/actions/vendors";
 import { VendorForm } from "@/components/vendor-form";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { getVerticalId } from "@/lib/vertical";
 
-export default function NewVendorPage() {
+export default async function NewVendorPage() {
+  const verticalId = await getVerticalId();
   return (
     <div className="px-4 pt-5 pb-28 space-y-4">
       <Link
@@ -13,7 +15,7 @@ export default function NewVendorPage() {
         <ArrowLeft className="h-3.5 w-3.5" /> Back to vendors
       </Link>
       <h1 className="text-2xl font-bold text-slate-900 dark:text-neutral-100">Add vendor</h1>
-      <VendorForm action={createVendor} submitLabel="Create vendor" />
+      <VendorForm action={createVendor} submitLabel="Create vendor" verticalId={verticalId} />
     </div>
   );
 }

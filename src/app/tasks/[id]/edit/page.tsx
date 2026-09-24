@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { notFound } from "next/navigation";
 import { updateTask } from "@/actions/tasks";
 import { TaskForm } from "@/components/task-form";
@@ -12,6 +12,7 @@ export default async function EditTaskPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const db = await vdb();
   const { id } = await params;
   const [task, vendors, users] = await Promise.all([
     db.task.findUnique({ where: { id } }),

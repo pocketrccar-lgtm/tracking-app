@@ -265,7 +265,7 @@ export function TaskForm({
               className="h-12"
             />
             <p className="mt-1 text-xs text-slate-400">
-              Each day of effort ≈ one day on your ₹30L goal date.
+              Each day of effort ≈ one day on the goal date.
             </p>
           </div>
 

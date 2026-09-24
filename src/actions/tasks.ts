@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { vdb, assertInVertical } from "@/lib/vertical";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { TASKS_TAG } from "@/lib/task-cache";
@@ -36,8 +36,10 @@ function fromForm(fd: FormData) {
 }
 
 export async function createTask(fd: FormData) {
+  const db = await vdb();
   const d = fromForm(fd);
   if (!d.title) throw new Error("Title required");
+  await assertInVertical(db, { vendorId: d.vendorId || null });
   const task = await db.task.create({
     data: {
       vendorId: d.vendorId || null,
@@ -71,8 +73,10 @@ export type NewTaskInput = {
 };
 
 export async function createTasks(tasks: NewTaskInput[]) {
+  const db = await vdb();
   const clean = (tasks ?? []).filter((t) => t?.title?.trim());
   if (!clean.length) throw new Error("No tasks to create");
+  for (const t of clean) await assertInVertical(db, { vendorId: t.vendorId || null });
   // create one-by-one so we get each new id (for the confirmation popup)
   const ids: string[] = [];
   for (const t of clean) {
@@ -96,6 +100,7 @@ export async function createTasks(tasks: NewTaskInput[]) {
 }
 
 export async function updateTask(id: string, fd: FormData) {
+  const db = await vdb();
   const d = fromForm(fd);
   await db.task.update({
     where: { id },
@@ -119,11 +124,13 @@ export async function updateTask(id: string, fd: FormData) {
 }
 
 export async function setTaskPhase(id: string, phase: string) {
+  const db = await vdb();
   await db.task.update({ where: { id }, data: { phase: phase || null } });
   bustTasks(id);
 }
 
 export async function updateTaskStatus(id: string, status: string) {
+  const db = await vdb();
   await db.task.update({
     where: { id },
     data: {
@@ -136,6 +143,7 @@ export async function updateTaskStatus(id: string, status: string) {
 
 // Push the due date out by N days (from the current due date, or today).
 export async function snoozeTask(id: string, days: number) {
+  const db = await vdb();
   const task = await db.task.findUnique({ where: { id }, select: { dueDate: true } });
   const base = task?.dueDate ? new Date(task.dueDate) : new Date();
   base.setHours(0, 0, 0, 0);
@@ -145,6 +153,7 @@ export async function snoozeTask(id: string, days: number) {
 }
 
 export async function deleteTask(id: string) {
+  const db = await vdb();
   await db.task.delete({ where: { id } });
   bustTasks();
   redirect("/tasks");
@@ -152,12 +161,14 @@ export async function deleteTask(id: string) {
 
 // Inline delete from the list — no redirect, just drop the row.
 export async function removeTask(id: string) {
+  const db = await vdb();
   await db.task.delete({ where: { id } });
   bustTasks();
 }
 
 // ─── Inline field edits (tap-to-edit on the task detail page) ────────────────
 export async function setTaskTitle(id: string, title: string) {
+  const db = await vdb();
   const t = title.trim();
   if (!t) return;
   await db.task.update({ where: { id }, data: { title: t } });
@@ -165,17 +176,20 @@ export async function setTaskTitle(id: string, title: string) {
 }
 
 export async function setTaskNotes(id: string, notes: string) {
+  const db = await vdb();
   await db.task.update({ where: { id }, data: { notes: notes.trim() || null } });
   bustTasks(id);
 }
 
 export async function setTaskAssignee(id: string, assignedToId: string | null) {
+  const db = await vdb();
   await db.task.update({ where: { id }, data: { assignedToId: assignedToId || null } });
   bustTasks(id);
 }
 
 // "Done when" lives inside description as a "DONE-WHEN: …" marker.
 export async function setTaskDoneWhen(id: string, text: string) {
+  const db = await vdb();
   const t = await db.task.findUnique({ where: { id }, select: { description: true } });
   const body = (t?.description ?? "").replace(/\s*DONE-WHEN:\s*[^]*$/i, "").trimEnd();
   const clean = text.trim();

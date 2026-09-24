@@ -12,14 +12,12 @@ import {
   DRIFT_STATUSES,
   MARKET_LEVELS,
   VENDOR_TYPE_LABELS,
-  VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
   STATUS_COLORS,
-  DRIFT_STATUS_LABELS,
-  MARKET_LEVEL_LABELS,
 } from "@/lib/enums";
 import { useCallback, useEffect, useState } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
+import { labelsFor } from "@/lib/vertical-labels";
 
 const selectClass =
   "h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm focus:border-red-500 focus:outline-none focus:ring-2 focus:ring-red-500/20";
@@ -30,13 +28,16 @@ export function VendorListFilters({
   typeCounts,
   wrongCount,
   statusCounts,
+  verticalId,
 }: {
   states: string[];
   pendingCount: number;
   typeCounts: Record<string, number>;
   wrongCount: number;
   statusCounts: Record<string, number>;
+  verticalId: string;
 }) {
+  const labels = labelsFor(verticalId);
   const router = useRouter();
   const sp = useSearchParams();
   const [q, setQ] = useState(sp.get("q") ?? "");
@@ -104,12 +105,12 @@ export function VendorListFilters({
     });
 
   const fields: { key: string; label: string; options: { value: string; label: string }[] }[] = [
-    { key: "marketLevel", label: "Market level", options: MARKET_LEVELS.map((m) => ({ value: m, label: MARKET_LEVEL_LABELS[m] })) },
+    { key: "marketLevel", label: labels.marketName, options: MARKET_LEVELS.map((m) => ({ value: m, label: labels.market[m] })) },
     { key: "state", label: "State", options: states.map((s) => ({ value: s, label: s })) },
-    { key: "tier", label: "Tier", options: VENDOR_TIERS.map((t) => ({ value: t, label: VENDOR_TIER_LABELS[t] })) },
+    { key: "tier", label: "Tier", options: VENDOR_TIERS.map((t) => ({ value: t, label: labels.tier[t] })) },
     { key: "type", label: "Type", options: VENDOR_TYPES.map((t) => ({ value: t, label: VENDOR_TYPE_LABELS[t] })) },
     { key: "status", label: "Status", options: VENDOR_STATUSES.map((s) => ({ value: s, label: VENDOR_STATUS_LABELS[s] })) },
-    { key: "drift", label: "Drift", options: DRIFT_STATUSES.map((d) => ({ value: d, label: DRIFT_STATUS_LABELS[d] })) },
+    { key: "drift", label: labels.fitName, options: DRIFT_STATUSES.map((d) => ({ value: d, label: labels.fit[d] })) },
   ];
 
   return (

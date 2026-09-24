@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { scope } from "@/lib/vertical";
+import { labelsFor } from "@/lib/vertical-labels";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Calendar, Phone, ShoppingBag, Key, Target, CircleDot } from "lucide-react";
@@ -41,6 +42,8 @@ export default async function TaskViewPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
   const { id } = await params;
   const [task, allTasks, users] = await Promise.all([
     db.task.findUnique({
@@ -150,12 +153,15 @@ export default async function TaskViewPage({
                 <Key className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" />
                 <p className="text-sm font-semibold text-teal-900">
                   Finishing this unlocks {unlocksCount} task
-                  {unlocksCount === 1 ? "" : "s"} and moves ₹30L one step closer.
+                  {unlocksCount === 1 ? "" : "s"}
+                  {labels.hasRoadmap ? " and moves ₹30L one step closer." : "."}
                 </p>
               </div>
             ) : (
               <p className="text-sm text-slate-600">
-                A leaf task — completing it directly burns down the roadmap toward ₹30L.
+                {labels.hasRoadmap
+                  ? "A leaf task — completing it directly burns down the roadmap toward ₹30L."
+                  : "A leaf task — completing it moves this category forward."}
               </p>
             )}
 

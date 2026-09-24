@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { scope } from "@/lib/vertical";
+import { labelsFor } from "@/lib/vertical-labels";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +14,8 @@ export default async function ProductsPage({
 }: {
   searchParams: Promise<{ drift?: string; scale?: string }>;
 }) {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
   const params = await searchParams;
   const where: Record<string, unknown> = {};
   if (params.drift === "yes") where.driftCapable = true;
@@ -51,10 +54,12 @@ export default async function ProductsPage({
           <Link href="/products" className={chip(!params.drift && !params.scale)}>
             All
           </Link>
-          <Link href="/products?drift=yes" className={chip(params.drift === "yes")}>
-            Drift only
-          </Link>
-          {["1:18", "1:24", "1:64", "1:10"].map((sc) => (
+          {labels.hasDriftProducts && (
+            <Link href="/products?drift=yes" className={chip(params.drift === "yes")}>
+              Drift only
+            </Link>
+          )}
+          {(labels.hasDriftProducts ? ["1:18", "1:24", "1:64", "1:10"] : []).map((sc) => (
             <Link
               key={sc}
               href={`/products?scale=${sc}`}

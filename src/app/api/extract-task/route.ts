@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
-import { db } from "@/lib/db";
+import { scope } from "@/lib/vertical";
+import { labelsFor } from "@/lib/vertical-labels";
 import { TASK_PRIORITIES, TASK_TYPES } from "@/lib/enums";
 
 export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
   // Accept either the standard name or the `claude_api` name set in Vercel.
   const apiKey = process.env.ANTHROPIC_API_KEY ?? process.env.claude_api;
   if (!apiKey) {
@@ -44,13 +47,13 @@ export async function POST(req: NextRequest) {
 
   const anthropic = new Anthropic({ apiKey });
 
-  const system = `You convert a spoken note into one or MORE structured sourcing tasks for an RC-car vendor CRM used by two partners (Syed, Shoaib).
+  const system = `You convert a spoken note into one or MORE structured sourcing tasks for a vendor CRM used by two partners (Syed, Shoaib). The note is about ${labels.aiContext}.
 
 CRITICAL — SPLIT INTO MULTIPLE TASKS: a single note usually contains SEVERAL distinct tasks — a numbered or bulleted list (1. … 2. … 3. …), several sentences each describing a different action, or items joined by "and", "also", "then", "next". Return EACH distinct action item as its OWN separate task. Do NOT merge different actions into one task. Only return a single task if the note genuinely describes just one action.
 
 Return ONLY a JSON object (no markdown, no prose):
 { "tasks": [ {
-  "title": string (short self-contained imperative, e.g. "Call about drift RC catalogue"),
+  "title": string (short self-contained imperative, e.g. "Call about their dealer price list"),
   "vendorId": string|null (BEST matching id from the vendor list, else null),
   "assignedToId": string|null (partner id if a person is named — "ask Shoaib to…", "Syed will…" — else null),
   "type": one of ${JSON.stringify(TASK_TYPES)} (business CATEGORY — a call/visit/whatsapp/email/sample/follow-up/research, or a function like LEGAL, FINANCE, OPS, INVENTORY, MARKETING, CONTENT, PRODUCT, SOURCING, STRATEGY; default SOURCING),

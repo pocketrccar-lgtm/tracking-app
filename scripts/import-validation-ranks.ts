@@ -17,11 +17,13 @@
  * Run dry:    DRY=1 npm run db:import-validation
  * Run apply:        npm run db:import-validation
  */
-import { PrismaClient } from "../src/generated/prisma";
+import { scopedDb } from "../src/lib/vertical";
 import { readFileSync, writeFileSync } from "fs";
 import path from "path";
 
-const db = new PrismaClient();
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 const DRY = process.env.DRY === "1";
 const JSON_PATH = path.join(__dirname, "_validation_ranked.json");
 const SOURCE_TAG = "Vendor_Validation_Ranked.xlsx";

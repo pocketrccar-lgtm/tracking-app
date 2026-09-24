@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
-import { db } from "@/lib/db";
+import { rawDb } from "@/lib/db";
+import { scopedDb } from "@/lib/vertical";
 
 export const TASKS_TAG = "tasks";
 export const USERS_TAG = "users";
@@ -23,13 +24,15 @@ export type CachedTaskRow = {
 };
 
 /**
- * Cached task list for the partner set. Returns plain serializable rows
+ * Cached task list for one vertical. Returns plain serializable rows
  * (dates as numbers) so the Data Cache can't mangle Date objects.
+ * The vertical is an ARGUMENT (cookies() can't be read inside unstable_cache), and
+ * unstable_cache keys on its arguments, so each vertical is cached separately.
  * Tagged "tasks" — every task mutation calls revalidateTag("tasks").
  */
 export const getCachedTaskRows = unstable_cache(
-  async (assignedToIds: string[] | null): Promise<CachedTaskRow[]> => {
-    const tasks = await db.task.findMany({
+  async (verticalId: string, assignedToIds: string[] | null): Promise<CachedTaskRow[]> => {
+    const tasks = await scopedDb(verticalId).task.findMany({
       where: assignedToIds ? { assignedToId: { in: assignedToIds } } : {},
       orderBy: [{ dueDate: "asc" }, { createdAt: "desc" }],
       take: 400,
@@ -61,7 +64,8 @@ export type CachedUser = { id: string; name: string; email: string | null };
 
 export const getCachedUsers = unstable_cache(
   async (): Promise<CachedUser[]> => {
-    const users = await db.user.findMany({
+    // Users are shared across verticals.
+    const users = await rawDb.user.findMany({
       select: { id: true, name: true, email: true },
       orderBy: { name: "asc" },
     });

@@ -1,7 +1,9 @@
-// Classify any unscored vendors from their notes, then GLOBALLY re-rank all by
+// Classify any unscored vendors from their notes, then re-rank ONE vertical by
 // business volume (gate = GREY/ABOVE_GREY & accept>=40). Prints the biggest per city.
-import { PrismaClient } from "../src/generated/prisma";
-const db = new PrismaClient();
+import { scopedDb } from "../src/lib/vertical";
+// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// script can never read, dedupe, rank or delete another vertical's rows.
+const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
 const clamp = (n: number, lo = 35, hi = 95) => Math.max(lo, Math.min(hi, Math.round(n)));
 
 function turnoverCr(n: string): number | null {

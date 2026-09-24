@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { vdb, assertInVertical } from "@/lib/vertical";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -35,9 +35,11 @@ function fromForm(fd: FormData) {
 }
 
 export async function createProduct(fd: FormData) {
+  const db = await vdb();
   const d = fromForm(fd);
   if (!d.vendorId) throw new Error("Vendor required");
   if (!d.name) throw new Error("Name required");
+  await assertInVertical(db, { vendorId: d.vendorId, categoryId: d.categoryId });
 
   const product = await db.product.create({
     data: {
@@ -71,9 +73,11 @@ export async function createProduct(fd: FormData) {
 }
 
 export async function updateProduct(id: string, fd: FormData) {
+  const db = await vdb();
   const d = fromForm(fd);
   const existing = await db.product.findUnique({ where: { id } });
   if (!existing) throw new Error("Product not found");
+  await assertInVertical(db, { categoryId: d.categoryId });
 
   const priceChanged =
     existing.wholesalePrice !== d.wholesalePrice ||
@@ -116,6 +120,7 @@ export async function updateProduct(id: string, fd: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  const db = await vdb();
   const p = await db.product.findUnique({ where: { id } });
   await db.product.delete({ where: { id } });
   if (p) {

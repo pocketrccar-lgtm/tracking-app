@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { NewTaskClient } from "@/components/new-task-client";
 import { PageHeader } from "@/components/page-header";
 import Link from "next/link";
@@ -11,6 +11,7 @@ export default async function NewTaskPage({
 }: {
   searchParams: Promise<{ vendorId?: string }>;
 }) {
+  const db = await vdb();
   const { vendorId } = await searchParams;
   const [vendors, users] = await Promise.all([
     db.vendor.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),

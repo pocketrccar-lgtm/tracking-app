@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/lib/db";
+import { vdb, assertInVertical } from "@/lib/vertical";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -15,6 +15,7 @@ function s(v: FormDataEntryValue | null): string | null {
 // list. Returns { status: "CONTACTED" } to merge into an update only when the
 // vendor is currently NEW; otherwise returns {} (leave its status alone).
 async function contactBumpIfNew(id: string): Promise<{ status?: string }> {
+  const db = await vdb();
   const v = await db.vendor.findUnique({ where: { id }, select: { status: true } });
   return v?.status === "NEW" ? { status: "CONTACTED" } : {};
 }
@@ -63,8 +64,10 @@ function fromFormData(fd: FormData) {
 }
 
 export async function createVendor(fd: FormData) {
+  const db = await vdb();
   const data = fromFormData(fd);
   if (!data.name) throw new Error("Name required");
+  await assertInVertical(db, { categoryId: data.categoryId });
   const phones = parsePhones(fd);
   const emails = parseEmails(fd);
 
@@ -82,10 +85,12 @@ export async function createVendor(fd: FormData) {
 }
 
 export async function updateVendor(id: string, fd: FormData) {
+  const db = await vdb();
   const data = fromFormData(fd);
   if (!data.name) throw new Error("Name required");
   // Editing a still-NEW vendor counts as engaging it → advance to CONTACTED.
   if (data.status === "NEW") data.status = "CONTACTED";
+  await assertInVertical(db, { categoryId: data.categoryId });
   const phones = parsePhones(fd);
   const emails = parseEmails(fd);
 
@@ -108,6 +113,7 @@ export async function updateVendor(id: string, fd: FormData) {
 }
 
 export async function deleteVendor(id: string) {
+  const db = await vdb();
   await db.vendor.delete({ where: { id } });
   revalidatePath("/vendors");
   revalidatePath("/dashboard");
@@ -115,6 +121,7 @@ export async function deleteVendor(id: string) {
 }
 
 export async function updateVendorStatus(id: string, status: string) {
+  const db = await vdb();
   // leaving the wrong-supplier state clears its reason
   await db.vendor.update({
     where: { id },
@@ -127,6 +134,7 @@ export async function updateVendorStatus(id: string, status: string) {
 
 // Mark a vendor a wrong supplier with the reason (Wholesaler | Different category).
 export async function markWrongSupplier(id: string, reason: string) {
+  const db = await vdb();
   await db.vendor.update({
     where: { id },
     data: { status: "WRONG_SUPPLIER", wrongReason: reason || null },
@@ -137,6 +145,7 @@ export async function markWrongSupplier(id: string, reason: string) {
 }
 
 export async function updateVendorTier(id: string, tier: string) {
+  const db = await vdb();
   const bump = await contactBumpIfNew(id);
   await db.vendor.update({ where: { id }, data: { tier, ...bump } });
   revalidatePath(`/vendors/${id}`);
@@ -145,6 +154,7 @@ export async function updateVendorTier(id: string, tier: string) {
 }
 
 export async function updateVendorType(id: string, type: string) {
+  const db = await vdb();
   const bump = await contactBumpIfNew(id);
   await db.vendor.update({ where: { id }, data: { type, ...bump } });
   revalidatePath(`/vendors/${id}`);

@@ -1,4 +1,5 @@
-import { db } from "@/lib/db";
+import { scope } from "@/lib/vertical";
+import { labelsFor } from "@/lib/vertical-labels";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -12,10 +13,7 @@ import {
   TASK_STATUS_COLORS,
   PRIORITY_COLORS,
   MARKET_LEVEL_COLORS,
-  MARKET_LEVEL_LABELS,
-  VENDOR_TIER_LABELS,
   VENDOR_STATUS_LABELS,
-  DRIFT_STATUS_LABELS,
   VENDOR_TYPE_LABELS,
   TASK_STATUS_LABELS,
   TASK_TYPE_LABELS,
@@ -52,6 +50,8 @@ export default async function VendorDetailPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const { db, verticalId } = await scope();
+  const labels = labelsFor(verticalId);
   const { id } = await params;
 
   const vendor = await db.vendor.findUnique({
@@ -99,7 +99,7 @@ export default async function VendorDetailPage({
                 variant="outline"
                 className={MARKET_LEVEL_COLORS[vendor.marketLevel as MarketLevel] ?? ""}
               >
-                {MARKET_LEVEL_LABELS[vendor.marketLevel as MarketLevel] ?? vendor.marketLevel}
+                {labels.market[vendor.marketLevel as MarketLevel] ?? vendor.marketLevel}
               </Badge>
             ) : null}
             <Badge variant="outline">
@@ -109,13 +109,13 @@ export default async function VendorDetailPage({
               variant="outline"
               className={TIER_COLORS[vendor.tier as VendorTier] ?? ""}
             >
-              {VENDOR_TIER_LABELS[vendor.tier as VendorTier] ?? vendor.tier}
+              {labels.tier[vendor.tier as VendorTier] ?? vendor.tier}
             </Badge>
             <Badge
               variant="outline"
               className={DRIFT_COLORS[vendor.driftStatus as DriftStatus] ?? ""}
             >
-              drift: {DRIFT_STATUS_LABELS[vendor.driftStatus as DriftStatus] ?? vendor.driftStatus}
+              {labels.fitName}: {labels.fit[vendor.driftStatus as DriftStatus] ?? vendor.driftStatus}
             </Badge>
           </div>
         </div>
@@ -141,6 +141,7 @@ export default async function VendorDetailPage({
         tier={vendor.tier}
         type={vendor.type}
         wrongReason={vendor.wrongReason}
+        verticalId={verticalId}
       />
 
       {(vendor.marketLevel || vendor.volumeScore != null) && (
@@ -165,7 +166,7 @@ export default async function VendorDetailPage({
                   variant="outline"
                   className={MARKET_LEVEL_COLORS[vendor.marketLevel as MarketLevel] ?? ""}
                 >
-                  {MARKET_LEVEL_LABELS[vendor.marketLevel as MarketLevel] ?? vendor.marketLevel}
+                  {labels.market[vendor.marketLevel as MarketLevel] ?? vendor.marketLevel}
                 </Badge>
               ) : null}
               <Badge variant="outline" className="bg-slate-50 text-slate-600">

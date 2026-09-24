@@ -1,4 +1,4 @@
-import { db } from "@/lib/db";
+import { vdb } from "@/lib/vertical";
 import { createPurchaseOrder } from "@/actions/purchase-orders";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ export default async function NewPOPage({
 }: {
   searchParams: Promise<{ vendorId?: string; productId?: string }>;
 }) {
+  const db = await vdb();
   const { vendorId, productId } = await searchParams;
   const [vendors, products] = await Promise.all([
     db.vendor.findMany({ select: { id: true, name: true }, orderBy: { name: "asc" } }),
