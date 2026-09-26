@@ -83,9 +83,42 @@ const EV_SCOOTERS: VerticalLabels = {
     "a low-speed non-RTO electric scooter sourcing vertical (≤25 km/h, ≤250 W makers, distributors and traders; dealer margin, MOQ, wattage certificates)",
 };
 
+// Battery suppliers for BCH e-cycles (36/48V) and low-speed e-scooters (48/60/72V).
+// Tier = how the first phone number was verified; marketLevel = battery chemistry.
+const EV_BATTERIES: VerticalLabels = {
+  fitName: "EV fit",
+  fit: {
+    YES_CONFIRMED: "E-cycle / scooter packs listed",
+    LIKELY: "EV-capable (ask)",
+    UNKNOWN: "Unknown",
+    NO: "Not for EV (UPS / solar / captive)",
+  },
+  fitChipConfirmed: "✓ EV pack",
+  fitChipLikely: "EV?",
+  fitConfirmedCard: "EV packs listed",
+  tier: {
+    T1_DRIFT_CONFIRMED: "Tier 1 — Number on website + Google",
+    T2_STRONG_SIGNAL: "Tier 2 — Verified number",
+    T3_VERIFY_DRIFT: "Tier 3 — Number to verify",
+    T4_INDIAMART_GATED: "Tier 4 — No number yet",
+  },
+  marketName: "Battery type",
+  market: {
+    BELOW_GREY: "Other / unconfirmed",
+    GREY: "Lead-acid (some also lithium)",
+    ABOVE_GREY: "Lithium (Li-ion / LFP)",
+  },
+  marketShort: { BELOW_GREY: "Other", GREY: "Lead-acid", ABOVE_GREY: "Lithium" },
+  hasRoadmap: false,
+  hasDriftProducts: false,
+  aiContext:
+    "an EV battery sourcing vertical (lithium Li-ion/LFP pack makers, lead-acid traction makers, cell importers in South India; 36/48V e-cycle and 48/60/72V e-scooter packs; cell grade, AIS-156/BIS certificates, MOQ, warranty)",
+};
+
 const LABELS: Record<string, VerticalLabels> = {
   "pocket-rc": POCKET_RC,
   "ev-scooters": EV_SCOOTERS,
+  "ev-batteries": EV_BATTERIES,
 };
 
 /** Wording for a vertical; unknown verticals get neutral RC-style defaults. */

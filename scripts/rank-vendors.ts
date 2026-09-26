@@ -3,7 +3,14 @@
 import { scopedDb } from "../src/lib/vertical";
 // Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
 // script can never read, dedupe, rank or delete another vertical's rows.
-const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
+const VERTICAL = process.env.VERTICAL ?? "pocket-rc";
+// These verticals' ranks come from their import files and they have no acceptScore, so this
+// script would set every rank to null (and the insert-only importers cannot put them back).
+if (VERTICAL === "ev-batteries" || VERTICAL === "ev-scooters") {
+  console.error(`rank-vendors refuses VERTICAL=${VERTICAL}: its ranks come from the import file, not acceptScore.`);
+  process.exit(1);
+}
+const db = scopedDb(VERTICAL);
 const clamp = (n: number, lo = 35, hi = 95) => Math.max(lo, Math.min(hi, Math.round(n)));
 
 function turnoverCr(n: string): number | null {

@@ -10,6 +10,7 @@ type V = { id: string; name: string; color: string | null };
 const ACTIVE: Record<string, string> = {
   red: "bg-red-600 text-white",
   emerald: "bg-emerald-600 text-white",
+  amber: "bg-amber-500 text-white",
 };
 
 /** Top bar: app name + one pill per category. Every page below follows the active pill. */

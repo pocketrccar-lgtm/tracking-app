@@ -12,9 +12,13 @@ export const DEFAULT_WA_TEMPLATE =
 export const EV_WA_TEMPLATE =
   "Hi {vendor},\n\nThis is from Bharath Cycle Hub, Bengaluru — a 25-year-old business in the sports & cycling trade (bicycles, e-cycles, sports goods & accessories).\n\nWe are adding low-speed electric scooters (non-RTO, ≤25 km/h, ≤250 W) and would like to become a dealer / distributor for your range.\n\nCould you please share your dealer price list, dealer margin, MOQ, and the motor wattage / non-RTO certificate for each model? Happy to share our GST details for your reference. Thank you!";
 
+export const BATTERY_WA_TEMPLATE =
+  "Hi {vendor},\n\nThis is from Bharath Cycle Hub, Bengaluru — a 25-year-old business in the sports & cycling trade (bicycles, e-cycles, sports goods & accessories).\n\nWe are sourcing batteries for our e-cycles (36V / 48V) and low-speed e-scooters (48V / 60V) — lithium (Li-ion / LFP) packs, and lead-acid where it fits.\n\nCould you please share your price list, MOQ, cell / plate specifications, BMS details (for lithium), warranty, and your AIS-156 / BIS certificate? Happy to share our GST details for your reference. Thank you!";
+
 const DEFAULTS: Record<string, string> = {
   "pocket-rc": DEFAULT_WA_TEMPLATE,
   "ev-scooters": EV_WA_TEMPLATE,
+  "ev-batteries": BATTERY_WA_TEMPLATE,
 };
 
 /** Default outreach text for a vertical. */

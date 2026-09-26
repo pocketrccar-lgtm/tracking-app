@@ -1,9 +1,16 @@
 // Clean up: drop generic "market location" entries + exact-normalized duplicates
 // (keeps the richest copy: ranked > has-phone > longer-notes > oldest).
 import { scopedDb } from "../src/lib/vertical";
-// Locked to ONE vertical (default Pocket RC; override with VERTICAL=ev-scooters) so this
+// Locked to ONE vertical (Pocket RC only — see the guard below) so this
 // script can never read, dedupe, rank or delete another vertical's rows.
-const db = scopedDb(process.env.VERTICAL ?? "pocket-rc");
+const VERTICAL = process.env.VERTICAL ?? "pocket-rc";
+// Its name normaliser merges distinct firms in other verticals (e.g. "SBL Batteries", Hyderabad vs
+// "S.B.L. Batteries", Davanagere) and would hard-delete one — so it only runs on Pocket RC.
+if (VERTICAL !== "pocket-rc") {
+  console.error(`cleanup-vendors refuses VERTICAL=${VERTICAL}: it only runs on pocket-rc.`);
+  process.exit(1);
+}
+const db = scopedDb(VERTICAL);
 const norm = (s: string) => (s || "").toLowerCase().replace(/\([^)]*\)/g, " ").replace(/[^a-z0-9]+/g, "");
 
 // names that are markets/areas, not a specific business
